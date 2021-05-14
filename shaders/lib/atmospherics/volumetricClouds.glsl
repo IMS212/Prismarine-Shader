@@ -59,6 +59,7 @@ float getUltraQualityVCSample(vec3 pos, float height, float verticalThickness, f
 	float ymult = pow(abs(height - pos.y) / verticalThickness, 2.0);
 	vec3 wind = vec3(frametime * 0.001 * VCLOUDS_SPEED, 0.0, 0.0);
 	float rainStrengthLowered = rainStrength / 3.0;
+	float opacity = VCLOUDS_OPACITY + (cameraPosition.y * 0.005);
 	
 	if (ymult < 2.0){
 		noise+= getHorizontalNoise(pos / samples * 1.0 - wind*1.1) * 0.25 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
@@ -74,7 +75,7 @@ float getUltraQualityVCSample(vec3 pos, float height, float verticalThickness, f
 		noise+= getHorizontalNoise(pos / samples * 0.00108 - wind*0.1) * 2.5 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
 
 	}
-	noise = clamp(mix(noise, 21.0, 0.25 * 0.0 * VCLOUDS_AMOUNT) - (10.0 + 5.0 * ymult), 0.0, 1.0) * (VCLOUDS_OPACITY - rainStrengthLowered) * far;
+	noise = clamp(mix(noise, 21.0, 0.25 * 0.0 * VCLOUDS_AMOUNT) - (10.0 + 5.0 * ymult), 0.0, 1.0) * (opacity - rainStrengthLowered) * far;
 	return noise;
 }
 
@@ -83,7 +84,8 @@ float getHighQualityVCSample(vec3 pos, float height, float verticalThickness, fl
 	float ymult = pow(abs(height - pos.y) / verticalThickness, 2.0);
 	vec3 wind = vec3(frametime * 0.001 * VCLOUDS_SPEED, 0.0, 0.0);
 	float rainStrengthLowered = rainStrength / 3.0;
-	
+	float opacity = VCLOUDS_OPACITY + (cameraPosition.y * 0.005);
+
 	if (ymult < 2.0){
 		noise+= getHorizontalNoise(pos / samples * 0.5 - wind*0.5) * 0.5 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
 		noise+= getHorizontalNoise(pos / samples * 0.25 - wind*0.4) * 1.5 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
@@ -93,7 +95,7 @@ float getHighQualityVCSample(vec3 pos, float height, float verticalThickness, fl
 		noise+= getHorizontalNoise(pos / samples * 0.016125) * 3.5 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
 
 	}
-	noise = clamp(mix(noise, 21.0, 0.25 * 0.0 * VCLOUDS_AMOUNT) - (10.0 + 5.0 * ymult), 0.0, 1.0) * (VCLOUDS_OPACITY - rainStrengthLowered) * far;
+	noise = clamp(mix(noise, 21.0, 0.25 * 0.0 * VCLOUDS_AMOUNT) - (10.0 + 5.0 * ymult), 0.0, 1.0) * (opacity - rainStrengthLowered) * far;
 	return noise;
 }
 
@@ -102,12 +104,13 @@ float getLowQualityVCSample(vec3 pos, float height, float verticalThickness, flo
 	float ymult = pow(abs(height - pos.y) / verticalThickness, 2.0);
 	vec3 wind = vec3(frametime * 0.001 * VCLOUDS_SPEED, 0.0, 0.0);
 	float rainStrengthLowered = rainStrength / 3.0;
+	float opacity = VCLOUDS_OPACITY + (cameraPosition.y * 0.005);
 
 	if (ymult < 2.0){
 		noise+= getHorizontalNoise(pos / samples * 0.1 - wind * 0.3) * 16 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
 	}
 
-	noise = clamp(mix(noise, 0, 0.25 * 0.0 * VCLOUDS_AMOUNT) - (10.0 + 1.0 * ymult), 0.0, 1.0) * (VCLOUDS_OPACITY - rainStrengthLowered);
+	noise = clamp(mix(noise, 0, 0.25 * 0.0 * VCLOUDS_AMOUNT) - (10.0 + 1.0 * ymult), 0.0, 1.0) * (opacity - rainStrengthLowered);
 	return noise;
 }
 

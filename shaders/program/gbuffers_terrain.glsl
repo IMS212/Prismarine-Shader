@@ -154,7 +154,8 @@ void main() {
 		float leaves   = float(mat > 1.98 && mat < 2.02);
 		float emissive = float(mat > 2.98 && mat < 3.02);
 		float lava     = float(mat > 3.98 && mat < 4.02);
-
+		float water    = float(mat > 0.98 && mat < 1.02);
+		
 		float metalness      = 0.0;
 		float emission       = (emissive + lava) * 0.25;
 		float subsurface     = foliage * 0.5 + leaves;
@@ -318,12 +319,13 @@ void main() {
 		#endif
 
 		#ifdef OVERWORLD
+		
 		if (isEyeInWater == 1.0){
 		float skymapMod = lightmap.y * lightmap.y * (3.0 - 2.0 * lightmap.y);
         float causticfactor = pow(skymapMod, 0.5) * 50 * (1 - pow(skymapMod, 0.5)) * (1 - rainStrength*0.5) * (1 - lightmap.x*0.8);
 		vec3 causticcol = waterColor.rgb * lightDay * lightDay;
 		vec3 causticpos = worldPos.xyz+cameraPosition.xyz;
-		float caustic = getCausticWaves(causticpos) * 8;
+		float caustic = getCausticWaves(causticpos);
 		vec3 lightcaustic = caustic*causticfactor*causticcol*shadowFade*shadow;
 		albedo.rgb *= 0.20 + lightmap.x*0.80;
 		albedo.rgb += (1 - lightmap.x) * (albedo.rgb * waterColor.rgb * waterColor.rgb * WATER_CAUSTICS_STRENGTH + WATER_CAUSTICS_STRENGTH * shadow * albedo.rgb * waterColor.rgb * waterColor.rgb);
@@ -457,6 +459,9 @@ void main() {
 		mat = 3.0;
 	if (mc_Entity.x == 10248)
 		mat = 4.0;
+	
+	if (mc_Entity.x == 10300 || mc_Entity.x == 10302) mat = 1.0;
+	if (mc_Entity.x == 10301 || mc_Entity.x == 10303) mat = 2.0;
 
 	if (mc_Entity.x == 10216 || mc_Entity.x == 10226 || mc_Entity.x == 10231 || mc_Entity.x == 10250 ||
 		mc_Entity.x == 10251 || mc_Entity.x == 10253)

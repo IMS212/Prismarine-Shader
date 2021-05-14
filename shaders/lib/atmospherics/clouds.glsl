@@ -2,13 +2,10 @@ uniform float eyeAltitude;
 uniform float sunAngle;
 
 float CloudNoise(vec2 coord, vec2 wind){
-	float noise = texture2D(noisetex, coord*1        + wind * 0.55).x;
-		  noise+= texture2D(noisetex, coord*0.5      + wind * 0.45).x * -2.0;
-		  noise+= texture2D(noisetex, coord*0.25     + wind * 0.35).x * 2.0;
-		  noise+= texture2D(noisetex, coord*0.125    + wind * 0.25).x * 5.0;
-		  noise+= texture2D(noisetex, coord*0.0625   + wind * 0.15).x * 9.0;
-		  noise+= texture2D(noisetex, coord*0.03125  + wind * 0.05).x * 10.0;
-		  noise+= texture2D(noisetex, coord*0.015625 + wind * 0.05).x * -12.0;
+	float noise = texture2D(noisetex, coord*0.25     + wind * 0.5).x * 2.0;
+		  noise+= texture2D(noisetex, coord*0.125    + wind * 0.45).x * 4.0;
+		  noise+= texture2D(noisetex, coord*0.0625   + wind * 0.4).x * 6.0;
+		  noise+= texture2D(noisetex, coord*0.03125  + wind * 0.35).x * 8.0;
 	return noise;
 }
 
@@ -121,7 +118,7 @@ vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol) {
 		vec3 cloudUP = mix(cloudNight, cloudDay, sunVisF) * (CLOUDS_UP_COLOR_MULT - rainStrength);
 		cloudUP 	*= 1.0 + scattering * (1.0 + 0.0);
 
-		vec3 cloudDOWN = vec3(255.0, 255.0, 255.0) / 255.0 * (0.005 + 0.005 * sqrt(sqrt(lightCol))) * sunVisF * CLOUDS_DOWN_COLOR_MULT;
+		vec3 cloudDOWN = vec3(220.0, 245.0, 255.0) / 255.0 * (0.005 + 0.005 * sqrt(sqrt(lightCol))) * sunVisF * (CLOUDS_DOWN_COLOR_MULT * 32);
 		cloudGradient  = min(cloudGradient, 1.0) * cloud;
 		cloudCol 	   = mix(cloudDOWN, cloudUP, cloudGradient);
 

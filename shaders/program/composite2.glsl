@@ -130,11 +130,12 @@
 		vec3 viewPos = ToNDC(screenPos);
 		#endif
 
+		float opacity = VCLOUDS_OPACITY + (cameraPosition.y * 0.005);
 		float cosS 		 = dot(normalize(viewPos), sunVec);
 		float scattering = pow(cosS * 0.5 * (2.0 * sunVisibility - 1.0) + 0.5, 6.0);
 		float vc 		 = texture2DLod(colortex5, texcoord.xy, 1.0).a;
-		vec3 vcCol 		 = lightCol.rgb / 8 + timeBrightnessLowered;
-		color 			 += mix(color, mix(vcCol, lightCol.rgb, scattering) * (VCLOUDS_OPACITY - rainStrengthLowered), vc);
+		vec3 vcCol 		 = lightCol.rgb / 4;
+		color 			 += mix(color, mix(vcCol, lightCol.rgb, scattering) * (opacity - rainStrengthLowered), vc);
 		#endif
 
 		#if defined END && defined END_VOLUMETRIC_FOG && defined LIGHT_SHAFT
