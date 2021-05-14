@@ -111,7 +111,7 @@ vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol) {
 
 		float sunVisF = pow(sqrt(sqrt(sunVisibility)), 1.0 - min((1.0 - min(moonVisibility, 0.6) / 0.6) * 0.115, 0.075) * 6.0);
 
-		vec3 cloudNight = pow(vec3(lightNight.r, lightNight.g, lightNight.b * 0.9), vec3(3.0 - 0.0)) * (13.5 - 0.0 * 10.0) * (1.0 + 3.0 * nightVision) / 12.0;
+		vec3 cloudNight = pow(vec3(lightNight.r, lightNight.g, lightNight.b * 0.9) * vec3(1, 1, 1), vec3(3.0 - 0.0)) * (13.5 - 0.0 * 10.0) * (1.0 + 3.0 * nightVision) / 8.0;
 		#ifdef WEATHER_PERBIOME
 		vec3 cloudDay	= pow(vec3(lightCol.r * 0.7, lightCol.g * 0.9, lightCol.b * 1.1 - rainStrength) * vec3(weatherCol.r, weatherCol.g * 0.9, weatherCol.b), vec3(1.5 + 0.0));
 		#else
