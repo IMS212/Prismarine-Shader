@@ -85,7 +85,7 @@ vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol) {
 	float gradientMix 		= dither * 0.15;
 	float cosS 				= dot(normalize(viewPos), sunVec);
 	float scattering 		= pow(cosS * 0.5 * (2.0 * sunVisibility - 1.0) + 0.5, 6.0);
-	float rainStrengthLow   = rainStrength / 1.5;
+	float rainStrengthLow   = rainStrength / 2;
 	float cloudHeightFactor = max(1.2 - 0.002 * CLOUDS_HEIGHT_FACTOR * eyeAltitude, 0.0) * max(1.2 - 0.002 * CLOUDS_HEIGHT_FACTOR * eyeAltitude, 0.0);
 	float cloudHeight		= CLOUD_HEIGHT * cloudHeightFactor * CLOUD_HEIGHT_MULTIPLIER;
 
@@ -115,10 +115,10 @@ vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol) {
 		#ifdef WEATHER_PERBIOME
 		vec3 cloudDay	= pow(vec3(lightCol.r * 0.7, lightCol.g * 0.9, lightCol.b * 1.1 - rainStrength) * vec3(weatherCol.r, weatherCol.g * 0.9, weatherCol.b), vec3(1.5 + 0.0));
 		#else
-		vec3 cloudDay	= pow(vec3(lightCol.r * 0.7, lightCol.g * 0.9, lightCol.b * 1.1 - rainStrength) * vec3(lightCol.r, lightCol.g * 0.9, lightCol.b), vec3(1.5 + 0.0));
+		vec3 cloudDay	= pow(vec3(lightCol.r * 0.7, lightCol.g * 0.8, lightCol.b * 1.1), vec3(1.5 + 0.0));
 		#endif
 
-		vec3 cloudUP = mix(cloudNight, cloudDay, sunVisF) * (CLOUDS_UP_COLOR_MULT - rainStrength - rainStrength);
+		vec3 cloudUP = mix(cloudNight, cloudDay, sunVisF) * (CLOUDS_UP_COLOR_MULT - rainStrength);
 		cloudUP 	*= 1.0 + scattering * (1.0 + 0.0);
 
 		vec3 cloudDOWN = vec3(255.0, 255.0, 255.0) / 255.0 * (0.005 + 0.005 * sqrt(sqrt(lightCol))) * sunVisF * CLOUDS_DOWN_COLOR_MULT;
