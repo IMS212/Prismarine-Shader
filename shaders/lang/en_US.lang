@@ -106,7 +106,7 @@ option.SHADOW_FILTER.comment=Enables shadow filtering. §a[+]§rThis effect bene
 
 option.sunPathRotation=Sun Path Rotation
 option.sunPathRotation.comment=Adjusts sun angle.
-
+option.SHADOW_SOFT=Shadow Softening
 option.SHADOW_PIXEL=Pixel Locked Shadows
 option.SHADOW_PIXEL.comment=Applies pixelation effect on shadows.
 value.SHADOW_PIXEL.0=OFF

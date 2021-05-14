@@ -76,7 +76,7 @@ vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol) {
 	vec2 wind 		= vec2(frametime * CLOUD_SPEED * 0.003, 0.0);
 		
 	#ifdef TAA
-		dither = fract(128 * frameTimeCounter + dither);
+		dither = fract(16.0 * frameTimeCounter + dither);
 	#endif
 
 	float NdotU 			= dot(nViewPos, upVec);
@@ -113,9 +113,9 @@ vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol) {
 
 		vec3 cloudNight = pow(vec3(lightNight.r, lightNight.g, lightNight.b * 0.9) * vec3(1, 1, 1), vec3(3.0 - 0.0)) * (13.5 - 0.0 * 10.0) * (1.0 + 3.0 * nightVision) / 8.0;
 		#ifdef WEATHER_PERBIOME
-		vec3 cloudDay	= pow(vec3(lightCol.r * 0.7, lightCol.g * 0.9, lightCol.b * 1.1 - rainStrength) * vec3(weatherCol.r, weatherCol.g * 0.9, weatherCol.b), vec3(1.5 + 0.0));
+		vec3 cloudDay	= pow(vec3(lightCol.r * 0.9, lightCol.g * 0.9, lightCol.b) * vec3(weatherCol.r, weatherCol.g * 0.9, weatherCol.b), vec3(1.5 + 0.0));
 		#else
-		vec3 cloudDay	= pow(vec3(lightCol.r * 0.7, lightCol.g * 0.8, lightCol.b * 1.1), vec3(1.5 + 0.0));
+		vec3 cloudDay	= pow(vec3(lightCol.r * 0.9, lightCol.g * 0.9, lightCol.b), vec3(1.5 + 0.0));
 		#endif
 
 		vec3 cloudUP = mix(cloudNight, cloudDay, sunVisF) * (CLOUDS_UP_COLOR_MULT - rainStrength);
@@ -128,7 +128,7 @@ vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol) {
 		cloud *= 1.0-exp(-(10.0-9.0*0.0)*NdotU);
 	}
 
-	return vec4(cloudCol * (CLOUD_BRIGHTNESS-rainStrengthLow)*0.15, cloud * cloud * CLOUD_OPACITY);
+	return vec4(cloudCol * (CLOUD_BRIGHTNESS-rainStrengthLow)*0.25, cloud * cloud * CLOUD_OPACITY);
 }
 
 vec4 DrawEndCloud(vec3 viewPos, float dither, vec3 lightCol){
