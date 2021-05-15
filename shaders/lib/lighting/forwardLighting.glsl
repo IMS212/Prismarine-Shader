@@ -77,10 +77,10 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
     #elif CLM_MAINCOL == 1
     float rWP = (cameraPosition.x + cameraPosition.x) * (worldPos.x + worldPos.x);
     float bWP = (cameraPosition.z + cameraPosition.z) * (worldPos.z + worldPos.z);
-    float redCol    = rWP * 0.00004;
+    float redCol    = rWP * 0.000039;
     float blueCol   = mix(20, 180, 240) * 0.000039 * 1.5;
     float greenCol  = bWP * 0.000038;
-	vec3 blockLighting = newLightmap * vec3(redCol, greenCol, blueCol) * (BLOCKLIGHT_I / 4);
+	vec3 blockLighting = newLightmap * vec3(redCol, greenCol, blueCol) * (BLOCKLIGHT_I / 2);
 
     #elif CLM_MAINCOL == 2
     float rWP = (cameraPosition.x + cameraPosition.x) * (worldPos.x + worldPos.x);

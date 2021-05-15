@@ -69,7 +69,7 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 	visibility = visfactor / (1.0 - invvisfactor * visibility) - visfactor;
 	visibility = clamp(visibility * 1.015 / invvisfactor - 0.015, 0.0, 1.0);
 	visibility = mix(1.0, visibility, 0.25 * 1 + 0.75) * 0.14285 * float(pixeldepth0 > 0.56) - (timeBrightness * LIGHTSHAFT_TIME_DECREASE_FACTOR);
-	if (isEyeInWater == 1.0) visibility = visibility * WATER_I;
+	if (isEyeInWater == 1.0) visibility = (visibility + 0.1) * WATER_I;
 	#endif
 
 	#if defined END || defined NETHER

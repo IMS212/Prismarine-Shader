@@ -2,10 +2,19 @@ uniform float eyeAltitude;
 uniform float sunAngle;
 
 float CloudNoise(vec2 coord, vec2 wind){
-	float noise = texture2D(noisetex, coord*0.25     + wind * 0.5).x * 2.0;
-		  noise+= texture2D(noisetex, coord*0.125    + wind * 0.45).x * 4.0;
-		  noise+= texture2D(noisetex, coord*0.0625   + wind * 0.4).x * 6.0;
-		  noise+= texture2D(noisetex, coord*0.03125  + wind * 0.35).x * 8.0;
+	float noise = texture2D(noisetex, coord*1.00     + wind * 0.4).x * 1.0;
+		  noise+= texture2D(noisetex, coord*0.50    + wind * 0.35).x * 3.0;
+		  noise+= texture2D(noisetex, coord*0.25   + wind * 0.3).x * 5.0;
+		  noise+= texture2D(noisetex, coord*0.125  + wind * 0.25).x * 7.0;
+		  #if CLOUDS_NOISE_QUALITY == 1
+		  noise+= texture2D(noisetex, coord*0.0625    + wind * 0.2).x * 1.5;
+		  noise+= texture2D(noisetex, coord*0.03125   + wind * 0.15).x * 2.0;
+		  noise+= texture2D(noisetex, coord*0.015625  + wind * 0.10).x * 2.5;
+		  #elif CLOUDS_NOISE_QUALITY == 2
+		  noise+= texture2D(noisetex, coord*0.007812    + wind * 0.05).x * 1;
+		  noise+= texture2D(noisetex, coord*0.003906).x * 1.5;
+		  noise+= texture2D(noisetex, coord*0.001953).x * 2;
+		  #endif
 	return noise;
 }
 

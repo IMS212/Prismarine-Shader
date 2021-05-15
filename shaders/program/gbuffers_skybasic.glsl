@@ -77,9 +77,6 @@ void SunGlare(inout vec3 color, vec3 viewPos, vec3 lightCol) {
 	visibility *= shadowFade * LIGHT_SHAFT_STRENGTH;
 	if (cameraPosition.y < 1.0) visibility *= exp(2.0 * cameraPosition.y - 2.0);
 
-	#ifdef LIGHT_SHAFT
-	if (isEyeInWater == 1) color += 0.25 * lightCol * visibility;
-	#endif
 	#ifdef SUN_GLARE
 	color += 0.25 * lightCol * visibility * (1.0 + 0.25 * isEyeInWater) * 0.2;
 	#endif
@@ -139,16 +136,18 @@ void main() {
 		vec3 planeCoord = wpos / (wpos.y + length(wpos.xz) * 0.5);
 		vec3 moonPos = vec3(gbufferModelViewInverse * vec4(-sunVec, 1.0));
 		vec3 moonCoord = moonPos / (moonPos.y + length(moonPos.xz));
-		vec2 ncoord = planeCoord.xz - moonCoord.xz;
-		ncoord *= 0.2;
+		vec2 hcoord = planeCoord.xz - moonCoord.xz;
+		hcoord *= 0.2;
 
+		//ignore this
 		#ifdef CRAZY_MODE
-		vec3 helios = texture2D(gaux4, ncoord * 0.8 + 0.6).rgb;
+		vec3 helios = texture2D(gaux4, hcoord * 0.8 + 0.6).rgb;
 		helios *= pow2(length(helios) + 0.6);
 		albedo.rgb += helios * 0.05 * NdotUhelios;
 		#else
+		//
 		if (moonVisibility > 0.0 && rainStrength == 0.0){
-			vec3 helios = texture2D(gaux4, ncoord * 0.8 + 0.6).rgb;
+			vec3 helios = texture2D(gaux4, hcoord * 0.8 + 0.6).rgb;
 			helios *= pow2(length(helios) + 0.6);
 			albedo.rgb += helios * 0.05 * NdotUhelios * (1.0 - sunVisibility);
 		}

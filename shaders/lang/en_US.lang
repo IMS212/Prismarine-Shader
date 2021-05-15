@@ -369,7 +369,10 @@ value.CLOUD_HEIGHT.7.5=Low
 value.CLOUD_HEIGHT.10.0=Medium
 value.CLOUD_HEIGHT.12.5=High
 value.CLOUD_HEIGHT.15.0=Very High
-
+option.CLOUDS_NOISE_QUALITY=Noise Quality
+value.CLOUDS_NOISE_QUALITY.0=Low
+value.CLOUDS_NOISE_QUALITY.1=Medium
+value.CLOUDS_NOISE_QUALITY.2=High
 option.CLOUD_SPEED=Speed
 option.CLOUD_SPEED.comment=Adjusts cloud speed.
 
