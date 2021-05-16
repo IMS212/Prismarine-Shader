@@ -45,32 +45,27 @@ float GetNoise(vec2 pos){
 	return fract(sin(dot(pos, vec2(12.9898, 4.1414))) * 43758.54953);
 }
 
-vec3 DrawStars(inout vec3 color,vec3 viewPos){
-	vec3 wpos=vec3(gbufferModelViewInverse*vec4(viewPos,1.));
-	vec3 planeCoord=wpos/(wpos.y+length(wpos.xz));
-	planeCoord.x+=.399;
-	planeCoord.z+=0.;
-	vec2 wind=vec2(frameTimeCounter,0.);
-	vec2 coord=planeCoord.xz*4+cameraPosition.xz*.0001+wind*.0001;
-	coord=floor(coord*1024.)/1024.;
+void DrawStars(inout vec3 color, vec3 viewPos) {
+	vec3 wpos = vec3(gbufferModelViewInverse * vec4(viewPos, 1.0));
+	vec3 planeCoord = wpos / (wpos.y + length(wpos.xz));
+	vec2 wind = vec2(frametime, 0.0);
+	vec2 coord = planeCoord.xz * 0.4 + cameraPosition.xz * 0.0001 + wind * 0.00125;
+	coord = floor(coord * 1024.0) / 1024.0;
 	
-	float cosT=clamp(dot(normalize(viewPos), normalize(upVec)), 0.0, 1.0);
-	float multiplier=sqrt(sqrt(cosT))*1*(1.-rainStrength)*moonVisibility;
-	if (timeBrightness < 0.6) multiplier=sqrt(sqrt(cosT))*0.8*(1.-rainStrength);
+	float VoU = clamp(dot(normalize(viewPos), normalize(upVec)), 0.0, 1.0);
+	float multiplier = sqrt(sqrt(VoU)) * 5.0 * (1.0 - rainStrength) * moonVisibility;
 	
-	float star=1.;
-	if(cosT>0.){
-		star*=GetNoise(coord.xy);
-		star*=GetNoise(coord.xy+.115);
-		star*=GetNoise(coord.xy+.230);
+	float star = 1.0;
+	if (VoU > 0.0) {
+		star *= GetNoise(coord.xy);
+		star *= GetNoise(coord.xy + 0.10);
+		star *= GetNoise(coord.xy + 0.23);
 	}
+	star = clamp(star - 0.8125, 0.0, 1.0) * multiplier;
 
-	float starsCov = 0.7;
-
-	star=clamp(star - starsCov, 0.0, 1.5) * multiplier;
-	
+	if (cameraPosition.y < 1.0) star *= exp(2.0 * cameraPosition.y - 2.0);
+		
 	color += star * pow(lightNight, vec3(0.8));
-	return vec3(star);
 }
 
 vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol) {
@@ -85,6 +80,7 @@ vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol) {
 		dither = fract(16.0 * frameTimeCounter + dither);
 	#endif
 
+	float brightness = CLOUD_BRIGHTNESS / 4.0;
 	float NdotU 			= dot(nViewPos, upVec);
 	float cloud 			= 0.0;
 	float cloudGradient 	= 0.0;
@@ -119,22 +115,22 @@ vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol) {
 
 		vec3 cloudNight = pow(vec3(lightNight.r, lightNight.g, lightNight.b * 0.9) * vec3(1, 1, 1), vec3(3.0 - 0.0)) * (13.5 - 0.0 * 10.0) * (1.0 + 3.0 * nightVision) / 8.0;
 		#ifdef WEATHER_PERBIOME
-		vec3 cloudDay	= pow(vec3(lightCol.r * 0.9, lightCol.g * 0.9, lightCol.b) * vec3(weatherCol.r, weatherCol.g * 0.9, weatherCol.b), vec3(1.5 + 0.0));
+		vec3 cloudDay	= pow(vec3(lightCol.r, lightCol.g * 0.9, lightCol.b * 2) * vec3(weatherCol.r, weatherCol.g * 0.9, weatherCol.b), vec3(1.5 + 0.0));
 		#else
-		vec3 cloudDay	= pow(vec3(lightCol.r * 0.9, lightCol.g * 0.9, lightCol.b), vec3(1.5 + 0.0));
+		vec3 cloudDay	= pow(vec3(lightCol.r, lightCol.g * 0.9, lightCol.b * 2), vec3(1.5 + 0.0));
 		#endif
 
 		vec3 cloudUP = mix(cloudNight, cloudDay, sunVisF) * (CLOUDS_UP_COLOR_MULT - rainStrength);
 		cloudUP 	*= 1.0 + scattering * (1.0 + 0.0);
 
-		vec3 cloudDOWN = vec3(220.0, 245.0, 255.0) / 255.0 * (0.005 + 0.005 * sqrt(sqrt(lightCol))) * sunVisF * (CLOUDS_DOWN_COLOR_MULT * 32);
+		vec3 cloudDOWN = vec3(180, 200, 255) / 200.0 * (0.005 + 0.005 * sqrt(sqrt(lightCol))) * sunVisF * (CLOUDS_DOWN_COLOR_MULT * 32);
 		cloudGradient  = min(cloudGradient, 1.0) * cloud;
 		cloudCol 	   = mix(cloudDOWN, cloudUP, cloudGradient);
 
 		cloud *= 1.0-exp(-(10.0-9.0*0.0)*NdotU);
 	}
 
-	return vec4(cloudCol * (CLOUD_BRIGHTNESS-rainStrengthLow)*0.25, cloud * cloud * CLOUD_OPACITY);
+	return vec4(cloudCol * (brightness-rainStrengthLow+timeBrightness)*0.25, cloud * cloud * CLOUD_OPACITY);
 }
 
 vec4 DrawEndCloud(vec3 viewPos, float dither, vec3 lightCol){

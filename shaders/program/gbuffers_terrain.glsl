@@ -319,14 +319,13 @@ void main() {
 		#endif
 
 		#ifdef OVERWORLD
-		
 		if (isEyeInWater == 1.0){
 		float skymapMod = lightmap.y * lightmap.y * (3.0 - 2.0 * lightmap.y);
-        float causticfactor = pow(skymapMod, 0.5) * 50 * (1 - pow(skymapMod, 0.5)) * (1 - rainStrength*0.5) * (1 - lightmap.x*0.8);
-		vec3 causticcol = waterColor.rgb * lightDay * lightDay;
-		vec3 causticpos = worldPos.xyz+cameraPosition.xyz;
-		float caustic = getCausticWaves(causticpos);
-		vec3 lightcaustic = caustic*causticfactor*causticcol*shadowFade*shadow;
+        float causticFactor = pow(skymapMod, 0.5) * 50 * (1 - pow(skymapMod, 0.5)) * (1 - rainStrength*0.5) * (1 - lightmap.x*0.8);
+		vec3 causticColor = waterColor.rgb * lightDay * lightDay;
+		vec3 causticPosition = worldPos.xyz+cameraPosition.xyz;
+		float caustic = getCausticWaves(causticPosition);
+		vec3 lightcaustic = caustic*causticFactor*causticColor*shadowFade*shadow;
 		albedo.rgb *= 0.20 + lightmap.x*0.80;
 		albedo.rgb += (1 - lightmap.x) * (albedo.rgb * waterColor.rgb * waterColor.rgb * WATER_CAUSTICS_STRENGTH + WATER_CAUSTICS_STRENGTH * shadow * albedo.rgb * waterColor.rgb * waterColor.rgb);
 		albedo.rgb *= 1.0+lightcaustic;

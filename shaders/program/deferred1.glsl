@@ -226,7 +226,7 @@ void main() {
 				#endif
 
 				#if SKY_MODE == 1
-                skyReflection = GetSkyColor(skyRefPos, true);
+                skyReflection = GetSkyColor(skyRefPos, lightCol, true);
 				#endif
 				
 				#ifdef REFLECTION_ROUGH

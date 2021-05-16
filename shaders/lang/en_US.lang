@@ -240,7 +240,7 @@ value.CLOUDS.1=Planar
 value.CLOUDS.2=Vanilla
 value.CLOUDS.3=Volumetric
 
-option.VCF_MIPMAP=Color Smoothing
+option.VCF_MIPMAP=Mipmap
 option.VCF_MIPMAP.comment=Makes the volumetric clouds/fog less noisy. Toggle it off for sharper look.
 
 option.VFOG_NOISE_QUALITY=Noise Quality
@@ -306,6 +306,8 @@ option.WEATHER_PERBIOME.comment=Use varied weather color for different biomes. �
 option.LIGHT_SHAFT=Light Shafts
 option.LIGHT_SHAFT.comment=Adds volumetric rays from sun / moon. §a[+]§rThis effect benefits from TAA. §e[*]§rPerformance depends on Shadowmap Resolution.
 
+option.LIGHTHSHAFT_CLOUDY_NOISE=Cloudy Noise
+option.LIGHTHSHAFT_CLOUDY_NOISE.comment=Makes light rays look like volumetric cloudy fog.
 option.LIGHTSHAFT_AUTOCOLOR=Automatic coloring 
 option.LIGHTSHAFT_AUTOCOLOR.comment=Automatically picks the color of each ray depending on the sunlight/moonlight color.
 option.LIGHTSHAFT_WATER=Underwater Light Shafts

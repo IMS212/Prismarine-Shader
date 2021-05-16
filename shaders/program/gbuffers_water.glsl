@@ -393,7 +393,7 @@ void main() {
 				#endif
 
 				#if SKY_MODE == 1
-                skyReflection = GetSkyColor(skyRefPos, true);
+                skyReflection = GetSkyColor(skyRefPos, lightCol, true);
 				#endif
 				
 				vec3 specular = GetSpecularHighlight(newNormal, viewPos,  0.9, vec3(0.02),

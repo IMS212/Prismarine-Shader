@@ -14,14 +14,14 @@ vec3 GetFogColor(vec3 viewPos) {
 	else density = 0;
 	#endif
 
-    float nightDensity = 0.0;
+    float nightDensity = 0.6;
     float weatherDensity = 0.1 * (cameraPosition.y * 0.01) * WEATHER_OPACITY;
 
     float groundDensity = 0.08 * (4.0 - 3.0 * sunVisibility) *
                           (10.0 * rainStrength * rainStrength + 1.0);
     
     float exposure = exp2(timeBrightness * 0.75 - 1.00) * timeBrightness;
-    float nightExposure = exp2(-3.5);
+    float nightExposure = exp2(-4);
 
 	float baseGradient = exp(-(VoU * 0.5 + 0.5) * 0.5 / density);
 

@@ -177,7 +177,7 @@ vec2 getVolumetricCloud(float pixeldepth0, float pixeldepth1) {
 	vec4 wpos 		= vec4(0.0);
 
 	float quality	= VCLOUDS_QUALITY / 2;
-	float dither 	= Bayer8(gl_FragCoord.xy) * quality;
+	float dither 	= Bayer256(gl_FragCoord.xy) * quality;
 	float maxDist 	= VCLOUDS_RANGE*far;
 	float minDist 	= 0.01f+dither;
 
@@ -186,7 +186,7 @@ vec2 getVolumetricCloud(float pixeldepth0, float pixeldepth1) {
 		if (getDepth(pixeldepth0) < minDist || vc.y > 0.999){
 			break;
 		}
-		wpos = getWorldPos(getFragPos(texCoord.xy, distx(minDist)));
+		wpos = getWorldPos(getFragPos(texcoord.xy, distx(minDist)));
 		if (length(wpos.xz) < maxDist){
 			float verticalNoise = getVerticalNoise((wpos.xz + cameraPosition.xz + frametime) * 0.0003 * VCLOUDS_SPEED);
 			wpos.xyz += cameraPosition.xyz + vec3(frametime*4.0,-verticalNoise*32.0,0.0);
@@ -229,7 +229,7 @@ vec2 getVolumetricFog(float pixeldepth0, float pixeldepth1) {
 		if (getDepth(pixeldepth0) < minDist || vc.y > 0.999){
 			break;
 		}
-		wpos = getWorldPos(getFragPos(texCoord.xy,distx(minDist)));
+		wpos = getWorldPos(getFragPos(texcoord.xy,distx(minDist)));
 		if (length(wpos.xz) < maxDist){
 			float verticalNoise = getVerticalNoise((wpos.xz + cameraPosition.xz + frametime) * 0.005 * VFOG_SPEED);
 			wpos.xyz += cameraPosition.xyz + vec3(frametime * 1.0, -verticalNoise * 32.0,0.0);

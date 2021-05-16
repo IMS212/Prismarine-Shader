@@ -66,6 +66,7 @@ void RoundSunMoon(inout vec3 color, vec3 viewPos, vec3 sunColor, vec3 moonColor)
 }
 
 void SunGlare(inout vec3 color, vec3 viewPos, vec3 lightCol) {
+	float timeBrightnessLowered = timeBrightness / 2;
 	float VoL = dot(normalize(viewPos), lightVec);
 	float visfactor = 0.05 * (-0.8 * timeBrightness + 1.0) * (3.0 * rainStrength + 1.0);
 	float invvisfactor = 1.0 - visfactor;
@@ -78,7 +79,7 @@ void SunGlare(inout vec3 color, vec3 viewPos, vec3 lightCol) {
 	if (cameraPosition.y < 1.0) visibility *= exp(2.0 * cameraPosition.y - 2.0);
 
 	#ifdef SUN_GLARE
-	color += 0.25 * lightCol * visibility * (1.0 + 0.25 * isEyeInWater) * 0.2;
+	color += lightCol * visibility * (1.0 + 0.25 * isEyeInWater) * 0.2 / (timeBrightness * 2);
 	#endif
 }
 

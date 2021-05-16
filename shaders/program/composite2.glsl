@@ -131,17 +131,17 @@
 		float timeBrightnessLowered = timeBrightness / 1.5;
 		float rainStrengthLowered = rainStrength / 2.0;
 		
-		#if defined OVERWORLD && CLOUDS == 3 && defined LIGHT_SHAFT
+		#if defined OVERWORLD && CLOUDS == 3
 
 		float opacity = VCLOUDS_OPACITY + (cameraPosition.y * 0.01);
 		float cosS = dot(normalize(viewPos), sunVec);
 		float scattering = pow(cosS * 0.5 * (2.0 * sunVisibility - 1.0) + 0.5, 6.0);
 		float vcmult = opacity*(1.0-moonVisibility*0.7)*(1.0-rainStrength*0.5);
-		vec3 lightColorC = vec3(lightCol.r * 0.7, lightCol.g * 0.9, lightCol.b * 1.8) / 4 + timeBrightness;
+		vec3 lightColorC = vec3(lightCol.r * 0.7, lightCol.g * 0.9, lightCol.b * 1.8) / 4;
 		color = mix(color,mix(ambientCol,lightColorC,texture2DLod(colortex4,texcoord.xy,float(2.0)).a)*vcmult,texture2DLod(colortex5,texcoord.xy,float(2.0)).a*texture2DLod(colortex5,texcoord.xy,float(2.0)).a);
 		#endif
 
-		#if defined END && defined END_VOLUMETRIC_FOG && defined LIGHT_SHAFT
+		#if defined END && defined END_VOLUMETRIC_FOG
 		vec3 fogcol = vec3(CLOUDS_END_R * 4, CLOUDS_END_G, CLOUDS_END_B * 8) * CLOUDS_END_I * 0.00001;
 		color += mix(color, mix(fogcol, fogcol, vc.y) * VFOG_OPACITY, vc.y);
 		#endif
