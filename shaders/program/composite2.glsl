@@ -2,8 +2,10 @@
 	uniform int isEyeInWater;
 	const bool colortex0MipmapEnabled = false;
 	const bool colortex1MipmapEnabled = true;
+	#ifdef VCF_MIPMAP
 	const bool colortex4MipmapEnabled = true;
 	const bool colortex5MipmapEnabled = true;
+	#endif
 
 	varying vec3 lightVector;
 	varying vec3 upVec;
@@ -106,7 +108,15 @@
 	void main() {
 		vec3 color = texture2DLod(colortex0, texcoord.st, 0.0).rgb;
 		float dither = Bayer64(gl_FragCoord.xy);
+		vec2 vc = vec2(texture2DLod(colortex4, texcoord.xy, float(2.0)).a, texture2DLod(colortex5, texcoord.xy, float(2.0)).a);
 
+		vec3 screenPos = vec3(gl_FragCoord.xy / vec2(viewWidth, viewHeight), gl_FragCoord.z);
+		#ifdef TAA
+		vec3 viewPos = ToNDC(vec3(TAAJitter(screenPos.xy, -0.5), screenPos.z));
+		#else
+		vec3 viewPos = ToNDC(screenPos);
+		#endif
+		
 		#ifdef MOTION_BLUR
 		float z = texture2D(depthtex1, texCoord.st).x;
 
@@ -120,28 +130,20 @@
 		float pixeldepth = texture2D(depthtex1,texcoord.xy).x;
 		float timeBrightnessLowered = timeBrightness / 1.5;
 		float rainStrengthLowered = rainStrength / 2.0;
-		vec4 fragpos = getFragPos(texcoord.xy,pixeldepth);
 		
 		#if defined OVERWORLD && CLOUDS == 3 && defined LIGHT_SHAFT
-		vec3 screenPos = vec3(gl_FragCoord.xy / vec2(viewWidth, viewHeight), gl_FragCoord.z);
-		#ifdef TAA
-		vec3 viewPos = ToNDC(vec3(TAAJitter(screenPos.xy, -0.5), screenPos.z));
-		#else
-		vec3 viewPos = ToNDC(screenPos);
-		#endif
 
-		float opacity = VCLOUDS_OPACITY + (cameraPosition.y * 0.005);
-		float cosS 		 = dot(normalize(viewPos), sunVec);
+		float opacity = VCLOUDS_OPACITY + (cameraPosition.y * 0.01);
+		float cosS = dot(normalize(viewPos), sunVec);
 		float scattering = pow(cosS * 0.5 * (2.0 * sunVisibility - 1.0) + 0.5, 6.0);
-		float vc 		 = texture2DLod(colortex5, texcoord.xy, 1.0).a;
-		vec3 vcCol 		 = lightCol.rgb / 4;
-		color 			 += mix(color, mix(vcCol, lightCol.rgb, scattering) * (opacity - rainStrengthLowered), vc);
+		float vcmult = opacity*(1.0-moonVisibility*0.7)*(1.0-rainStrength*0.5);
+		vec3 lightColorC = vec3(lightCol.r * 0.7, lightCol.g * 0.9, lightCol.b * 1.8) / 4 + timeBrightness;
+		color = mix(color,mix(ambientCol,lightColorC,texture2DLod(colortex4,texcoord.xy,float(2.0)).a)*vcmult,texture2DLod(colortex5,texcoord.xy,float(2.0)).a*texture2DLod(colortex5,texcoord.xy,float(2.0)).a);
 		#endif
 
 		#if defined END && defined END_VOLUMETRIC_FOG && defined LIGHT_SHAFT
-		float vc 		 = texture2DLod(colortex5, texcoord.xy, 1.0).a;
-		vec3 vfCol 		 = vec3(CLOUDS_END_R * 4, CLOUDS_END_G, CLOUDS_END_B * 8) * CLOUDS_END_I * 0.00001;
-		color			 += mix(color, mix(vfCol, vfCol, vc.x) * VFOG_OPACITY, vc);
+		vec3 fogcol = vec3(CLOUDS_END_R * 4, CLOUDS_END_G, CLOUDS_END_B * 8) * CLOUDS_END_I * 0.00001;
+		color += mix(color, mix(fogcol, fogcol, vc.y) * VFOG_OPACITY, vc.y);
 		#endif
 		
 	/* DRAWBUFFERS:07 */

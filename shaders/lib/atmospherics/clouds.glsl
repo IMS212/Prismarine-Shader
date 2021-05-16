@@ -2,10 +2,10 @@ uniform float eyeAltitude;
 uniform float sunAngle;
 
 float CloudNoise(vec2 coord, vec2 wind){
-	float noise = texture2D(noisetex, coord*1.00     + wind * 0.4).x * 1.0;
-		  noise+= texture2D(noisetex, coord*0.50    + wind * 0.35).x * 3.0;
-		  noise+= texture2D(noisetex, coord*0.25   + wind * 0.3).x * 5.0;
-		  noise+= texture2D(noisetex, coord*0.125  + wind * 0.25).x * 7.0;
+	float noise = texture2D(noisetex, coord*0.25     + wind * 0.4).x * 2.0;
+		  noise+= texture2D(noisetex, coord*0.125    + wind * 0.35).x * 4.0;
+		  noise+= texture2D(noisetex, coord*0.0625   + wind * 0.3).x * 6.0;
+		  noise+= texture2D(noisetex, coord*0.03125  + wind * 0.25).x * 8.0;
 		  #if CLOUDS_NOISE_QUALITY == 1
 		  noise+= texture2D(noisetex, coord*0.0625    + wind * 0.2).x * 1.5;
 		  noise+= texture2D(noisetex, coord*0.03125   + wind * 0.15).x * 2.0;
@@ -91,7 +91,7 @@ vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol) {
 	float gradientMix 		= dither * 0.15;
 	float cosS 				= dot(normalize(viewPos), sunVec);
 	float scattering 		= pow(cosS * 0.5 * (2.0 * sunVisibility - 1.0) + 0.5, 6.0);
-	float rainStrengthLow   = rainStrength / 2;
+	float rainStrengthLow   = rainStrength / 3;
 	float cloudHeightFactor = max(1.2 - 0.002 * CLOUDS_HEIGHT_FACTOR * eyeAltitude, 0.0) * max(1.2 - 0.002 * CLOUDS_HEIGHT_FACTOR * eyeAltitude, 0.0);
 	float cloudHeight		= CLOUD_HEIGHT * cloudHeightFactor * CLOUD_HEIGHT_MULTIPLIER;
 

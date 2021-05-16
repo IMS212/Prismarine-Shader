@@ -39,6 +39,7 @@ uniform sampler2D colortex0;
 uniform sampler2D colortex1;
 uniform sampler2D depthtex0;
 uniform sampler2D depthtex1;
+uniform sampler2D noisetex;
 
 #ifdef LIGHT_SHAFT
 uniform sampler2DShadow shadowtex0;

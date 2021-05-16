@@ -1,8 +1,6 @@
 #ifdef FSH
 	const bool colortex0MipmapEnabled = false;
 	const bool colortex1MipmapEnabled = true;
-	const bool colortex4MipmapEnabled = true;
-	const bool colortex5MipmapEnabled = true;
 
 	varying vec3 lightVector;
 	varying vec3 upVec;
@@ -58,10 +56,10 @@
 	#include "/lib/atmospherics/volumetricClouds.glsl"
 
 	void main() {
-		vec3 volumetricCol = texture2D(colortex5, texcoord.st).rgb;
+		vec3 aux2 = texture2D(colortex4, texcoord.st).rgb;
+		vec3 aux = texture2D(colortex5, texcoord.st).rgb;
 		vec4 color = texture2D(colortex0, texcoord.st);
-		float pixeldepth0 = texture2D(depthtex0, texcoord.xy).x;
-		float pixeldepth1 = texture2D(depthtex1, texcoord.xy).x;
+		float alpha = pow(texture2D(colortex1, texcoord.xy).a, 2.2);
 		vec3 vl = texture2DLod(colortex1, texCoord.xy, 1.5).rgb;
 		vl *= vl;
 
@@ -83,23 +81,31 @@
 		if (cameraPosition.y < 1.0) vl *= exp(2.0 * cameraPosition.y - 2.0);
 		
 		color.rgb += vl;
-		
+
+		float pixeldepth0 = texture2D(depthtex0, texcoord.xy).x;
+		float pixeldepth1 = texture2D(depthtex1, texcoord.xy).x;
+
 		#if defined OVERWORLD && CLOUDS == 3 && defined LIGHT_SHAFT
-		vec2 vc = vec2(0.0);
-		vc = getVolumetricCloud(pixeldepth0, pixeldepth1);
+		vec2 vc = getVolumetricCloud(pixeldepth1, pixeldepth0);
+		//tatsu pls help
+		//if (alpha > 0.0001){
+			//float opacity = VCLOUDS_OPACITY + (cameraPosition.y * 0.005);
+			//float vcmult = opacity * (1.0 - moonVisibility * 0.7) * (1.0 - rainStrength * 0.5);
+			//color.rgb += mix(color.rgb, mix(ambientCol * (1.0 - mix(0.25, 0.825, moonVisibility) * rainStrength), lightCol * (1.0 + mix(1.0, -0.75, moonVisibility) * rainStrength), texture2DLod(colortex4, texcoord.xy, float(2.0)).a) * vcmult, texture2DLod(colortex5,texcoord.xy,float(2.0)).a * texture2DLod(colortex5,texcoord.xy,float(2.0)).a);
+		//}
 		#endif
 
 		#if defined END && defined LIGHT_SHAFT
 		#ifdef END_VOLUMETRIC_FOG
-		vec2 vc = vec2(0.0);
-		vc = getVolumetricFog(pixeldepth0, pixeldepth1);
+		vec2 vc = getVolumetricFog(pixeldepth0, pixeldepth1);
 		#endif
 		#endif
 
-		/*DRAWBUFFERS:0145*/
+	/*DRAWBUFFERS:0145*/
 		gl_FragData[0] = color;
 		#if (defined END_VOLUMETRIC_FOG && defined END) || (CLOUDS == 3 && defined OVERWORLD)
-		gl_FragData[3] = vec4(volumetricCol, vc.y);
+		gl_FragData[2] = vec4(aux2, vc.x);
+		gl_FragData[3] = vec4(aux, vc.y);
 		#endif
 	}
 #endif
