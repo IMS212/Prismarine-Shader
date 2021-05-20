@@ -81,9 +81,9 @@ void main() {
 	albedo.rgb = mix(vec3(1),albedo.rgb,pow(albedo.a,(1.0-albedo.a)*0.5)*1.05);
 	albedo.rgb *= 1.0-pow(albedo.a,32.0);
 	if (water > 0.9){
-		#if defined OVERWORLD
-		float caustic = getCausticWaves(wpos);
-		albedo.rgb = vec3(1.0+3.0*caustic);
+		#if defined OVERWORLD && defined WATER_TINT
+		//float caustic = getCausticWaves(wpos);
+		//albedo.rgb = vec3(1.0+3.0*caustic);
 		albedo.rgb *= vec3(waterColor.r, waterColor.g * 0.8, waterColor.b) * WATER_I;
 		#endif
 		}
