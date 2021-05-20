@@ -94,9 +94,7 @@ vec3 MotionBlur(vec3 color, float z, float dither) {
 
 //Includes//
 #include "/lib/util/dither.glsl"
-#include "/lib/prismarine/fragPos.glsl"
 #include "/lib/color/dimensionColor.glsl"
-#include "/lib/prismarine/volumetricClouds.glsl"
 
 #ifdef OUTLINE_OUTER
 #include "/lib/util/outlineOffset.glsl"
