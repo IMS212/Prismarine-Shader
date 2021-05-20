@@ -39,12 +39,12 @@ uniform sampler2D colortex0;
 uniform sampler2D colortex1;
 uniform sampler2D depthtex0;
 uniform sampler2D depthtex1;
-uniform sampler2D noisetex;
 
-#ifdef LIGHT_SHAFT
+#if FOG_MODE == 1 || FOG_MODE == 2
 uniform sampler2DShadow shadowtex0;
 uniform sampler2DShadow shadowtex1;
 uniform sampler2D shadowcolor0;
+uniform sampler2D noisetex;
 #endif
 
 //Attributes//
@@ -73,7 +73,7 @@ float GetLinearDepth(float depth) {
 #include "/lib/util/dither.glsl"
 #include "/lib/atmospherics/waterFog.glsl"
 
-#ifdef LIGHT_SHAFT
+#if FOG_MODE == 1 || FOG_MODE == 2
 #include "/lib/atmospherics/volumetricLight.glsl"
 #endif
 
@@ -118,7 +118,7 @@ void main() {
 	color.rgb = mix(color.rgb, outerOutline.rgb, outerOutline.a);
 	#endif
 	
-	#ifdef LIGHT_SHAFT
+	#if FOG_MODE == 1 || FOG_MODE == 2
 	float dither = Bayer64(gl_FragCoord.xy);
 	vec3 vl = GetLightShafts(z0, z1, translucent, dither);
 	#else

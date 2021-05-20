@@ -1,110 +1,98 @@
-#ifdef FSH
-const bool colortex0MipmapEnabled = false;
-const bool colortex1MipmapEnabled = true;
+/* 
+BSL Shaders v7.2.01 by Capt Tatsu 
+https://bitslablab.com 
+*/ 
 
-varying vec3 lightVector;
-varying vec3 upVec;
-varying vec3 sunVec;
-varying vec3 moonVec;
-varying float moonVisibility;
-uniform float shadowFade;
-varying vec4 texcoord;
+//Settings//
+#include "/lib/settings.glsl"
+
+//Fragment Shader///////////////////////////////////////////////////////////////////////////////////
+#ifdef FSH
+
+//Varyings//
 varying vec2 texCoord;
+
+varying vec3 sunVec, upVec;
+
+//Uniforms//
+uniform int isEyeInWater;
+uniform int worldTime;
+
 uniform float blindFactor;
+uniform float rainStrength;
+uniform float shadowFade;
+uniform float timeAngle, timeBrightness;
+uniform float frameTimeCounter;
+
+uniform ivec2 eyeBrightnessSmooth;
+
+uniform vec3 cameraPosition;
+
 uniform sampler2D colortex0;
 uniform sampler2D colortex1;
-uniform sampler2D colortex2;
-uniform sampler2D colortex3;
-uniform sampler2D colortex4;
-uniform sampler2D colortex5;
-uniform sampler2D depthtex0;
-uniform sampler2D depthtex1;
-uniform sampler2D noisetex;
 
-uniform mat4 gbufferProjection;
-uniform mat4 gbufferProjectionInverse;
-uniform mat4 gbufferModelViewInverse;
-uniform mat4 gbufferModelView;
-uniform float rainStrength;
-uniform float wetness;
-uniform ivec2 eyeBrightnessSmooth;
-uniform int isEyeInWater;
-uniform float nightVision;
-uniform int worldTime;
-uniform float frameTimeCounter;
-uniform vec3 cameraPosition;
-uniform vec3 sunPosition;
-uniform float viewWidth;
-uniform float viewHeight;
-uniform float far;
-uniform float near;
-uniform float aspectRatio;
-uniform float timeAngle, timeBrightness;
+//Optifine Constants//
+const bool colortex1MipmapEnabled = true;
 
+//Common Variables//
 float eBS = eyeBrightnessSmooth.y / 240.0;
 float sunVisibility = clamp(dot(sunVec, upVec) + 0.05, 0.0, 0.1) * 10.0;
 
-#ifdef WORLD_TIME_ANIMATION
-float frametime = float(worldTime)/20.0*ANIMATION_SPEED;
-#else
-float frametime = frameTimeCounter*ANIMATION_SPEED;
-#endif
-
-#include "/lib/util/dither.glsl"
-#include "/lib/util/fragPos.glsl"
+//Includes//
 #include "/lib/color/dimensionColor.glsl"
-#include "/lib/atmospherics/volumetricClouds.glsl"
 
+//Program//
 void main() {
-	vec3 aux2 = texture2D(colortex4, texcoord.st).rgb;
-	vec3 aux = texture2D(colortex5, texcoord.st).rgb;
-	vec4 color = texture2D(colortex0, texcoord.st);
-	float alpha = pow(texture2D(colortex1, texcoord.xy).a, 2.2);
+    vec4 color = texture2D(colortex0, texCoord.xy);
+	
 	vec3 vl = texture2DLod(colortex1, texCoord.xy, 1.5).rgb;
 	vl *= vl;
 
 	#ifdef OVERWORLD
-	#ifdef LIGHTSHAFT_AUTOCOLOR
-	vl *= lightCol * 0.25;
-	#else
-	vl *= vec3(LIGHTSHAFT_R, LIGHTSHAFT_G, LIGHTSHAFT_B) * LIGHTSHAFT_I / 255.0 * 0.25;
-	#endif
+    vl *= lightCol * 0.25;
+	if (cameraPosition.y < 1.0) vl *= exp(2.0 * cameraPosition.y - 2.0);
 	#endif
 
 	#ifdef END
-	vl *= endCol.rgb * 0.025;
+    vl *= endCol.rgb * 0.1;
 	#endif
 
-	vl *= (LIGHT_SHAFT_STRENGTH + isEyeInWater) * (1.0 - rainStrength * eBS * 0.875) * shadowFade *
-		(1.0 - blindFactor);
-
-	if (cameraPosition.y < 1.0) vl *= exp(2.0 * cameraPosition.y - 2.0);
-		
+    vl *= LIGHT_SHAFT_STRENGTH * (1.0 - rainStrength * eBS * 0.875) * shadowFade *
+		  (1.0 - blindFactor);
+	
 	color.rgb += vl;
-
-	float pixeldepth0 = texture2D(depthtex0, texcoord.xy).x;
-	float pixeldepth1 = texture2D(depthtex1, texcoord.xy).x;
-
-	#if defined OVERWORLD && CLOUDS == 3 && defined LIGHT_SHAFT
-	vec2 vc = getVolumetricCloud(pixeldepth1, pixeldepth0);
-		//if (alpha > 0.0001){
-			//float opacity = VCLOUDS_OPACITY + (cameraPosition.y * 0.005);
-			//float vcmult = opacity * (1.0 - moonVisibility * 0.7) * (1.0 - rainStrength * 0.5);
-			//color.rgb += mix(color.rgb, mix(ambientCol * (1.0 - mix(0.25, 0.825, moonVisibility) * rainStrength), lightCol * (1.0 + mix(1.0, -0.75, moonVisibility) * rainStrength), texture2DLod(colortex4, texcoord.xy, float(2.0)).a) * vcmult, texture2DLod(colortex5,texcoord.xy,float(2.0)).a * texture2DLod(colortex5,texcoord.xy,float(2.0)).a);
-		//}
-	#endif
-
-	#if defined END && defined LIGHT_SHAFT
-	#ifdef END_VOLUMETRIC_FOG
-	vec2 vc = getVolumetricFog(pixeldepth0, pixeldepth1);
-	#endif
-	#endif
-
-	/*DRAWBUFFERS:0145*/
+	
+	/*DRAWBUFFERS:0*/
 	gl_FragData[0] = color;
-	#if (defined END_VOLUMETRIC_FOG && defined END) || (CLOUDS == 3 && defined OVERWORLD)
-	gl_FragData[2] = vec4(aux2, vc.x);
-	gl_FragData[3] = vec4(aux, vc.y);
-	#endif
-	}
+}
+
+#endif
+
+//Vertex Shader/////////////////////////////////////////////////////////////////////////////////////
+#ifdef VSH
+
+//Varyings//
+varying vec2 texCoord;
+
+varying vec3 sunVec, upVec;
+
+//Uniforms//
+uniform float timeAngle;
+
+uniform mat4 gbufferModelView;
+
+//Program//
+void main() {
+	texCoord = gl_MultiTexCoord0.xy;
+	
+	gl_Position = ftransform();
+
+	const vec2 sunRotationData = vec2(cos(sunPathRotation * 0.01745329251994), -sin(sunPathRotation * 0.01745329251994));
+	float ang = fract(timeAngle - 0.25);
+	ang = (ang + (cos(ang * 3.14159265358979) * -0.5 + 0.5 - ang) / 3.0) * 6.28318530717959;
+	sunVec = normalize((gbufferModelView * vec4(vec3(-sin(ang), cos(ang) * sunRotationData) * 2000.0, 1.0)).xyz);
+
+	upVec = normalize(gbufferModelView[1].xyz);
+}
+
 #endif

@@ -33,7 +33,6 @@ uniform vec3 cameraPosition;
 
 uniform mat4 gbufferProjection, gbufferPreviousProjection, gbufferProjectionInverse;
 uniform mat4 gbufferModelView, gbufferPreviousModelView, gbufferModelViewInverse;
-uniform mat4 shadowModelView, shadowProjection;
 
 uniform sampler2D colortex0;
 uniform sampler2D colortex3;
@@ -150,7 +149,6 @@ float GetAmbientOcclusion(float z){
 #endif
 
 //Includes//
-#include "/lib/util/spaceConversion.glsl"
 #include "/lib/color/dimensionColor.glsl"
 #include "/lib/color/skyColor.glsl"
 #include "/lib/color/blocklightColor.glsl"
@@ -274,10 +272,17 @@ void main() {
 		color.rgb *= GetAmbientOcclusion(z);
 		#endif
 
+		#if FOG_MODE == 0 || FOG_MODE == 2
 		Fog(color.rgb, viewPos.xyz);
+		#endif
 	} else {
 		#ifdef NETHER
 		color.rgb = netherCol.rgb * 0.04;
+		#endif
+		#if defined END && !defined LIGHT_SHAFT
+		float VoL = dot(normalize(viewPos.xyz), lightVec);
+		VoL = pow(VoL * 0.5 + 0.5, 16.0) * 0.75 + 0.25;
+		color.rgb+= endCol.rgb * 0.05 * VoL;
 		#endif
 
 		if (isEyeInWater == 2) {

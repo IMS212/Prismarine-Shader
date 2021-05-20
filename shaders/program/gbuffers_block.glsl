@@ -19,7 +19,6 @@ varying vec3 sunVec, upVec, eastVec;
 
 varying vec4 color;
 
-
 #ifdef ADVANCED_MATERIALS
 varying float dist;
 
@@ -53,7 +52,6 @@ uniform mat4 shadowProjection;
 uniform mat4 shadowModelView;
 
 uniform sampler2D texture;
-uniform sampler2D noisetex;
 
 #ifdef ADVANCED_MATERIALS
 uniform ivec2 atlasSize;
@@ -146,7 +144,7 @@ void main() {
 		
 		float metalness      = 0.0;
 		float emission       = 0.0;
-		float subsurface     = float(blockEntityId == 10402) * 0.5;
+		float subsurface     = float(blockEntityId == 10108) * 0.5;
 		vec3 baseReflectance = vec3(0.04);
 
 		vec3 screenPos = vec3(gl_FragCoord.xy / vec2(viewWidth, viewHeight), gl_FragCoord.z);
@@ -249,20 +247,6 @@ void main() {
 		#if defined ADVANCED_MATERIALS && defined REFLECTION_SPECULAR && defined REFLECTION_ROUGH
 		normalMap = mix(vec3(0.0, 0.0, 1.0), normalMap, smoothness);
 		newNormal = clamp(normalize(normalMap * tbnMatrix), vec3(-1.0), vec3(1.0));
-		#endif
-
-		#ifdef OVERWORLD
-		if (isEyeInWater == 1.0){
-		float skymapMod = lightmap.y * lightmap.y * (3.0 - 2.0 * lightmap.y);
-        float causticfactor = pow(skymapMod, 0.5) * 50 * (1 - pow(skymapMod, 0.5)) * (1 - rainStrength*0.5) * (1 - lightmap.x*0.8);
-		vec3 causticcol = waterColor.rgb * lightDay * lightDay;
-		vec3 causticpos = worldPos.xyz+cameraPosition.xyz;
-		float caustic = getCausticWaves(causticpos);
-		vec3 lightcaustic = caustic*causticfactor*causticcol*shadowFade*shadow;
-		albedo.rgb *= 0.20 + lightmap.x*0.80;
-		albedo.rgb += (1 - lightmap.x) * (albedo.rgb * waterColor.rgb * waterColor.rgb * WATER_CAUSTICS_STRENGTH + WATER_CAUSTICS_STRENGTH  * shadow * albedo.rgb * waterColor.rgb * waterColor.rgb);
-		albedo.rgb *= 1.0+lightcaustic;
-		}
 		#endif
 	}
 

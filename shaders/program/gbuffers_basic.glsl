@@ -41,8 +41,6 @@ uniform mat4 gbufferModelViewInverse;
 uniform mat4 shadowProjection;
 uniform mat4 shadowModelView;
 
-uniform sampler2D noisetex;
-
 //Common Variables//
 float eBS = eyeBrightnessSmooth.y / 240.0;
 float sunVisibility  = clamp((dot( sunVec, upVec) + 0.05) * 10.0, 0.0, 1.0);

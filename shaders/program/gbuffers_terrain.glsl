@@ -65,6 +65,7 @@ uniform sampler2D normals;
 uniform float wetness;
 
 uniform mat4 gbufferModelView;
+
 #endif
 #endif
 
@@ -74,7 +75,7 @@ float sunVisibility  = clamp((dot( sunVec, upVec) + 0.05) * 10.0, 0.0, 1.0);
 float moonVisibility = clamp((dot(-sunVec, upVec) + 0.05) * 10.0, 0.0, 1.0);
 
 #ifdef WORLD_TIME_ANIMATION
-float frametime = frameTimeCounter * 16 * ANIMATION_SPEED;
+float frametime = float(worldTime) * 0.05 * ANIMATION_SPEED;
 #else
 float frametime = frameTimeCounter * ANIMATION_SPEED;
 #endif
@@ -103,6 +104,8 @@ float InterleavedGradientNoise() {
 #include "/lib/util/spaceConversion.glsl"
 #include "/lib/lighting/forwardLighting.glsl"
 #include "/lib/surface/ggx.glsl"
+#include "/lib/color/waterColor.glsl"
+#include "/lib/prismarine/caustics.glsl"
 
 #ifdef TAA
 #include "/lib/util/jitter.glsl"
@@ -154,11 +157,11 @@ void main() {
 		float leaves   = float(mat > 1.98 && mat < 2.02);
 		float emissive = float(mat > 2.98 && mat < 3.02);
 		float lava     = float(mat > 3.98 && mat < 4.02);
-		float water    = float(mat > 0.98 && mat < 1.02);
-		
+		float candle   = float(mat > 4.98 && mat < 5.02);
+
 		float metalness      = 0.0;
-		float emission       = (emissive + lava) * 0.25;
-		float subsurface     = foliage * 0.5 + leaves;
+		float emission       = (emissive + lava + candle) * 0.25;
+		float subsurface     = (foliage + candle) * 0.5 + leaves;
 		vec3 baseReflectance = vec3(0.04);
 
 		vec3 screenPos = vec3(gl_FragCoord.xy / vec2(viewWidth, viewHeight), gl_FragCoord.z);
@@ -203,7 +206,12 @@ void main() {
 		#endif
 		
 		vec3 outNormal = newNormal;
-		if(foliage > 0.5) newNormal = upVec;
+		if (foliage > 0.5){
+			newNormal = upVec;
+			#ifdef ADVANCED_MATERIALS
+			newNormal = normalize(mix(outNormal, newNormal, normalMap.z * normalMap.z));
+			#endif
+		}
 		
 		float NoL = clamp(dot(newNormal, lightVec), 0.0, 1.0);
 
@@ -244,7 +252,6 @@ void main() {
 		#endif
 		
 		vec3 shadow = vec3(0.0);
-		
 		GetLighting(albedo.rgb, shadow, viewPos, worldPos, lightmap, color.a, NoL, vanillaDiffuse,
 					parallaxShadow, emission, subsurface);
 
@@ -261,12 +268,15 @@ void main() {
 		puddles *= 1.0 - weatherweight;
 		#endif
 		
-		puddles *= clamp(lightmap.y * 32.0 - 31.0, 0.0, 1.0);
+		puddles *= clamp(lightmap.y * 32.0 - 31.0, 0.0, 1.0) * (1.0 - lava);
+
+		float ps = pow(mix(psl, psh, porosity), psc); //1.0, 0.25, 0.5 | sqrt(1.0 - 0.75 * porosity)
+		float pd = pow(mix(pdl, pdh, porosity), pdc); //0.05, 0.45, 1.0 | (0.4 * porosity + 0.05)
 		
-		smoothness = mix(smoothness, 1.0, puddles * sqrt(1.0 - 0.75 * porosity));
+		smoothness = mix(smoothness, 1.0, puddles * ps);
 		f0 = max(f0, puddles * 0.02);
 
-		albedo.rgb *= 1.0 - (puddles * (0.4 * porosity + 0.05));
+		albedo.rgb *= 1.0 - (puddles * pd);
 
 		if (puddles > 0.001 && rainStrength > 0.001) {
 			mat3 tbnMatrix = mat3(tangent.x, binormal.x, normal.x,
@@ -297,13 +307,12 @@ void main() {
 		#endif
 		
 		float aoSquared = ao * ao;
-		shadow *= aoSquared; fresnel3 *= aoSquared;
+		shadow *= aoSquared;
 		albedo.rgb = albedo.rgb * (1.0 - fresnel3 * smoothness * smoothness * (1.0 - metalness));
 		#endif
 
 		#if defined OVERWORLD || defined END
 		vec3 specularColor = GetSpecularColor(lightmap.y, metalness, baseReflectance);
-		if (isEyeInWater == 1.0) specularColor *= waterColor.rgb * 8.0;
 		
 		albedo.rgb += GetSpecularHighlight(newNormal, viewPos, smoothness, baseReflectance,
 										   specularColor, shadow * vanillaDiffuse, color.a);
@@ -318,17 +327,17 @@ void main() {
 		}
 		#endif
 
-		#ifdef OVERWORLD
+		#if defined OVERWORLD && defined WATER_TINT
 		if (isEyeInWater == 1.0){
-		float skymapMod = lightmap.y * lightmap.y * (3.0 - 2.0 * lightmap.y);
-        float causticFactor = pow(skymapMod, 0.5) * 50 * (1 - pow(skymapMod, 0.5)) * (1 - rainStrength*0.5) * (1 - lightmap.x*0.8);
-		vec3 causticColor = waterColor.rgb * lightDay * lightDay;
-		vec3 causticPosition = worldPos.xyz+cameraPosition.xyz;
-		float caustic = getCausticWaves(causticPosition);
-		vec3 lightcaustic = caustic*causticFactor*causticColor*shadowFade*shadow;
-		albedo.rgb *= 0.20 + lightmap.x*0.80;
-		albedo.rgb += (1 - lightmap.x) * (albedo.rgb * waterColor.rgb * waterColor.rgb * WATER_CAUSTICS_STRENGTH + WATER_CAUSTICS_STRENGTH * shadow * albedo.rgb * waterColor.rgb * waterColor.rgb);
-		albedo.rgb *= 1.0+lightcaustic;
+			float skymapMod = lightmap.y * lightmap.y * (3.0 - 2.0 * lightmap.y);
+			float causticFactor = pow(skymapMod, 0.5) * 50 * (1 - pow(skymapMod, 0.5)) * (1 - rainStrength*0.5) * (1 - lightmap.x*0.8);
+			vec3 causticColor = waterColor.rgb * lightDay * lightDay;
+			vec3 causticPosition = worldPos.xyz+cameraPosition.xyz;
+			float caustic = getCausticWaves(causticPosition);
+			vec3 lightcaustic = caustic*causticFactor*causticColor*shadowFade*shadow;
+			albedo.rgb *= 0.20 + lightmap.x*0.80;
+			albedo.rgb += (1 - lightmap.x) * (albedo.rgb * waterColor.rgb * waterColor.rgb * WATER_CAUSTICS_STRENGTH + WATER_CAUSTICS_STRENGTH * shadow * albedo.rgb * waterColor.rgb * waterColor.rgb);
+			albedo.rgb *= 1.0+lightcaustic;
 		}
 		#endif
 	} else albedo.a = 0.0;
@@ -394,7 +403,7 @@ attribute vec4 at_tangent;
 
 //Common Variables//
 #ifdef WORLD_TIME_ANIMATION
-float frametime = frameTimeCounter * 0.05 * ANIMATION_SPEED;
+float frametime = float(worldTime) * 0.05 * ANIMATION_SPEED;
 #else
 float frametime = frameTimeCounter * ANIMATION_SPEED;
 #endif
@@ -444,32 +453,26 @@ void main() {
 	
 	mat = 0.0; recolor = 0.0;
 
-	if (mc_Entity.x == 10100 || mc_Entity.x == 10101 || mc_Entity.x == 10102 || mc_Entity.x == 10103 ||
-	    mc_Entity.x == 10104 || mc_Entity.x == 10107 || mc_Entity.x == 10108 || mc_Entity.x == 10109)
+	if (mc_Entity.x >= 10100 && mc_Entity.x < 10200)
 		mat = 1.0;
-	if (mc_Entity.x == 10105 || mc_Entity.x == 10106){
+	if (mc_Entity.x == 10104 || mc_Entity.x == 10105){
 		mat = 2.0;
 		color.rgb *= 1.225;
 	}
-	if (mc_Entity.x == 10200 || mc_Entity.x == 10207 || mc_Entity.x == 10210 || mc_Entity.x == 10214 ||
-		mc_Entity.x == 10215 || mc_Entity.x == 10216 || mc_Entity.x == 10226 || mc_Entity.x == 10231 ||
-		mc_Entity.x == 10249 || mc_Entity.x == 10250 || mc_Entity.x == 10251 || mc_Entity.x == 10252 ||
-		mc_Entity.x == 10253)
+	if (mc_Entity.x >= 10200 && mc_Entity.x < 10300)
 		mat = 3.0;
-	if (mc_Entity.x == 10248)
+	if (mc_Entity.x == 10203)
 		mat = 4.0;
-	
-	if (mc_Entity.x == 10300 || mc_Entity.x == 10302) mat = 1.0;
-	if (mc_Entity.x == 10301 || mc_Entity.x == 10303) mat = 2.0;
+	if (mc_Entity.x == 10207)
+		mat = 5.0;
 
-	if (mc_Entity.x == 10216 || mc_Entity.x == 10226 || mc_Entity.x == 10231 || mc_Entity.x == 10250 ||
-		mc_Entity.x == 10251 || mc_Entity.x == 10253)
+	if (mc_Entity.x == 10201 || mc_Entity.x == 10205)
 		recolor = 1.0;
 
-	if (mc_Entity.x == 10245)
+	if (mc_Entity.x == 10202)
 		lmCoord.x -= 0.0667;
 
-	if (mc_Entity.x == 10248)
+	if (mc_Entity.x == 10203)
 		lmCoord.x += 0.0667;
 
 	if (mc_Entity.x == 10400)

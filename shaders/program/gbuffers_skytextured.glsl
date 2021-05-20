@@ -59,6 +59,7 @@ float GetLuminance(vec3 color) {
 #include "/lib/color/lightColor.glsl"
 #endif
 #if defined CLOUDS && defined END
+#include "/lib/color/endColor.glsl"
 #include "/lib/color/lightColor.glsl"
 #include "/lib/color/skyColor.glsl"
 #include "/lib/util/dither.glsl"
@@ -67,29 +68,18 @@ float GetLuminance(vec3 color) {
 #endif
 
 //Program//
-void main(){
-	vec4 albedo = texture2D(texture, texCoord.xy);
+void main() {
+	vec4 albedo = texture2D(texture, texCoord);
 	vec4 screenPos = vec4(gl_FragCoord.xy / vec2(viewWidth, viewHeight), gl_FragCoord.z, 1.0);
 	vec4 viewPos = gbufferProjectionInverse * (screenPos * 2.0 - 1.0);
 	viewPos /= viewPos.w;
-	
-	#ifdef OVERWORLD
-	#ifdef ROUND_SUN_MOON
-	albedo.a = 0.0;
-	#else
-	vec3 nViewPos = normalize(viewPos.xyz);
-	float NdotU = dot(nViewPos, upVec);
-	albedo.a *= min(NdotU*10, 1.0);
-	#endif
 
-    #endif
-	
 	#ifdef OVERWORLD
 	albedo *= color;
 	albedo.rgb = pow(albedo.rgb,vec3(2.2)) * SKYBOX_BRIGHTNESS * albedo.a;
 
 	#if CLOUDS == 1
-	if (albedo.a > 0.0){
+	if (albedo.a > 0.0) {
 		float cloudAlpha = texture2D(gaux1, gl_FragCoord.xy / vec2(viewWidth, viewHeight)).r;
 		float alphaMult = 1.0 - 0.6 * rainStrength;
 		albedo.a *= 1.0 - cloudAlpha / (alphaMult * alphaMult);
@@ -103,14 +93,15 @@ void main(){
 	#endif
 
 	#ifdef END
+	albedo.rgb = pow(albedo.rgb,vec3(2.2));
+
 	vec3 nViewPos = normalize(viewPos.xyz);
 	float NdotU = dot(nViewPos, upVec);
 	float dither = Bayer64(gl_FragCoord.xy);
 	vec3 wpos = normalize((gbufferModelViewInverse * viewPos).xyz);
-	albedo.rgb = pow(albedo.rgb,vec3(4.4)) * SKYBOX_BRIGHTNESS * 0.3;
 	
 	#if END_SKY == 2 || END_SKY == 3
-	vec4 cloud = DrawEndCloud(viewPos.xyz * 1000000.0, dither, lightCol);
+	vec4 cloud = DrawCloud(viewPos.xyz, dither, lightCol, ambientCol);
 	albedo.rgb = mix(albedo.rgb, cloud.rgb, cloud.a);
 	#endif
 
@@ -118,6 +109,11 @@ void main(){
 	albedo.rgb += DrawAurora(viewPos.xyz, dither, 24);
 	#endif
 
+	#ifdef SKY_DESATURATION
+	albedo.rgb = GetLuminance(albedo.rgb) * endCol.rgb;
+	#endif
+
+	albedo.rgb *= SKYBOX_BRIGHTNESS * 0.02;
 	#endif
 	
     /* DRAWBUFFERS:0 */

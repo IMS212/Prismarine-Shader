@@ -1,4 +1,3 @@
-
 /* 
 BSL Shaders v7.2.01 by Capt Tatsu 
 https://bitslablab.com 
@@ -12,9 +11,8 @@ https://bitslablab.com
 
 //Varyings//
 varying float star;
-uniform float far;
-uniform float near;
-varying vec3 upVec, sunVec, moonVec;
+
+varying vec3 upVec, sunVec;
 
 //Uniforms//
 uniform int isEyeInWater;
@@ -28,13 +26,14 @@ uniform float rainStrength;
 uniform float shadowFade;
 uniform float timeAngle, timeBrightness;
 uniform float viewWidth, viewHeight;
-varying vec4 texcoord;
+
 uniform ivec2 eyeBrightnessSmooth;
 
 uniform vec3 cameraPosition;
 
 uniform mat4 gbufferModelViewInverse;
 uniform mat4 gbufferProjectionInverse;
+
 uniform sampler2D gaux4;
 uniform sampler2D noisetex;
 
@@ -66,7 +65,6 @@ void RoundSunMoon(inout vec3 color, vec3 viewPos, vec3 sunColor, vec3 moonColor)
 }
 
 void SunGlare(inout vec3 color, vec3 viewPos, vec3 lightCol) {
-	float timeBrightnessLowered = timeBrightness / 2;
 	float VoL = dot(normalize(viewPos), lightVec);
 	float visfactor = 0.05 * (-0.8 * timeBrightness + 1.0) * (3.0 * rainStrength + 1.0);
 	float invvisfactor = 1.0 - visfactor;
@@ -78,17 +76,23 @@ void SunGlare(inout vec3 color, vec3 viewPos, vec3 lightCol) {
 	visibility *= shadowFade * LIGHT_SHAFT_STRENGTH;
 	if (cameraPosition.y < 1.0) visibility *= exp(2.0 * cameraPosition.y - 2.0);
 
+	#ifdef LIGHT_SHAFT
+	if (isEyeInWater == 1) color += 0.25 * lightCol * visibility;
+	#endif
 	#ifdef SUN_GLARE
-	color += lightCol * visibility * (1.0 + 0.25 * isEyeInWater) * 0.2 / (timeBrightness * 2);
+	color += 0.25 * lightCol * visibility * (1.0 + 0.25 * isEyeInWater) * 0.2;
 	#endif
 }
 
 //Includes//
+#include "/lib/color/endColor.glsl"
 #include "/lib/color/lightColor.glsl"
 #include "/lib/color/skyColor.glsl"
 #include "/lib/util/dither.glsl"
 #include "/lib/atmospherics/clouds.glsl"
 #include "/lib/atmospherics/sky.glsl"
+#include "/lib/prismarine/functions.glsl"
+#include "/lib/prismarine/complexSky.glsl"
 
 //Program//
 void main() {
@@ -96,65 +100,25 @@ void main() {
 	vec4 viewPos = gbufferProjectionInverse * (screenPos * 2.0 - 1.0);
 	viewPos /= viewPos.w;
 
-	vec3 wpos = normalize((gbufferModelViewInverse * viewPos).xyz);
 	vec3 nViewPos = normalize(viewPos.xyz);
 	float NdotU = dot(nViewPos, upVec);
-	float dither = Bayer256(gl_FragCoord.xy);
-	
+	float dither = Bayer64(gl_FragCoord.xy);
+	vec3 wpos = normalize((gbufferModelViewInverse * viewPos).xyz);
+
 	#ifdef OVERWORLD
 	
-	#if CLOUDS == 1
-	vec4 cloud = DrawCloud(viewPos.xyz * 1000000.0, dither, lightCol, ambientCol);
-	float cloudMask = min(cloud.a, 0.25) + cloud.a * 0.5; 
-	#endif
-
 	#if SKY_MODE == 2
     vec3 worldvec = normalize(mat3(gbufferModelViewInverse) * (viewPos.xyz));
-	
     vec3 sun_vec = normalize(mat3(gbufferModelViewInverse) * sunVec);
-
     mat2x3 light_vec;
         light_vec[0] = sun_vec;
         light_vec[1] = -sun_vec;
 
     vec3 albedo = renderAtmosphere(worldvec, light_vec);
-	#endif
-
-	#if SKY_MODE == 1
-	vec3 albedo = GetSkyColor(viewPos.xyz, lightCol, false);
+	#elif SKY_MODE == 1
+	vec3 albedo = GetSkyColor(viewPos.xyz, false);
 	#endif
 	
-	#ifdef STARS
-	if (moonVisibility > 0.0) DrawStars(albedo.rgb, viewPos.xyz);
-	#endif
-	
-	#if defined AURORA && (CLOUDS == 1 || CLOUDS == 3)
-	albedo.rgb += DrawAurora(viewPos.xyz, dither, 24);
-	#endif
-
-	#ifdef HELIOS
-		float NdotUhelios = pow2(pow2(clamp(NdotU * 3.0, 0.0, 1.0)));
-		vec3 planeCoord = wpos / (wpos.y + length(wpos.xz) * 0.5);
-		vec3 moonPos = vec3(gbufferModelViewInverse * vec4(-sunVec, 1.0));
-		vec3 moonCoord = moonPos / (moonPos.y + length(moonPos.xz));
-		vec2 hcoord = planeCoord.xz - moonCoord.xz;
-		hcoord *= 0.2;
-
-		//ignore this
-		#ifdef CRAZY_MODE
-		vec3 helios = texture2D(gaux4, hcoord * 0.8 + 0.6).rgb;
-		helios *= pow2(length(helios) + 0.6);
-		albedo.rgb += helios * 0.05 * NdotUhelios;
-		#else
-		//
-		if (moonVisibility > 0.0 && rainStrength == 0.0){
-			vec3 helios = texture2D(gaux4, hcoord * 0.8 + 0.6).rgb;
-			helios *= pow2(length(helios) + 0.6);
-			albedo.rgb += helios * 0.05 * NdotUhelios * (1.0 - sunVisibility);
-		}
-		#endif
-	#endif
-
 	#ifdef ROUND_SUN_MOON
 	vec3 lightMA = mix(lightMorning, lightEvening, mefade);
     vec3 sunColor = mix(lightMA, sqrt(lightDay * lightMA * LIGHT_DI), timeBrightness);
@@ -163,32 +127,46 @@ void main() {
 	RoundSunMoon(albedo, viewPos.xyz, sunColor, moonColor);
 	#endif
 
-	SunGlare(albedo, viewPos.xyz, lightCol);
+	#ifdef STARS
+	if (moonVisibility > 0.0) DrawStars(albedo.rgb, viewPos.xyz);
+	#endif
+
+	#ifdef AURORA
+	albedo.rgb += DrawAurora(viewPos.xyz, dither, 24);
+	#endif
 	
+	#ifdef HELIOS
+		float NdotUhelios = pow2(pow2(clamp(NdotU * 3.0, 0.0, 1.0)));
+		vec3 planeCoord = wpos / (wpos.y + length(wpos.xz) * 0.5);
+		vec3 moonPos = vec3(gbufferModelViewInverse * vec4(-sunVec, 1.0));
+		vec3 moonCoord = moonPos / (moonPos.y + length(moonPos.xz));
+		vec2 hcoord = planeCoord.xz - moonCoord.xz;
+		hcoord *= 0.2;
+
+		if (moonVisibility > 0.0 && rainStrength == 0.0){
+			vec3 helios = texture2D(gaux4, hcoord * 0.8 + 0.6).rgb;
+			helios *= pow2(length(helios) + 0.6);
+			albedo.rgb += helios * 0.05 * NdotUhelios * (1.0 - sunVisibility);
+		}
+	#endif
+
 	#if CLOUDS == 1
+	vec4 cloud = DrawCloud(viewPos.xyz, dither, lightCol, ambientCol);
 	albedo.rgb = mix(albedo.rgb, cloud.rgb, cloud.a);
 	#endif
 
-	albedo.rgb *= (1.0 + nightVision);
+	SunGlare(albedo, viewPos.xyz, lightCol);
+
+	albedo.rgb *= (4.0 - 3.0 * eBS) * (1.0 + nightVision);
 	#endif
 	
 	#ifdef END
 	vec3 albedo = vec3(0.0);
+	#endif
 	
-	#if END_SKY == 2 || END_SKY == 3
-	vec4 cloud = DrawEndCloud(viewPos.xyz * 1000000.0, dither, lightCol);
-	albedo.rgb = mix(albedo.rgb, cloud.rgb, cloud.a);
-	#endif
-
-	#if END_SKY == 1 || END_SKY == 3
-	albedo.rgb += DrawAurora(viewPos.xyz, dither, 24);
-	#endif
-
-	#endif
-
     /* DRAWBUFFERS:0 */
 	gl_FragData[0] = vec4(albedo, 1.0 - star);
-    #if (defined OVERWORLD && CLOUDS == 1)
+    #if (CLOUDS == 1 && defined OVERWORLD)
     /* DRAWBUFFERS:04 */
 	gl_FragData[1] = vec4(cloud.a, 0.0, 0.0, 0.0);
     #endif

@@ -138,12 +138,6 @@ void ColorGrading(inout vec3 color) {
 	color = mix(color, cgTint, CG_TM);
 }
 
-void BSLTonemap(inout vec3 color) {
-	color = color * exp2(2.0 + EXPOSURE);
-	color = color / pow(pow(color, vec3(TONEMAP_WHITE_CURVE)) + 1.0, vec3(1.0 / TONEMAP_WHITE_CURVE));
-	color = pow(color, mix(vec3(TONEMAP_LOWER_CURVE), vec3(TONEMAP_UPPER_CURVE), sqrt(color)));
-}
-
 void ColorSaturation(inout vec3 color) {
 	float grayVibrance = (color.r + color.g + color.b) / 3.0;
 	float graySaturation = grayVibrance;
@@ -170,7 +164,6 @@ vec2 GetLightPos() {
 //Includes//
 #include "/lib/color/lightColor.glsl"
 
-
 #ifdef LENS_FLARE
 #include "/lib/post/lensFlare.glsl"
 #endif
@@ -178,6 +171,13 @@ vec2 GetLightPos() {
 #ifdef RETRO_FILTER
 #include "/lib/util/dither.glsl"
 #endif
+
+
+void BSLTonemap(inout vec3 color) {
+	color = color * exp2(2.0 + EXPOSURE);
+	color = color / pow(pow(color, vec3(TONEMAP_WHITE_CURVE)) + 1.0, vec3(1.0 / TONEMAP_WHITE_CURVE));
+	color = pow(color, mix(vec3(TONEMAP_LOWER_CURVE), vec3(TONEMAP_UPPER_CURVE), sqrt(color)));
+}
 
 //Program//
 void main() {
