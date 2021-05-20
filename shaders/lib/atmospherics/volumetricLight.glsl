@@ -66,12 +66,12 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 	#ifdef OVERWORLD //////////// O V E R W O R L D ////////////
 	float visfactor 	= 0.05 * (-0.4 * timeBrightness + 1.0) * (1.0 * rainStrength + 0.1);
 	float invvisfactor	= 1.0 - visfactor;
-	float visibility 	= 0.94 - (rainStrength / 2);
+	float visibility 	= 0.94 - (rainStrength / 4);
 
 	visibility = visfactor / (1.0 - invvisfactor * visibility) - visfactor;
 	visibility = clamp(visibility * 1.015 / invvisfactor - 0.015, 0.0, 1.0);
 	visibility = mix(1.0, visibility, 0.25 * eBS + 0.75) - (timeBrightness * LIGHTSHAFT_TIME_DECREASE_FACTOR);
-	visibility = visibility - (rainStrength / 2.0) - (cameraPosition.y * LIGHTSHAFT_ALTITUDE_DECREASE_FACTOR * 0.5);
+	visibility = visibility - (rainStrength / 4.0) - (cameraPosition.y * LIGHTSHAFT_ALTITUDE_DECREASE_FACTOR * 0.5);
 	if (isEyeInWater == 1.0) visibility = (visibility + 0.02) * WATER_I;
 	if (eyeAltitude < 2.0) visibility *= clamp((eyeAltitude-1.0), 0.0, 1.0);
 
@@ -104,7 +104,7 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 		float depth0 = getDepth(pixeldepth0);
 		float depth1 = getDepth(pixeldepth1);
 		
-		vec3 watercol = mix(vec3(1.0), vec3(waterColor.r, waterColor.g * 0.1, waterColor.b) / (waterColor.a * waterColor.a), pow(waterAlpha, 0.45));
+		vec3 watercol = mix(vec3(1.0), vec3(waterColor.r, waterColor.g * 0.4, waterColor.b * 8) / (waterColor.a * waterColor.a), pow(waterAlpha, 0.5));
 
 		float maxDist = LIGHTSHAFT_MAX_DISTANCE;
 		if (isEyeInWater == 1.0) maxDist = maxDist * 0.5;
@@ -150,7 +150,7 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 				vec3 shadow = clamp(shadowCol * (1.0 - shadow0) + shadow0, vec3(0.0), vec3(1.0));
 
 				if (depth0 < minDist) shadow *= color;
-				else if (isEyeInWater == 1.0) shadow *= watercol * 0.05 * (1.0 + eBS) * sqrt(minDist / maxDist);
+				else if (isEyeInWater == 1.0) shadow *= watercol * 0.4 * (1.0 + eBS) * sqrt(minDist / maxDist);
 
 				#if (defined LIGHTSHAFT_CLOUDY_NOISE && defined OVERWORLD) || (defined END && defined END_VOLUMETRIC_FOG)
 				vec3 npos = worldposition.xyz + cameraPosition.xyz + vec3(frameTimeCounter * 4.0, 0, 0);

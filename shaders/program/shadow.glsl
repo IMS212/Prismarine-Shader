@@ -84,7 +84,7 @@ void main() {
 		#if defined OVERWORLD && defined WATER_TINT
 		//float caustic = getCausticWaves(wpos);
 		//albedo.rgb = vec3(1.0+3.0*caustic);
-		albedo.rgb *= vec3(waterColor.r, waterColor.g * 0.8, waterColor.b) * WATER_I;
+		albedo.rgb = vec3(waterColor.r, waterColor.g * 0.8, waterColor.b) * WATER_I;
 		#endif
 		}
 	#else

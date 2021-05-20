@@ -307,7 +307,7 @@ void main() {
 		#endif
 		
 		float aoSquared = ao * ao;
-		shadow *= aoSquared;
+		shadow *= aoSquared; fresnel3 *= aoSquared;
 		albedo.rgb = albedo.rgb * (1.0 - fresnel3 * smoothness * smoothness * (1.0 - metalness));
 		#endif
 

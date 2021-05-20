@@ -7,7 +7,7 @@ void WaterFog(inout vec3 color, vec3 viewPos) {
     fog = 1.0 - exp(-3.0 * fog);
     
     #if WATER_MODE == 0 || WATER_MODE == 2
-    vec3 waterFogColor = waterColor.rgb * waterAlpha;
+    vec3 waterFogColor = vec3(waterColor.r, waterColor.g * 0.8, waterColor.b) * waterAlpha;
     #elif  WATER_MODE == 1 || WATER_MODE == 3
     vec3 waterFogColor = fogColor * fogColor * 0.5;
     #endif
