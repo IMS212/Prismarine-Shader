@@ -80,15 +80,18 @@ vec3 WavingBlocks(vec3 position, float istopv) {
     #ifdef WAVING_PLANT
     if (mc_Entity.x == 10100 && istopv > 0.9)
         wave += CalcMove(worldpos, 0.35, 1.0, vec2(0.25, 0.06));
-    if ((mc_Entity.x == 10102 || mc_Entity.x == 10108) && (istopv > 0.9 || fract(worldpos.y + 0.0675) > 0.01))
-        wave += CalcMove(worldpos, 0.35, 1.15, vec2(0.15, 0.06));
-    if (mc_Entity.x == 10101 && (istopv > 0.9 || fract(worldpos.y + 0.005) > 0.01))
+    if (mc_Entity.x == 10101 && istopv > 0.9)
         wave += CalcMove(worldpos, 0.7, 1.35, vec2(0.12, 0.06));
-    if (mc_Entity.x == 10103 || (mc_Entity.x == 10104.0 && (istopv > 0.9 || fract(worldpos.y+0.005)>0.01)))
-        wave += CalcMove(worldpos, 0.7, 1.25, vec2(0.12, 0.06));
+    if (mc_Entity.x == 10102 && (istopv > 0.9 || fract(worldpos.y + 0.005) > 0.01) ||
+        mc_Entity.x == 10103)
+        wave += CalcMove(worldpos, 0.35, 1.15, vec2(0.15, 0.06));
+    if (mc_Entity.x == 10104 && (istopv > 0.9 || fract(worldpos.y + 0.0675) > 0.01))
+        wave += CalcMove(worldpos, 0.35, 1.0, vec2(0.15, 0.06));
     if (mc_Entity.x == 10106)
-        wave += CalcMove(worldpos, 0.35, 1.25, vec2(0.06, 0.06));
-    if (mc_Entity.x == 10107)
+        wave += CalcMove(worldpos, 0.35, 1.25, vec2(0.06, 0.06));        
+    if (mc_Entity.x == 10107 || mc_Entity.x == 10206)
+        wave += CalcMove(worldpos, 0.5, 1.25, vec2(0.06, 0.00));
+    if (mc_Entity.x == 10108)
         wave.y += CalcLilypadMove(worldpos);
     #endif
     #ifdef WAVING_LEAF
@@ -96,13 +99,13 @@ vec3 WavingBlocks(vec3 position, float istopv) {
         wave += CalcMove(worldpos, 0.25, 1.0, vec2(0.08, 0.08));
     #endif
     #ifdef WAVING_LIQUID
-    if (mc_Entity.x == 10248)
+    if (mc_Entity.x == 10203)
         wave.y += CalcLavaMove(worldpos);
     #endif
     #ifdef WAVING_EXTRA
-    if ((mc_Entity.x == 10249 || mc_Entity.x == 10252) && istopv > 0.9)
+    if (mc_Entity.x == 10204 && istopv > 0.9)
         wave += CalcMove(worldpos, 1.0, 1.5, vec2(0.0, 0.37));
-    if(mc_Entity.x == 10251 || mc_Entity.x == 10253)
+    if (mc_Entity.x == 10205)
 		wave += CalcLanternMove(worldpos);
     #endif
 

@@ -303,11 +303,13 @@ value.DISTANT_FADE.2=Cylindrical
 option.WEATHER_PERBIOME=Per Biome Weather
 option.WEATHER_PERBIOME.comment=Use varied weather color for different biomes. §c[-]§rMay not work under unknown conditions.
 
-option.LIGHT_SHAFT=Light Shafts
-option.LIGHT_SHAFT.comment=Adds volumetric rays from sun / moon. §a[+]§rThis effect benefits from TAA. §e[*]§rPerformance depends on Shadowmap Resolution.
+option.FOG_MODE=Fog Mode
+value.FOG_MODE.0=Default
+value.FOG_MODE.1=Volumetric
+value.FOG_MODE.2=Mixed
 
-option.LIGHTHSHAFT_CLOUDY_NOISE=Cloudy Noise
-option.LIGHTHSHAFT_CLOUDY_NOISE.comment=Makes light rays look like volumetric cloudy fog.
+option.LIGHTSHAFT_CLOUDY_NOISE=Cloudy Noise
+option.LIGHTSHAFT_CLOUDY_NOISE.comment=Makes light rays look like volumetric cloudy fog.
 option.LIGHTSHAFT_AUTOCOLOR=Automatic coloring 
 option.LIGHTSHAFT_AUTOCOLOR.comment=Automatically picks the color of each ray depending on the sunlight/moonlight color.
 option.LIGHTSHAFT_WATER=Underwater Light Shafts
@@ -330,6 +332,14 @@ option.WEATHER_OPACITY=Weather Opacity
 option.WEATHER_OPACITY.comment=Adjusts weather opacity.
 
 #Sky Config
+option.SKY_DENSITY_D=Day Density
+option.SKY_EXPOSURE_D=Day Exposure
+option.SKY_DENSITY_N=Night Density
+option.SKY_EXPOSURE_N=Night Exposure
+option.SKY_DENSITY_W=Weather Density
+option.SKY_EXPOSURE_W=Weather Exposure
+option.SKY_HORIZON_N=Near Horizon
+option.SKY_HORIZON_F=Far Horizon
 option.ATMOSPHERIC_DENSITY=Atmospheric Density
 option.HORIZON_OFFSET=Horizon Offset
 option.CHORIZON_BLENDINGFACTOR=Horizon Blending
@@ -418,6 +428,9 @@ value.WATER_MODE.0=Default
 value.WATER_MODE.1=Vanilla
 value.WATER_MODE.2=Tinted Vanilla
 value.WATER_MODE.3=Flat Vanilla
+
+option.WATER_TINT=Water Tint
+option.WATER_TINT.comment=Tints underwater surface with water color and caustics.
 
 option.WATER_FOG_DENSITY=Water Fog Density
 option.WATER_FOG_DENSITY.comment=Adjusts water fog density.

@@ -26,7 +26,7 @@ float dither8x8(vec2 pos)
 		15, 47, 7, 39, 13, 45, 5, 37,
 		63, 31, 55, 23, 61, 29, 53, 21);
 
-    vec2 positon = floor(mod(vec2(texcoord.s * viewWidth,texcoord.t * viewHeight), 8.0f));
+    vec2 positon = floor(mod(vec2(texCoord.s * viewWidth,texCoord.t * viewHeight), 8.0f));
 
 	int dither = ditherPattern[int(positon.x) + int(positon.y) * 8];
 
@@ -133,45 +133,7 @@ float getLowQualityVCSample(vec3 pos, float height, float verticalThickness, flo
 
 
 
-//VOLUMETRIC FOG NOISE
-float getHighQualityVFSample(vec3 pos, float height, float verticalThickness, float samples){
-	float noise = 0.0;
-	float ymult = pow(abs(height - pos.y) / verticalThickness, 16.0);
-	vec3 wind = vec3(frametime * 0.001 * VFOG_SPEED, 0.0, 0.0);
-	float rainStrengthLowered = rainStrength / 2.0;
-
-	if (ymult < 4.0){
-		noise+= getHorizontalNoise(pos / samples * 1 - wind * 0.6) * 0.5;
-		noise+= getHorizontalNoise(pos / samples * 0.5 - wind * 0.5) * 0.75 * VFOG_HORIZONTAL_THICKNESS;
-		noise+= getHorizontalNoise(pos / samples * 0.25 - wind * 0.4) * 1.00 * VFOG_HORIZONTAL_THICKNESS;
-		noise+= getHorizontalNoise(pos / samples * 0.125 - wind * 0.3) * 1.25 * VFOG_HORIZONTAL_THICKNESS;
-		noise+= getHorizontalNoise(pos / samples * 0.076 - wind * 0.2) * 1.50 * VFOG_HORIZONTAL_THICKNESS;
-		noise+= getHorizontalNoise(pos / samples * 0.038 - wind * 0.1) * 1.75 * VFOG_HORIZONTAL_THICKNESS;
-		noise+= getHorizontalNoise(pos / samples * 0.016) * 2.00 * VFOG_HORIZONTAL_THICKNESS;
-		noise+= getHorizontalNoise(pos / samples * 0.008) * 2.25 * VFOG_HORIZONTAL_THICKNESS;
-	}
-	noise = clamp(mix(noise, 21.0, 0.25 * 0.0 * VFOG_AMOUNT) - (10.0 + 5.0 * ymult), 0.0, 1.0) * (VFOG_OPACITY - rainStrengthLowered) * far;
-	return noise;
-}
-
-float getLowQualityVFSample(vec3 pos, float height, float verticalThickness, float samples){
-	float noise = 0.0;
-	float ymult = pow(abs(height - pos.y) / verticalThickness, 16.0);
-	vec3 wind = vec3(frametime * 0.001 * VFOG_SPEED, 0.0, 0.0);
-	float rainStrengthLowered = rainStrength / 2.0;
-
-	if (ymult < 4.0){
-		noise+= getHorizontalNoise(pos / samples * 0.125 - wind * 0.3) * 10 * VFOG_HORIZONTAL_THICKNESS;
-	}
-
-	noise = clamp(mix(noise, 20, 0.25 * 0.0 * VFOG_AMOUNT) - (10.0 + 5.0 * ymult), 0.0, 1.0) * (VFOG_OPACITY - rainStrengthLowered);
-	return noise;
-}
-
-
-
 //FINAL
-
 vec2 getVolumetricCloud(float pixeldepth0, float pixeldepth1) {
 	vec2 vc 		= vec2(0.0);
 	vec4 wpos 		= vec4(0.0);
@@ -186,7 +148,7 @@ vec2 getVolumetricCloud(float pixeldepth0, float pixeldepth1) {
 		if (getDepth(pixeldepth0) < minDist || vc.y > 0.999){
 			break;
 		}
-		wpos = getWorldPos(getFragPos(texcoord.xy, distx(minDist)));
+		wpos = getWorldPos(getFragPos(texCoord.xy, distx(minDist)));
 		if (length(wpos.xz) < maxDist){
 			float verticalNoise = getVerticalNoise((wpos.xz + cameraPosition.xz + frametime) * 0.0003 * VCLOUDS_SPEED);
 			wpos.xyz += cameraPosition.xyz + vec3(frametime*4.0,-verticalNoise*32.0,0.0);
@@ -209,47 +171,6 @@ vec2 getVolumetricCloud(float pixeldepth0, float pixeldepth1) {
 			vc.y 	  = max(noise, vc.y);
 		}
 		minDist = minDist + quality;
-	}
-	return vc;
-}
-
-vec2 getVolumetricFog(float pixeldepth0, float pixeldepth1) {
-	vec2 vc = vec2(0.0);
-
-	float dither = Bayer64(gl_FragCoord.xy) * VFOG_QUALITY*2;
-	#ifdef TAA
-		dither = fract(dither + frameCounter / 256.0);
-	#endif
-
-	float maxDist = VFOG_RANGE*far;
-	float minDist = 0.01+dither;
-	vec4 wpos = vec4(0.0);
-
-	for (minDist; minDist < maxDist; ) {
-		if (getDepth(pixeldepth0) < minDist || vc.y > 0.999){
-			break;
-		}
-		wpos = getWorldPos(getFragPos(texcoord.xy,distx(minDist)));
-		if (length(wpos.xz) < maxDist){
-			float verticalNoise = getVerticalNoise((wpos.xz + cameraPosition.xz + frametime) * 0.005 * VFOG_SPEED);
-			wpos.xyz += cameraPosition.xyz + vec3(frametime * 1.0, -verticalNoise * 32.0,0.0);
-
-			#ifdef WORLD_CURVATURE
-			if (length(wpos.xz) < WORLD_CURVATURE_SIZE) wpos.y += length(wpos.xz) * length(wpos.xyz) / WORLD_CURVATURE_SIZE;
-			else break;
-			#endif
-
-			#if VFOG_NOISE_QUALITY == 0
-			float noise = getLowQualityVFSample(wpos.xyz, VFOG_HEIGHT, VFOG_VERTICAL_THICKNESS, VFOG_AMOUNT);
-			#elif VFOG_NOISE_QUALITY == 1
-			float noise = getHighQualityVFSample(wpos.xyz, VFOG_HEIGHT, VFOG_VERTICAL_THICKNESS, VFOG_AMOUNT);
-			#endif
-			
-			float col = pow(smoothstep(VFOG_HEIGHT - VFOG_VERTICAL_THICKNESS * noise, VFOG_HEIGHT + VFOG_VERTICAL_THICKNESS * noise, wpos.y), 0.0);
-			vc.x = max(noise * col, vc.x);
-			vc.y = max(noise, vc.y);
-		}
-		minDist = minDist + VFOG_QUALITY / 2;
 	}
 	return vc;
 }

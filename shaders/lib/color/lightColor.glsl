@@ -1,8 +1,12 @@
-float eBSS = eBS / 2.0;
 vec3 lightMorning    = vec3(LIGHT_MR,   LIGHT_MG,   LIGHT_MB)   * LIGHT_MI / 255.0;
 vec3 lightDay        = vec3(LIGHT_DR,   LIGHT_DG,   LIGHT_DB)   * LIGHT_DI / 255.0;
 vec3 lightEvening    = vec3(LIGHT_ER,   LIGHT_EG,   LIGHT_EB)   * LIGHT_EI / 255.0;
 vec3 lightNight      = vec3(LIGHT_NR,   LIGHT_NG,   LIGHT_NB)   * LIGHT_NI * 0.3 / 255.0;
+
+vec3 cloudEvening    = vec3(LIGHT_ER * 1.15,   LIGHT_EG,   LIGHT_EB)   * LIGHT_EI * 0.6 / 255.0;
+vec3 cloudMorning    = vec3(LIGHT_MR * 1.1,   LIGHT_MG,   LIGHT_MB)   * LIGHT_MI * 0.6 / 255.0;
+vec3 cloudDay        = vec3(LIGHT_DR,   LIGHT_DG,   LIGHT_DB)   * LIGHT_DI / 255.0;
+vec3 cloudNight      = vec3(LIGHT_NR,   LIGHT_NG,   LIGHT_NB * 0.85)   * LIGHT_NI * 0.8 / 255.0;
 
 vec3 ambientMorning  = vec3(AMBIENT_MR, AMBIENT_MG, AMBIENT_MB) * AMBIENT_MI / 255.0;
 vec3 ambientDay      = vec3(AMBIENT_DR, AMBIENT_DG, AMBIENT_DB) * AMBIENT_DI / 255.0;
@@ -32,14 +36,12 @@ vec3 ambientNight    = vec3(AMBIENT_NR, AMBIENT_NG, AMBIENT_NB) * AMBIENT_NI * 0
 	);
 #endif
 
-#ifndef WEATHER_PERBIOME
 #if SKY_MODE == 2
 	uniform float isCold;
 	vec4 weatherCold     = vec4(vec3(WEATHER_CR, WEATHER_CG, WEATHER_CB) / 255.0, 1.0) * WEATHER_CI;
 	vec4 weatherRain     = vec4(vec3(WEATHER_RR, WEATHER_RG, WEATHER_RB) / 255.0, 1.0) * WEATHER_RI;
 	float weatherWeight = isCold;
 	vec4 weatherCol = mix(weatherRain,(weatherCold  * isCold) / max(weatherWeight, 0.0001),weatherWeight);
-#endif
 #endif
 
 #ifndef WEATHER_PERBIOME
@@ -63,7 +65,9 @@ vec3 CalcLightColor(vec3 sun, vec3 night, vec3 weatherCol) {
 }
 
 vec3 lightSun   = CalcSunColor(lightMorning, lightDay, lightEvening);
+vec3 cloudSun   = CalcSunColor(cloudMorning, cloudDay, cloudEvening);
 vec3 ambientSun = CalcSunColor(ambientMorning, ambientDay, ambientEvening);
 
 vec3 lightCol   = CalcLightColor(lightSun, lightNight, weatherCol.rgb);
+vec3 cloudColor = CalcLightColor(cloudSun, cloudNight, weatherCol.rgb);
 vec3 ambientCol = CalcLightColor(ambientSun, ambientNight, weatherCol.rgb);

@@ -21,7 +21,7 @@ vec3 GetSpecularColor(float skylight, float metalness, vec3 baseReflectance){
     specularColor *= specularColor * skylight;
     #endif
     #ifdef END
-    specularColor = endCol.rgb * 0.2;
+    specularColor = endCol.rgb * 0.35;
     #endif
     
     specularColor = pow(specularColor, vec3(1.0 - 0.5 * metalness)) *
