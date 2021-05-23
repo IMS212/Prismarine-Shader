@@ -8,7 +8,7 @@ vec3 GetFogColor(vec3 viewPos) {
     float VoL = clamp(dot(nViewPos, sunVec), -1.0, 1.0);
 
 	float density = 0.4;
-    float nightDensity = 0.65;
+    float nightDensity = 0.35;
     float weatherDensity = 1.5;
     float groundDensity = 0.08 * (4.0 - 3.0 * sunVisibility) *
                           (10.0 * rainStrength * rainStrength + 1.0);

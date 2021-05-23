@@ -11,7 +11,7 @@ https://bitslablab.com
 
 //Varyings//
 varying float star;
-
+varying vec2 texCoord;
 varying vec3 upVec, sunVec;
 
 //Uniforms//
@@ -26,6 +26,7 @@ uniform float rainStrength;
 uniform float shadowFade;
 uniform float timeAngle, timeBrightness;
 uniform float viewWidth, viewHeight;
+uniform float far, near;
 
 uniform ivec2 eyeBrightnessSmooth;
 
@@ -34,7 +35,8 @@ uniform vec3 cameraPosition;
 uniform mat4 gbufferModelViewInverse;
 uniform mat4 gbufferProjectionInverse;
 
-uniform sampler2D gaux4;
+uniform sampler2D colortex15;
+uniform sampler2D colortex14;
 uniform sampler2D noisetex;
 
 //Common Variables//
@@ -80,7 +82,7 @@ void SunGlare(inout vec3 color, vec3 viewPos, vec3 lightCol) {
 	if (isEyeInWater == 1) color += 0.25 * lightCol * visibility;
 	#endif
 	#ifdef SUN_GLARE
-	color += 0.25 * lightCol * visibility * (1.0 + 0.25 * isEyeInWater) * 0.2;
+	color += 0.75 * lightCol * visibility * (1.0 + 0.25 * isEyeInWater) * 0.2;
 	#endif
 }
 
@@ -117,6 +119,15 @@ void main() {
     vec3 albedo = renderAtmosphere(worldvec, light_vec);
 	#elif SKY_MODE == 1
 	vec3 albedo = GetSkyColor(viewPos.xyz, false);
+	#elif SKY_MODE == 0
+    vec3 worldvec = normalize(mat3(gbufferModelViewInverse) * (viewPos.xyz));
+    vec3 sun_vec = normalize(mat3(gbufferModelViewInverse) * sunVec);
+    mat2x3 light_vec;
+        light_vec[0] = sun_vec;
+        light_vec[1] = -sun_vec;
+
+    vec3 albedo = renderAtmosphere(worldvec, light_vec);
+	albedo += GetSkyColor(viewPos.xyz, false);
 	#endif
 	
 	#ifdef ROUND_SUN_MOON
@@ -135,7 +146,7 @@ void main() {
 	albedo.rgb += DrawAurora(viewPos.xyz, dither, 24);
 	#endif
 	
-	#ifdef HELIOS
+	#if NIGHT_SKY_MODE == 0 || NIGHT_SKY_MODE == 2
 		float NdotUhelios = pow2(pow2(clamp(NdotU * 3.0, 0.0, 1.0)));
 		vec3 planeCoord = wpos / (wpos.y + length(wpos.xz) * 0.5);
 		vec3 moonPos = vec3(gbufferModelViewInverse * vec4(-sunVec, 1.0));
@@ -144,9 +155,24 @@ void main() {
 		hcoord *= 0.2;
 
 		if (moonVisibility > 0.0 && rainStrength == 0.0){
-			vec3 helios = texture2D(gaux4, hcoord * 0.8 + 0.6).rgb;
+			vec3 helios = texture2D(colortex15, hcoord * 0.8 + 0.6).rgb;
 			helios *= pow2(length(helios) + 0.6);
 			albedo.rgb += helios * 0.05 * NdotUhelios * (1.0 - sunVisibility);
+		}
+	#endif
+
+	#if NIGHT_SKY_MODE == 1 || NIGHT_SKY_MODE == 2
+		float NdotUnebula = pow2(pow2(clamp(NdotU * 3.0, 0.0, 1.0)));
+		vec3 planeCoord2 = wpos / (wpos.y + length(wpos.xz) * 0.5);
+		vec3 moonPos2 = vec3(gbufferModelViewInverse * vec4(-sunVec, 1.0));
+		vec3 moonCoord2 = moonPos2 / (moonPos2.y + length(moonPos2.xz));
+		vec2 ncoord = planeCoord2.xz - moonCoord2.xz;
+		ncoord *= 0.2;
+
+		if (moonVisibility > 0.0 && rainStrength == 0.0){
+			vec3 nebula = texture2D(colortex14, ncoord * 0.8 + 0.6).rgb;
+			nebula *= pow2(length(nebula) + 0.6);
+			albedo.rgb += nebula * 0.05 * NdotUnebula * (1.0 - sunVisibility);
 		}
 	#endif
 
@@ -179,7 +205,7 @@ void main() {
 
 //Varyings//
 varying float star;
-
+varying vec2 texCoord;
 varying vec3 sunVec, upVec;
 
 //Uniforms//
@@ -189,6 +215,8 @@ uniform mat4 gbufferModelView;
 
 //Program//
 void main() {
+	texCoord = (gl_TextureMatrix[0] * gl_MultiTexCoord0).xy;
+
 	const vec2 sunRotationData = vec2(cos(sunPathRotation * 0.01745329251994), -sin(sunPathRotation * 0.01745329251994));
 	float ang = fract(timeAngle - 0.25);
 	ang = (ang + (cos(ang * 3.14159265358979) * -0.5 + 0.5 - ang) / 3.0) * 6.28318530717959;

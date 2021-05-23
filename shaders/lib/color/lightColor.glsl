@@ -5,15 +5,15 @@ vec3 lightNight      = vec3(LIGHT_NR,   LIGHT_NG,   LIGHT_NB)   * LIGHT_NI * 0.3
 
 vec3 cloudEvening    = vec3(LIGHT_ER * 1.15,   LIGHT_EG,   LIGHT_EB)   * LIGHT_EI * 0.6 / 255.0;
 vec3 cloudMorning    = vec3(LIGHT_MR * 1.1,   LIGHT_MG,   LIGHT_MB)   * LIGHT_MI * 0.6 / 255.0;
-vec3 cloudDay        = vec3(LIGHT_DR,   LIGHT_DG,   LIGHT_DB)   * LIGHT_DI / 255.0;
-vec3 cloudNight      = vec3(LIGHT_NR,   LIGHT_NG,   LIGHT_NB * 0.85)   * LIGHT_NI * 0.8 / 255.0;
+vec3 cloudDay        = vec3(LIGHT_DR,   LIGHT_DG,   LIGHT_DB)   * LIGHT_DI * 0.9 / 255.0;
+vec3 cloudNight      = vec3(LIGHT_NR * 1.2,   LIGHT_NG * 0.85,   LIGHT_NB * 0.75)   * LIGHT_NI * 0.8 / 255.0;
 
 vec3 ambientMorning  = vec3(AMBIENT_MR, AMBIENT_MG, AMBIENT_MB) * AMBIENT_MI / 255.0;
 vec3 ambientDay      = vec3(AMBIENT_DR, AMBIENT_DG, AMBIENT_DB) * AMBIENT_DI / 255.0;
 vec3 ambientEvening  = vec3(AMBIENT_ER, AMBIENT_EG, AMBIENT_EB) * AMBIENT_EI / 255.0;
 vec3 ambientNight    = vec3(AMBIENT_NR, AMBIENT_NG, AMBIENT_NB) * AMBIENT_NI * 0.3 / 255.0;
 
-#if SKY_MODE == 1 && defined WEATHER_PERBIOME
+#if SKY_MODE != 2 && defined WEATHER_PERBIOME
 	uniform float isDesert, isMesa, isCold, isSwamp, isMushroom, isSavanna;
 
 	vec4 weatherRain     = vec4(vec3(WEATHER_RR, WEATHER_RG, WEATHER_RB) / 255.0, 1.0) * WEATHER_RI;
@@ -45,7 +45,7 @@ vec3 ambientNight    = vec3(AMBIENT_NR, AMBIENT_NG, AMBIENT_NB) * AMBIENT_NI * 0
 #endif
 
 #ifndef WEATHER_PERBIOME
-#if SKY_MODE == 1
+#if SKY_MODE != 2
 	vec4 weatherCol = vec4(vec3(WEATHER_RR, WEATHER_RG, WEATHER_RB) / 255.0, 1.0) * WEATHER_RI;
 #endif
 #endif

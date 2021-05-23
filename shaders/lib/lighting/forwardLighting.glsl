@@ -1,7 +1,6 @@
 #if defined OVERWORLD || defined END
 #include "/lib/lighting/shadows.glsl"
 #endif
-
 void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos,
                  vec2 lightmap, float smoothLighting, float NoL, float vanillaDiffuse,
                  float parallaxShadow, float emission, float subsurface) {

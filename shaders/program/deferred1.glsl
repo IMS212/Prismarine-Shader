@@ -227,6 +227,19 @@ void main() {
                 skyReflection = GetSkyColor(skyRefPos, lightCol, true);
 				#endif
 				
+				#if SKY_MODE == 0
+				skyReflection = GetSkyColor(skyRefPos, true);
+				vec3 worldvec = normalize(mat3(gbufferModelViewInverse) * (skyRefPos.xyz));
+						
+				vec3 sun_vec = normalize(mat3(gbufferModelViewInverse) * sunVec);
+
+				mat2x3 light_vec;
+					light_vec[0] = sun_vec;
+					light_vec[1] = -sun_vec;
+
+				skyReflection += renderAtmosphere(worldvec, light_vec);
+				#endif
+
 				#ifdef REFLECTION_ROUGH
 				float cloudMixRate = smoothness * smoothness * (3.0 - 2.0 * smoothness);
 				#else

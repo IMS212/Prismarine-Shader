@@ -13,10 +13,15 @@ float CloudNoise(vec2 coord, vec2 wind){
 		  noise+= texture2D(noisetex, coord*0.015625  + wind * 0.15).x * 2.5;
 		  noise+= texture2D(noisetex, coord*0.010025  + wind * 0.1).x * 3;
 		  #elif CLOUDS_NOISE_QUALITY == 2
-		  noise+= texture2D(noisetex, coord*0.007812    + wind * 0.05).x * 0.5;
-		  noise+= texture2D(noisetex, coord*0.003906).x * 0.75;
-		  noise+= texture2D(noisetex, coord*0.001953).x * 1;
+		  noise+= texture2D(noisetex, coord*0.0625    + wind * 0.25).x * 1.5;
+		  noise+= texture2D(noisetex, coord*0.03125   + wind * 0.2).x * 2.0;
+		  noise+= texture2D(noisetex, coord*0.015625  + wind * 0.15).x * 2.5;
+		  noise+= texture2D(noisetex, coord*0.010025  + wind * 0.1).x * 3;
+		  noise+= texture2D(noisetex, coord*0.007812    + wind * 0.05).x * 3.5;
+		  noise+= texture2D(noisetex, coord*0.003906).x * 4;
+		  noise = noise / 2.5;
 		  #endif
+
 	return noise;
 }
 
@@ -25,7 +30,7 @@ float CloudCoverage(float noise, float coverage, float NdotU, float VoL) {
 	noiseCoverageVoL *= noiseCoverageVoL;
 	noiseCoverageVoL *= noiseCoverageVoL;
 	float NdotUmult = 0.05;
-	float cloudAmount = CLOUD_AMOUNT - rainStrength - rainStrength;
+	float cloudAmount = CLOUD_AMOUNT - rainStrength;
 	float noiseCoverage = coverage * coverage + cloudAmount
 							* (1.0 + noiseCoverageVoL * 0.175) 
 							* (1.0 + NdotU * NdotUmult * (1.0-sqrt(rainStrength)*3.0))
@@ -101,7 +106,9 @@ vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol) {
 		#endif
 
 		#ifdef END
-		vec3 cloudDay = pow(vec3(endCol.r * 1.6, endCol.g * 0.9, endCol.b * 2) * 2, vec3(1.5));
+		vec4 endCColSqrt = vec4(vec3(CLOUDS_END_R, CLOUDS_END_G, CLOUDS_END_B) / 255.0, 1.0) * CLOUDS_END_I;
+		vec4 endCCol = endCColSqrt * endCColSqrt;
+		vec3 cloudDay = pow(endCCol.rgb * 2, vec3(1.5));
 		#endif
 
 		vec3 cloudUP = mix(cloudNight, cloudDay, sunVisF) * (CLOUDS_UP_COLOR_MULT);

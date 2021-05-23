@@ -64,15 +64,15 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 	float VoL 			= dot(nViewPos, lightVec);
 
 	#ifdef OVERWORLD //////////// O V E R W O R L D ////////////
-	float visfactor 	= 0.05 * (-0.4 * timeBrightness + 1.0) * (1.0 * rainStrength + 0.1);
+	float visfactor 	= 0.05 * (-LIGHTSHAFT_TIME_DECREASE_FACTOR * timeBrightness + 1.0) * (1.0 * rainStrength + 0.1) + isEyeInWater;
 	float invvisfactor	= 1.0 - visfactor;
 	float visibility 	= 0.94 - (rainStrength / 4);
 
 	visibility = visfactor / (1.0 - invvisfactor * visibility) - visfactor;
 	visibility = clamp(visibility * 1.015 / invvisfactor - 0.015, 0.0, 1.0);
-	visibility = mix(1.0, visibility, 0.25 * eBS + 0.75) - (timeBrightness * LIGHTSHAFT_TIME_DECREASE_FACTOR);
+	visibility = mix(1.0, visibility, 0.25 * eBS + 0.75);
 	visibility = visibility - (rainStrength / 4.0) - (cameraPosition.y * LIGHTSHAFT_ALTITUDE_DECREASE_FACTOR * 0.5);
-	if (isEyeInWater == 1.0) visibility = (visibility + 0.02) * WATER_I;
+	if (isEyeInWater == 1.0) visibility = (visibility * 16) * WATER_I;
 	if (eyeAltitude < 2.0) visibility *= clamp((eyeAltitude-1.0), 0.0, 1.0);
 
 	#elif defined END //////////// E N D ////////////
@@ -90,7 +90,7 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 
 	#if defined LIGHTSHAFT_PERSISTENCE && defined OVERWORLD
 	float persistence   = LIGHTSHAFT_PERSISTENCE_FACTOR;
-	if (isEyeInWater == 0) persistence 	   *= min(2.0 + rainStrength*rainStrength - sunVisibility * sunVisibility, 8.0) - (timeBrightness * LIGHTSHAFT_TIME_DECREASE_FACTOR);
+	if (isEyeInWater == 0) persistence 	   *= min(2.0 + rainStrength*rainStrength - sunVisibility * sunVisibility, 8.0) - (timeBrightness * 0.05);
 	if (isEyeInWater == 1.0) persistence   *= min(2.0 + rainStrength*rainStrength - sunVisibility * sunVisibility, 8.0) - (cameraPosition.y * LIGHTSHAFT_ALTITUDE_DECREASE_FACTOR * 0.5) * 0.5;
 	if (persistence <= 32.00) {
 		if (persistence >= 1.0) visibility *= max((VoL + persistence) / (persistence + 1.0), 0.0);
@@ -107,12 +107,11 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 		vec3 watercol = mix(vec3(1.0), vec3(waterColor.r, waterColor.g * 0.4, waterColor.b * 8) / (waterColor.a * waterColor.a), pow(waterAlpha, 0.5));
 
 		float maxDist = LIGHTSHAFT_MAX_DISTANCE;
-		if (isEyeInWater == 1.0) maxDist = maxDist * 0.5;
 		
-		int sampleCount = 9 + isEyeInWater;
+		int sampleCount = 9;
 
 		for(int i = 0; i < sampleCount; i++) {
-			float minDist = exp2(i + dither) - 0.95 * (LIGHTSHAFT_MIN_DISTANCE + isEyeInWater);
+			float minDist = exp2(i + dither) - 0.95 * LIGHTSHAFT_MIN_DISTANCE;
 			if (isEyeInWater == 1) minDist = (pow(i + dither + 0.5, 2.0)) * LIGHTSHAFT_MIN_DISTANCE * 0.055;
 
 			float breakFactor = 0.0;

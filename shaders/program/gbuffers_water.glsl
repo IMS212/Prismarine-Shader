@@ -400,6 +400,19 @@ void main() {
 				#if SKY_MODE == 1
                 skyReflection = GetSkyColor(skyRefPos, true);
 				#endif
+
+				#if SKY_MODE == 0
+				skyReflection = GetSkyColor(skyRefPos, true);
+				vec3 worldvec = normalize(mat3(gbufferModelViewInverse) * (skyRefPos.xyz));
+						
+				vec3 sun_vec = normalize(mat3(gbufferModelViewInverse) * sunVec);
+
+				mat2x3 light_vec;
+					light_vec[0] = sun_vec;
+					light_vec[1] = -sun_vec;
+
+				skyReflection += renderAtmosphere(worldvec, light_vec);
+				#endif
 				
 				vec3 specular = GetSpecularHighlight(newNormal, viewPos,  0.9, vec3(0.02),
 													 specularColor, shadow, color.a);
@@ -487,6 +500,19 @@ void main() {
 					skyReflection = GetSkyColor(skyRefPos, true);
 					#endif
 					
+					#if SKY_MODE == 0
+					skyReflection = GetSkyColor(skyRefPos, true);
+					vec3 worldvec = normalize(mat3(gbufferModelViewInverse) * (skyRefPos.xyz));
+							
+					vec3 sun_vec = normalize(mat3(gbufferModelViewInverse) * sunVec);
+
+					mat2x3 light_vec;
+						light_vec[0] = sun_vec;
+						light_vec[1] = -sun_vec;
+
+					skyReflection += renderAtmosphere(worldvec, light_vec);
+					#endif
+
 					#ifdef AURORA
 					skyReflection += DrawAurora(skyRefPos * 100.0, dither, 12);
 					#endif
