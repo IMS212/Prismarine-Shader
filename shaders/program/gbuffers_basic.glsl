@@ -31,6 +31,7 @@ uniform float screenBrightness;
 uniform float shadowFade;
 uniform float timeAngle, timeBrightness;
 uniform float viewWidth, viewHeight;
+uniform sampler2D noisetex;
 
 uniform ivec2 eyeBrightnessSmooth;
 

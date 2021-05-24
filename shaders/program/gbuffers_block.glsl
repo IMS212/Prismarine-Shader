@@ -52,6 +52,7 @@ uniform mat4 shadowProjection;
 uniform mat4 shadowModelView;
 
 uniform sampler2D texture;
+uniform sampler2D noisetex;
 
 #ifdef ADVANCED_MATERIALS
 uniform ivec2 atlasSize;

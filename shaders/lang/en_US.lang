@@ -286,6 +286,9 @@ option.VCLOUDS_HEIGHT=Height
 option.VCLOUDS_VERTICAL_THICKNESS=Vertcial Thickness
 option.VCLOUDS_HORIZONTAL_THICKNESS=Horizontal Thickness
 
+option.FOG_ALTITUDE_INCREASE_FACTOR=Height-Based Increasing
+option.FOG_ALTITUDE_INCREASE_FACTOR.comment=Increases fog density depending on how high you are.
+
 option.SKY_DESATURATION=Sky Desaturation
 option.SKY_DESATURATION.comment=Reduces saturation while adding some tint to the skybox at night
 
@@ -644,11 +647,11 @@ option.BLOCKLIGHT_R_END=Red (In End)
 option.BLOCKLIGHT_G_END=Green (In End)
 option.BLOCKLIGHT_B_END=Blue (In End)
 option.COLORED_LIGHTING_MODE=Colored Lighting
-option.COLORED_LIGHTING_MODE.comment=World Position - Depends on your XZ coordinates. Light Color - Depends on sunlight/moonlight color.
+option.COLORED_LIGHTING_MODE.comment=XZ-pos - Depends on your XZ coordinates. Light Color - Depends on sunlight/moonlight color.
 value.COLORED_LIGHTING_MODE.0=§cOFF
-value.COLORED_LIGHTING_MODE.1=World Position
+value.COLORED_LIGHTING_MODE.1=XZ-pos (Dynamic)
 value.COLORED_LIGHTING_MODE.2=Light Color
-value.COLORED_LIGHTING_MODE.3=prolly SSPT but idk if ima do it anytime soon
+value.COLORED_LIGHTING_MODE.3=XZ-pos (Static)
 option.CLM_MAINCOL=Main Color
 option.CLM_MAINCOL.comment=Selects the main color for world position based colored lighting.
 value.CLM_MAINCOL.0=Green

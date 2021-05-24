@@ -156,6 +156,10 @@ float GetAmbientOcclusion(float z){
 #include "/lib/util/dither.glsl"
 #include "/lib/atmospherics/sky.glsl"
 #include "/lib/atmospherics/fog.glsl"
+#ifdef OVERWORLD
+#include "/lib/prismarine/functions.glsl"
+#include "/lib/prismarine/complexSky.glsl"
+#endif
 
 #ifdef OUTLINE_ENABLED
 #include "/lib/util/outlineOffset.glsl"

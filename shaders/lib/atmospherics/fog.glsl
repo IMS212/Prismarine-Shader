@@ -7,7 +7,7 @@ vec3 GetFogColor(vec3 viewPos) {
     float VoU = clamp(dot(nViewPos,  upVec), -1.0, 1.0);
     float VoL = clamp(dot(nViewPos, sunVec), -1.0, 1.0);
 
-	float density = 0.4;
+	float density = 0.4 + (cameraPosition.y * FOG_ALTITUDE_INCREASE_FACTOR);
     float nightDensity = 0.35;
     float weatherDensity = 1.5;
     float groundDensity = 0.08 * (4.0 - 3.0 * sunVisibility) *

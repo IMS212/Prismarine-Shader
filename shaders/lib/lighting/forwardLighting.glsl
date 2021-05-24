@@ -55,7 +55,7 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
     #endif
 
     //Three different lighting modes for emissive things in Overworld.
-    //WORLD POSITION BASED
+    //WORLD POSITION BASED - DYNAMIC
     #if defined OVERWORLD && COLORED_LIGHTING_MODE == 1
 
     #if CLM_MAINCOL == 0
@@ -64,7 +64,7 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
     float redCol    = rWP * 0.00004;
     float greenCol  = mix(20, 180, 240) * 0.000039;
     float blueCol   = bWP * 0.000038;
-	vec3 blockLighting = newLightmap * newLightmap * vec3(redCol, greenCol, blueCol) * (BLOCKLIGHT_I / 2);
+	vec3 blockLighting = newLightmap * newLightmap * vec3(redCol, greenCol, blueCol) * (BLOCKLIGHT_I);
     
     #elif CLM_MAINCOL == 1
     float rWP = (cameraPosition.x + cameraPosition.x) * (worldPos.x + worldPos.x);
@@ -80,9 +80,19 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
     float blueCol    = rWP * 0.00004;
     float redCol   = mix(20, 180, 240) * 0.000031 * 1.5;
     float greenCol  = bWP * 0.000038;
-	vec3 blockLighting = newLightmap * vec3(redCol, greenCol, blueCol) * (BLOCKLIGHT_I / 4);
+	vec3 blockLighting = newLightmap * vec3(redCol, greenCol, blueCol) * (BLOCKLIGHT_I / 2);
 
     #endif
+    #endif
+
+    //WORLD POSITION BASED - STATIC
+    #if COLORED_LIGHTING_MODE == 3 && defined OVERWORLD
+	float redCol    = texture2D(noisetex, (cameraPosition.xz + worldPos.xz) * 0.0001).r;
+	float greenCol  = texture2D(noisetex, (cameraPosition.xz + worldPos.xz) * 0.0002).r;
+	float blueCol   = texture2D(noisetex, (cameraPosition.xz + worldPos.xz) * 0.0003).r;
+	blocklightCol   = vec3(redCol, greenCol, blueCol) * BLOCKLIGHT_I * 2;
+
+    vec3 blockLighting =  newLightmap * newLightmap * blocklightCol;
     #endif
 
     //TIME BASED

@@ -3,15 +3,19 @@ uniform float sunAngle;
 #include "/lib/color/auroraColor.glsl"
 
 float CloudNoise(vec2 coord, vec2 wind){
-	float noise = texture2D(noisetex, coord*0.25     + wind * 0.4).x * 2.0;
-		  noise+= texture2D(noisetex, coord*0.125    + wind * 0.35).x * 4.0;
-		  noise+= texture2D(noisetex, coord*0.0625   + wind * 0.3).x * 6.0;
-		  noise+= texture2D(noisetex, coord*0.03125  + wind * 0.25).x * 8.0;
+	float noise = texture2D(noisetex, coord*1        + wind * 0.55).x;
+		  noise+= texture2D(noisetex, coord*0.5      + wind * 0.45).x * -2.0;
+		  noise+= texture2D(noisetex, coord*0.25     + wind * 0.35).x * 2.0;
+		  noise+= texture2D(noisetex, coord*0.125    + wind * 0.25).x * 5.0;
+		  noise+= texture2D(noisetex, coord*0.0625   + wind * 0.15).x * 9.0;
+		  noise+= texture2D(noisetex, coord*0.03125  + wind * 0.05).x * 10.0;
+		  noise+= texture2D(noisetex, coord*0.015625 + wind * 0.05).x * -12.0;
 		  #if CLOUDS_NOISE_QUALITY == 1
 		  noise+= texture2D(noisetex, coord*0.0625    + wind * 0.25).x * 1.5;
 		  noise+= texture2D(noisetex, coord*0.03125   + wind * 0.2).x * 2.0;
 		  noise+= texture2D(noisetex, coord*0.015625  + wind * 0.15).x * 2.5;
 		  noise+= texture2D(noisetex, coord*0.010025  + wind * 0.1).x * 3;
+		  noise = noise / 1.5;
 		  #elif CLOUDS_NOISE_QUALITY == 2
 		  noise+= texture2D(noisetex, coord*0.0625    + wind * 0.25).x * 1.5;
 		  noise+= texture2D(noisetex, coord*0.03125   + wind * 0.2).x * 2.0;
@@ -19,7 +23,7 @@ float CloudNoise(vec2 coord, vec2 wind){
 		  noise+= texture2D(noisetex, coord*0.010025  + wind * 0.1).x * 3;
 		  noise+= texture2D(noisetex, coord*0.007812    + wind * 0.05).x * 3.5;
 		  noise+= texture2D(noisetex, coord*0.003906).x * 4;
-		  noise = noise / 2.5;
+		  noise = noise / 1.5;
 		  #endif
 
 	return noise;

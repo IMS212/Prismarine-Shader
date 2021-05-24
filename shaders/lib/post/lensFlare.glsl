@@ -69,23 +69,41 @@ void LensFlare(inout vec3 color, vec2 lightPos, float truePos, float multiplier)
 			BaseLens(lightPos, 0.3,  0.70, 1.0) * vec3(1.8, 0.4, 2.5) * 0.06 +
 			BaseLens(lightPos, 0.3,  0.95, 1.0) * vec3(0.1, 0.2, 2.5) * 0.10 +
 			
-			OverlapLens(lightPos, 0.18, -0.30, -0.41) * vec3(2.5, 1.2, 0.1) * 0.010 +
-			OverlapLens(lightPos, 0.16, -0.18, -0.29) * vec3(2.5, 0.5, 0.1) * 0.020 +
-			OverlapLens(lightPos, 0.15,  0.06,  0.19) * vec3(2.5, 0.2, 0.1) * 0.015 +
-			OverlapLens(lightPos, 0.14,  0.15,  0.28) * vec3(1.8, 0.1, 1.2) * 0.015 +
-			OverlapLens(lightPos, 0.16,  0.24,  0.37) * vec3(1.0, 0.1, 2.5) * 0.015 +
+			OverlapLens(lightPos, 0.18, -0.30, -0.41) * vec3(2.5, 1.2, 0.1) * 0.110 +
+			OverlapLens(lightPos, 0.16, -0.18, -0.29) * vec3(2.5, 0.5, 0.1) * 0.120 +
+			OverlapLens(lightPos, 0.15,  0.06,  0.19) * vec3(2.5, 0.2, 0.1) * 0.115 +
+			OverlapLens(lightPos, 0.14,  0.15,  0.28) * vec3(1.8, 0.1, 1.2) * 0.115 +
+			OverlapLens(lightPos, 0.16,  0.24,  0.37) * vec3(1.0, 0.1, 2.5) * 0.115 +
 				
 			PointLens(lightPos, 0.03, -0.55) * vec3(2.5, 1.6, 0.0) * 0.20 +
 			PointLens(lightPos, 0.02, -0.40) * vec3(2.5, 1.0, 0.0) * 0.15 +
+			PointLens(lightPos, 0.02, -0.10) * vec3(2.5, 1.0, 4.0) * 0.75 +
+			PointLens(lightPos, 0.02, 0.21) * vec3(0.5, 2.0, 10.0) * 0.25 +
 			PointLens(lightPos, 0.04,  0.43) * vec3(2.5, 0.6, 0.6) * 0.20 +
 			PointLens(lightPos, 0.02,  0.60) * vec3(0.2, 0.6, 2.5) * 0.15 +
 			PointLens(lightPos, 0.03,  0.67) * vec3(0.2, 1.6, 2.5) * 0.25 +
+			PointLens(lightPos, 0.04,  0.62) * vec3(4.2, 1.6, 2.5) * 0.25 +
+			PointLens(lightPos, 0.04,  0.64) * vec3(3.2, 1.6, 2.5) * 0.25 +
+			PointLens(lightPos, 0.04,  0.95) * vec3(13.2, 11.6, 2.5) * 0.25 +
+			PointLens(lightPos, 0.04,  1.04) * vec3(13.2, 5.8, 1.5) * 0.25 +
 				
 			RingLens(lightPos, 0.25, 0.43, 0.45) * vec3(0.10, 0.35, 2.50) * 1.5 +
-			RingLens(lightPos, 0.18, 0.98, 0.99) * vec3(0.15, 1.00, 2.55) * 2.5
+			RingLens(lightPos, 0.25, 0.40, 0.42) * vec3(0.10, 5.35, 2.50) * 1.5 +
+			RingLens(lightPos, 0.25, 0.37, 0.39) * vec3(5.0, 5.0, 0.00) * 1.5 +
+			RingLens(lightPos, 0.25, 0.34, 0.36) * vec3(7.0, 4.0, 0.00) * 1.5 +
+			RingLens(lightPos, 0.25, 0.31, 0.33) * vec3(9.0, 0.00, 0.00) * 1.5 +
+			RingLens(lightPos, 0.15, 0.30, 0.32) * vec3(0.10, 5.35, 2.50) * 0.5 +
+			RingLens(lightPos, 0.15, 0.27, 0.29) * vec3(5.0, 5.0, 0.00) * 0.5 +
+			RingLens(lightPos, 0.15, 0.24, 0.26) * vec3(7.0, 4.0, 0.00) * 0.5 +
+			RingLens(lightPos, 0.15, 0.21, 0.23) * vec3(9.0, 0.00, 0.00) * 0.5 +
+			RingLens(lightPos, 0.18, 0.98, 0.99) * vec3(0.10, 0.35, 2.50) * 2.5 +
+			RingLens(lightPos, 0.18, 0.95, 0.96) * vec3(0.10, 5.35, 2.50) * 2.5 +
+			RingLens(lightPos, 0.18, 0.92, 0.93) * vec3(5.0, 5.0, 0.00) * 2.5 +
+			RingLens(lightPos, 0.18, 0.89, 0.90) * vec3(7.0, 4.0, 0.00) * 2.5 +
+			RingLens(lightPos, 0.18, 0.86, 0.87) * vec3(9.0, 0.00, 0.00) * 2.5
 		) * (falloffIn - falloffOut) + (
-			AnamorphicLens(lightPos, 1.0, -1.0) * vec3(0.3,0.7,1.0) * 0.35 +
-			RainbowLens(lightPos, 0.525, -1.0, 0.2) * 0.05 +
+			AnamorphicLens(lightPos, 1.0, -1.0) * vec3(1.0,1.0,1.0) * 0.35 +
+			RainbowLens(lightPos, 0.525, -1.0, 0.2) * 0.29 +
 			RainbowLens(lightPos, 2.0, 4.0, 0.1) * 0.05
 		) * (1.0 - falloffOut);
 
