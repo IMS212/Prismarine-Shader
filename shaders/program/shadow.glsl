@@ -14,8 +14,9 @@ varying float mat;
 
 varying vec2 texCoord, lmCoord;
 varying vec3 sunVec, upVec, eastVec;
-varying vec3 wpos;
+varying vec3 cpos;
 varying vec4 color;
+varying vec3 wpos;
 
 //Uniforms//
 uniform vec3 cameraPosition;
@@ -82,9 +83,7 @@ void main() {
 	albedo.rgb *= 1.0-pow(albedo.a,32.0);
 	if (water > 0.9){
 		#if defined OVERWORLD && defined WATER_TINT
-		//float caustic = getCausticWaves(wpos);
-		//albedo.rgb = vec3(1.0+3.0*caustic);
-		albedo.rgb = vec3(waterColor.r, waterColor.g * 0.8, waterColor.b) * WATER_I;
+		albedo.rgb = waterColor.rgb * WATER_I;
 		#endif
 		}
 	#else
@@ -103,7 +102,7 @@ void main() {
 varying float mat;
 
 varying vec2 texCoord, lmCoord;
-varying vec3 wpos;
+varying vec3 cpos;
 varying vec4 color;
 
 //Uniforms//
@@ -138,10 +137,15 @@ float frametime = frameTimeCounter * ANIMATION_SPEED;
 //Program//
 void main() {
 	texCoord = gl_MultiTexCoord0.xy;
+
 	vec4 cposition = gl_Position;
 	cposition = shadowProjectionInverse * cposition;
 	cposition = shadowModelViewInverse * cposition;
-	wpos = cposition.xyz*1.1+cameraPosition.xyz;
+	#ifdef WATER_TINT
+	cpos = cposition.xyz*1.1+cameraPosition.xyz;
+	#endif
+	cposition.xyz += cameraPosition.xyz;
+
 	lmCoord = (gl_TextureMatrix[1] * gl_MultiTexCoord1).xy;
 	lmCoord = clamp((lmCoord - 0.03125) * 1.06667, vec2(0.0), vec2(0.9333, 1.0));
 

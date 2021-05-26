@@ -328,16 +328,13 @@ void main() {
 		#endif
 
 		#if defined OVERWORLD && defined WATER_TINT
-		if (isEyeInWater == 1.0){
-			float skymapMod = lightmap.y * lightmap.y * (3.0 - 2.0 * lightmap.y);
-			float causticFactor = pow(skymapMod, 0.5) * 50 * (1 - pow(skymapMod, 0.5)) * (1 - rainStrength*0.5) * (1 - lightmap.x*0.8);
-			vec3 causticColor = waterColor.rgb * lightDay * lightDay;
-			vec3 causticPosition = worldPos.xyz+cameraPosition.xyz;
-			float caustic = getCausticWaves(causticPosition);
-			vec3 lightcaustic = caustic*causticFactor*causticColor*shadowFade*shadow;
-			albedo.rgb *= 0.20 + lightmap.x*0.80;
+		if (isEyeInWater == 1){
+			float causticsFactor = pow(lightmap.y * lightmap.y, 0.5) * (1.0 - pow(lightmap.y * lightmap.y, 0.5)) * (1.0 - rainStrength*0.5) * (1.0 - lightmap.x) * WATER_CAUSTICS_STRENGTH;
+			vec3 pos = worldPos.xyz+cameraPosition.xyz;
+			vec3 caustic = getCaustics(pos) * causticsFactor * waterColor.rgb * shadow * shadowFade;
 			albedo.rgb += (1 - lightmap.x) * (albedo.rgb * waterColor.rgb * waterColor.rgb * WATER_CAUSTICS_STRENGTH + WATER_CAUSTICS_STRENGTH * shadow * albedo.rgb * waterColor.rgb * waterColor.rgb);
-			albedo.rgb *= 1.0+lightcaustic;
+			albedo.rgb *= 1.0 + caustic;
+			albedo.rgb *= 0.2 + lightmap.x;
 		}
 		#endif
 	} else albedo.a = 0.0;
@@ -461,6 +458,7 @@ void main() {
 	}
 	if (mc_Entity.x >= 10200 && mc_Entity.x < 10300)
 		mat = 3.0;
+
 	if (mc_Entity.x == 10203)
 		mat = 4.0;
 	if (mc_Entity.x == 10207)

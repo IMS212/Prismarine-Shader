@@ -1,6 +1,8 @@
 #if defined OVERWORLD || defined END
 #include "/lib/lighting/shadows.glsl"
 #endif
+
+#include "/lib/prismarine/functions.glsl"
 void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos,
                  vec2 lightmap, float smoothLighting, float NoL, float vanillaDiffuse,
                  float parallaxShadow, float emission, float subsurface) {
@@ -87,10 +89,10 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
 
     //WORLD POSITION BASED - STATIC
     #if COLORED_LIGHTING_MODE == 3 && defined OVERWORLD
-	float redCol    = texture2D(noisetex, (cameraPosition.xz + worldPos.xz) * 0.0001).r;
-	float greenCol  = texture2D(noisetex, (cameraPosition.xz + worldPos.xz) * 0.0002).r;
-	float blueCol   = texture2D(noisetex, (cameraPosition.xz + worldPos.xz) * 0.0003).r;
-	blocklightCol   = vec3(redCol, greenCol, blueCol) * BLOCKLIGHT_I * 2;
+	float redCol    = texture2D(noisetex, (cameraPosition.xz + worldPos.xz) * 0.0004).r;
+	float greenCol  = texture2D(noisetex, (cameraPosition.xz + worldPos.xz) * 0.0006).r;
+	float blueCol   = texture2D(noisetex, (cameraPosition.xz + worldPos.xz) * 0.0008).r;
+	blocklightCol   = vec3(redCol, greenCol, blueCol) * BLOCKLIGHT_I;
 
     vec3 blockLighting =  newLightmap * newLightmap * blocklightCol;
     #endif

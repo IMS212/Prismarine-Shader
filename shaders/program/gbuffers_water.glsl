@@ -174,13 +174,12 @@ vec3 GetWaterNormal(vec3 worldPos, vec3 viewPos, vec3 viewVector) {
 #include "/lib/util/dither.glsl"
 #include "/lib/util/spaceConversion.glsl"
 #include "/lib/atmospherics/sky.glsl"
-#include "/lib/prismarine/functions.glsl"
-#include "/lib/prismarine/complexSky.glsl"
 #include "/lib/atmospherics/fog.glsl"
 #include "/lib/lighting/forwardLighting.glsl"
 #include "/lib/reflections/raytrace.glsl"
 #include "/lib/reflections/simpleReflections.glsl"
 #include "/lib/surface/ggx.glsl"
+#include "/lib/prismarine/complexSky.glsl"
 
 #ifdef OVERWORLD
 #include "/lib/atmospherics/clouds.glsl"

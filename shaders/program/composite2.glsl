@@ -30,8 +30,6 @@ uniform sampler2D colortex0;
 uniform sampler2D colortex1;
 uniform sampler2D colortex2;
 uniform sampler2D colortex3;
-uniform sampler2D colortex4;
-uniform sampler2D colortex5;
 uniform sampler2D depthtex0;
 uniform sampler2D depthtex1;
 uniform sampler2D noisetex;
@@ -48,8 +46,6 @@ float frametime = frameTimeCounter*ANIMATION_SPEED;
 //Optifine Constants//
 const bool colortex0MipmapEnabled = false;
 const bool colortex1MipmapEnabled = true;
-const bool colortex4MipmapEnabled = true;
-const bool colortex5MipmapEnabled = true;
 
 //Common Functions//
 vec3 MotionBlur(vec3 color, float z, float dither) {
@@ -105,12 +101,6 @@ vec3 MotionBlur(vec3 color, float z, float dither) {
 void main() {
     vec3 color = texture2DLod(colortex0, texCoord.xy, 0.0).rgb;
 	float dither = Bayer64(gl_FragCoord.xy);
-
-	#if CLOUDS == 3
-	vec2 vc = vec2(texture2DLod(colortex4,texCoord.xy,2).a, texture2DLod(colortex5,texCoord.xy,2).a);
-	float vcmult = 0.5*(1.0-moonVisibility*0.7)*(1.0-rainStrength*0.5);
-	color = mix(color,mix(ambientCol,lightCol,vc.x)*vcmult,vc.y*vc.y);
-	#endif
 
 	#ifdef MOTION_BLUR
 	float z = texture2D(depthtex1, texCoord.st).x;

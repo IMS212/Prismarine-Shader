@@ -12,7 +12,7 @@ https://bitslablab.com
 //Varyings//
 varying vec2 texCoord;
 
-varying vec3 upVec, sunVec;
+varying vec3 upVec, sunVec, lightVec;
 
 varying vec4 color;
 
@@ -21,6 +21,7 @@ uniform float nightVision;
 uniform float rainStrength;
 uniform float timeAngle, timeBrightness;
 uniform float viewWidth, viewHeight;
+uniform float shadowFade;
 
 uniform ivec2 eyeBrightnessSmooth;
 
@@ -36,7 +37,6 @@ uniform float worldTime;
 uniform vec3 cameraPosition;
 
 uniform mat4 gbufferModelViewInverse;
-uniform sampler2D gaux4;
 uniform sampler2D noisetex;
 #endif
 
@@ -102,7 +102,7 @@ void main() {
 	
 	#if END_SKY == 2 || END_SKY == 3
 	vec4 cloud = DrawCloud(viewPos.xyz, dither, lightCol, ambientCol);
-	albedo.rgb = mix(albedo.rgb, cloud.rgb, cloud.a);
+	albedo.rgb += mix(albedo.rgb, cloud.rgb, cloud.a);
 	#endif
 
 	#if END_SKY == 1 || END_SKY == 3

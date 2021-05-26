@@ -10,7 +10,7 @@ https://bitslablab.com
 #ifdef FSH
 
 //Varyings//
-varying vec2 texCoord;
+varying vec4 texCoord;
 
 varying vec3 sunVec, upVec;
 
@@ -23,11 +23,21 @@ uniform float rainStrength;
 uniform float shadowFade;
 uniform float timeAngle, timeBrightness;
 uniform float frameTimeCounter;
+uniform float far, near;
+uniform float viewHeight, viewWidth;
 
 uniform ivec2 eyeBrightnessSmooth;
 
 uniform vec3 cameraPosition;
 
+uniform mat4 gbufferProjection;
+uniform mat4 gbufferProjectionInverse;
+uniform mat4 gbufferModelViewInverse;
+uniform mat4 gbufferModelView;
+uniform mat4 shadowProjection;
+uniform mat4 shadowModelView;
+
+uniform sampler2D depthtex0, depthtex1;
 uniform sampler2D colortex0;
 uniform sampler2D colortex1;
 
@@ -35,6 +45,14 @@ uniform sampler2D colortex1;
 const bool colortex1MipmapEnabled = true;
 
 //Common Variables//
+float moonVisibility = clamp((dot(-sunVec, upVec) + 0.05) * 10.0, 0.0, 1.0);
+
+#ifdef WORLD_TIME_ANIMATION
+float frametime = float(worldTime)/20.0*ANIMATION_SPEED;
+#else
+float frametime = frameTimeCounter*ANIMATION_SPEED;
+#endif
+
 float eBS = eyeBrightnessSmooth.y / 240.0;
 float sunVisibility = clamp(dot(sunVec, upVec) + 0.05, 0.0, 0.1) * 10.0;
 
@@ -61,8 +79,8 @@ void main() {
 		  (1.0 - blindFactor);
 	
 	color.rgb += vl;
-	
-	/*DRAWBUFFERS:0*/
+
+	/* DRAWBUFFERS:0 */
 	gl_FragData[0] = color;
 }
 
@@ -72,7 +90,7 @@ void main() {
 #ifdef VSH
 
 //Varyings//
-varying vec2 texCoord;
+varying vec4 texCoord;
 
 varying vec3 sunVec, upVec;
 
@@ -83,7 +101,7 @@ uniform mat4 gbufferModelView;
 
 //Program//
 void main() {
-	texCoord = gl_MultiTexCoord0.xy;
+	texCoord = gl_MultiTexCoord0;
 	
 	gl_Position = ftransform();
 
