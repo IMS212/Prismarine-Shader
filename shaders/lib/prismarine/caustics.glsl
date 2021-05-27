@@ -1,9 +1,9 @@
 float waterH(vec3 pos){
-	float noise  = texture2D(noisetex, (pos.xz + vec2(frameTimeCounter) * 0.5 - pos.y) / WATER_CAUSTICS_AMOUNT * 1.5).r;
-		  noise += texture2D(noisetex, (pos.xz - vec2(frameTimeCounter) * 0.5 - pos.y) / WATER_CAUSTICS_AMOUNT * 3.0).r*0.8;
-		  noise -= texture2D(noisetex, (pos.xz + vec2(frameTimeCounter) * 0.5 + pos.y) / WATER_CAUSTICS_AMOUNT * 4.5).r*0.6;
-		  noise += texture2D(noisetex, (pos.xz - vec2(frameTimeCounter) * 0.5 - pos.y) / WATER_CAUSTICS_AMOUNT * 7.0).r*0.4;
-		  noise -= texture2D(noisetex, (pos.xz + vec2(frameTimeCounter) * 0.5 + pos.y) / WATER_CAUSTICS_AMOUNT * 14.0).r*0.2;
+	float noise  = texture2D(noisetex, (pos.xz + vec2(frametime) * 0.5 - pos.y) / WATER_CAUSTICS_AMOUNT * 1.5).r;
+		  noise += texture2D(noisetex, (pos.xz - vec2(frametime) * 0.5 - pos.y) / WATER_CAUSTICS_AMOUNT * 3.0).r*0.8;
+		  noise -= texture2D(noisetex, (pos.xz + vec2(frametime) * 0.5 + pos.y) / WATER_CAUSTICS_AMOUNT * 4.5).r*0.6;
+		  noise += texture2D(noisetex, (pos.xz - vec2(frametime) * 0.5 - pos.y) / WATER_CAUSTICS_AMOUNT * 7.0).r*0.4;
+		  noise -= texture2D(noisetex, (pos.xz + vec2(frametime) * 0.5 + pos.y) / WATER_CAUSTICS_AMOUNT * 14.0).r*0.2;
 	
 	return noise;
 }

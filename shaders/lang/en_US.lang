@@ -86,6 +86,13 @@ option.ABOUT.comment=by Capt Tatsu and Septonious. bitslablab.com
 value.ABOUT.0=BSL Edit
 
 #Lighting
+option.SHADING_REDUCTION_FACTOR=Shading Reduction
+option.NOISEMAP_SHADOWS=Noisemap Shadows
+value.NOISEMAP_SHADOWS.0=OFF
+value.NOISEMAP_SHADOWS.1=Cloud Shadows
+value.NOISEMAP_SHADOWS.2=Shading
+option.NOISEMAP_SHADOWS.comment=Random shadows on the world surface. First mode adds cloud shadows (not synced with clouds). Second mode adds small shadows at the light spots.
+
 option.shadowMapResolution=Shadowmap Quality
 option.shadowMapResolution.comment=Adjusts shadowmap size. §e[*]§rHigher resolution gives sharper shadows, but reduces performance.
 value.shadowMapResolution.512=Very Low (512)
@@ -244,9 +251,6 @@ value.CLOUDS.1=Planar
 value.CLOUDS.2=Vanilla
 value.CLOUDS.3=Volumetric
 
-option.VCF_MIPMAP=Mipmap
-option.VCF_MIPMAP.comment=Makes the volumetric clouds/fog less noisy. Toggle it off for sharper look.
-
 option.VFOG_NOISE_QUALITY=Noise Quality
 value.VFOG_NOISE_QUALITY.0=Low
 value.VFOG_NOISE_QUALITY.1=High
@@ -358,6 +362,7 @@ value.SKY_GROUND.0=§cOFF
 value.SKY_GROUND.1=Reflections Only
 value.SKY_GROUND.2=Full
 
+option.HORIZON_EXPONENT=Horizon Exponent
 option.HORIZON_DISTANCE=Horizon Distance
 option.HORIZON_DISTANCE.comment=Adjusts sky gradient. Nearer horizon gives slightly brighter sky, further horizon gives slightly darker sky. 
 option.HORIZON_HORIZONTAL_EXPONENT=Horizon Horizontal Exponent
@@ -403,17 +408,10 @@ option.CLOUD_OPACITY.comment=Adjusts cloud opacity.
 
 option.CLOUD_BRIGHTNESS=Brightness
 option.CLOUD_BRIGHTNESS.comment=Adjusts cloud brightness.
-
 option.CLOUDS_HEIGHT_FACTOR=Height Factor
 option.CLOUDS_HEIGHT_FACTOR.comment=Controls how quick can the player reach clouds. Higher values may cause slight artifacts!
 option.CLOUD_VERTICAL_THICKNESS=Vertical Thickness
-option.CLOUDS_NOISE_FACTOR=Noise Factor
 option.CLOUDS_NOISE_SAMPLES=Noise Samples
-option.CLOUDS_UP_COLOR_MULT=Up Color Multiplier
-option.CLOUDS_DOWN_COLOR_MULT=Down Color Multiplier
-option.CLOUDS_UP_COLOR_MULT.comment=Changes the brightness of higher parts of clouds
-option.CLOUDS_DOWN_COLOR_DIVMULT.comment=Changes the brightness of lower parts of clouds
-option.CLOUDS_NOISE_RESAMPLING_FACTOR.comment=Changes the amount of resampling added to clouds before final rendering. Affects clouds detail, size and thickness.
 option.CLOUD_HEIGHT_MULTIPLIER=Height Multiplier
 
 #Water
@@ -463,6 +461,9 @@ value.WATER_DETAIL.0.35=35%
 value.WATER_DETAIL.0.40=40%
 value.WATER_DETAIL.0.45=45%
 value.WATER_DETAIL.0.50=50%
+
+option.WATER_LIGHT_FLICKERING=Light Flickering
+option.WATER_LIGHT_FLICKERING.comment=Enables slight flickering of tinted surface beneath the water. Affects volumetric fog/rays as well.
 
 option.WATER_BUMP=Bumpiness
 option.WATER_BUMP.comment=Adjusts the intensity of water normals.
@@ -647,7 +648,7 @@ option.BLOCKLIGHT_R_END=Red (In End)
 option.BLOCKLIGHT_G_END=Green (In End)
 option.BLOCKLIGHT_B_END=Blue (In End)
 option.COLORED_LIGHTING_MODE=Colored Lighting
-option.COLORED_LIGHTING_MODE.comment=XZ-pos - Depends on your XZ coordinates. Light Color - Depends on sunlight/moonlight color.
+option.COLORED_LIGHTING_MODE.comment=XZ-pos (Static) - Depends on your XZ coordinates and doesn't change whenever you move. XZ-pos (Dynamic) - XZ-dependent, the color changes whenever you move. Light Color - Depends on sunlight/moonlight color.
 value.COLORED_LIGHTING_MODE.0=§cOFF
 value.COLORED_LIGHTING_MODE.1=XZ-pos (Dynamic)
 value.COLORED_LIGHTING_MODE.2=Light Color

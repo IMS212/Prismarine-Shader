@@ -14,7 +14,7 @@ varying float mat;
 
 varying vec2 texCoord, lmCoord;
 varying vec3 sunVec, upVec, eastVec;
-varying vec3 cpos;
+varying vec3 cposition;
 varying vec4 color;
 varying vec3 wpos;
 
@@ -24,6 +24,7 @@ uniform int blockEntityId;
 uniform float isEyeInWater;
 uniform sampler2D tex;
 uniform sampler2D noisetex;
+uniform sampler2D shadowtex1;
 uniform float frameTimeCounter;
 uniform int worldTime;
 uniform float viewWidth, viewHeight;
@@ -38,7 +39,11 @@ uniform mat4 shadowModelView;
 
 float sunVisibility  = clamp((dot( sunVec, upVec) + 0.05) * 10.0, 0.0, 1.0);
 float moonVisibility = clamp((dot(-sunVec, upVec) + 0.05) * 10.0, 0.0, 1.0);
-
+#ifdef WORLD_TIME_ANIMATION
+float frametime = float(worldTime) * 0.05 * ANIMATION_SPEED;
+#else
+float frametime = frameTimeCounter * ANIMATION_SPEED;
+#endif
 //Includes//
 #include "/lib/color/dimensionColor.glsl"
 #include "/lib/color/waterColor.glsl"
@@ -47,18 +52,11 @@ float moonVisibility = clamp((dot(-sunVec, upVec) + 0.05) * 10.0, 0.0, 1.0);
 #include "/lib/prismarine/caustics.glsl"
 
 //Common Functions//
-
 #ifdef TOON_LIGHTMAP
 vec2 lightmap = floor(lmCoord * 14.999 * (0.75 + 0.25 * color.a)) / 14.0;
 lightmap = clamp(lightmap, vec2(0.0), vec2(1.0));
 #else
 vec2 lightmap = clamp(lmCoord, vec2(0.0), vec2(1.0));
-#endif
-
-#ifdef WORLD_TIME_ANIMATION
-float frametime = float(worldTime)/20.0*ANIMATION_SPEED;
-#else
-float frametime = frameTimeCounter*ANIMATION_SPEED;
 #endif
 
 #ifdef WATER_TINT
@@ -79,11 +77,15 @@ void main() {
 	if (disable > 0.5 || albedo.a < 0.01) discard;
 
     #ifdef SHADOW_COLOR
-	albedo.rgb = mix(vec3(1),albedo.rgb,pow(albedo.a,(1.0-albedo.a)*0.5)*1.05);
-	albedo.rgb *= 1.0-pow(albedo.a,32.0);
+	albedo.rgb = mix(vec3(1),albedo.rgb,pow(albedo.a,(1.0-albedo.a)*0.5)*2);
+	albedo.rgb *= 1.0-pow(albedo.a,128.0);
+
 	if (water > 0.9){
-		#if defined OVERWORLD && defined WATER_TINT
+		#if defined OVERWORLD
 		albedo.rgb = waterColor.rgb * WATER_I;
+		#ifdef WATER_LIGHT_FLICKERING
+		albedo.rgb *= getCaustics(vec3(1,1,1));
+		#endif
 		#endif
 		}
 	#else
@@ -141,9 +143,6 @@ void main() {
 	vec4 cposition = gl_Position;
 	cposition = shadowProjectionInverse * cposition;
 	cposition = shadowModelViewInverse * cposition;
-	#ifdef WATER_TINT
-	cpos = cposition.xyz*1.1+cameraPosition.xyz;
-	#endif
 	cposition.xyz += cameraPosition.xyz;
 
 	lmCoord = (gl_TextureMatrix[1] * gl_MultiTexCoord1).xy;

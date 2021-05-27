@@ -329,12 +329,11 @@ void main() {
 
 		#if defined OVERWORLD && defined WATER_TINT
 		if (isEyeInWater == 1){
-			float causticsFactor = pow(lightmap.y * lightmap.y, 0.5) * (1.0 - pow(lightmap.y * lightmap.y, 0.5)) * (1.0 - rainStrength*0.5) * (1.0 - lightmap.x) * WATER_CAUSTICS_STRENGTH;
+			float causticsFactor = pow(x2(lightmap.y), 0.5) * (1.0 - pow(x2(lightmap.y), 0.5)) * (1.0 - rainStrength*0.5) * (1.0 - lightmap.x) * WATER_CAUSTICS_STRENGTH;
 			vec3 pos = worldPos.xyz+cameraPosition.xyz;
 			vec3 caustic = getCaustics(pos) * causticsFactor * waterColor.rgb * shadow * shadowFade;
-			albedo.rgb += (1 - lightmap.x) * (albedo.rgb * waterColor.rgb * waterColor.rgb * WATER_CAUSTICS_STRENGTH + WATER_CAUSTICS_STRENGTH * shadow * albedo.rgb * waterColor.rgb * waterColor.rgb);
-			albedo.rgb *= 1.0 + caustic;
-			albedo.rgb *= 0.2 + lightmap.x;
+			albedo.rgb += (1 - lightmap.x) * (albedo.rgb * x2(waterColor.rgb) * WATER_CAUSTICS_STRENGTH + WATER_CAUSTICS_STRENGTH * shadow * albedo.rgb * x2(waterColor.rgb));
+			albedo.rgb *= (1.0 + caustic) * (0.2 + lightmap.x);
 		}
 		#endif
 	} else albedo.a = 0.0;

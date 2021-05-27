@@ -3,6 +3,7 @@
 #endif
 
 #include "/lib/prismarine/functions.glsl"
+
 void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos,
                  vec2 lightmap, float smoothLighting, float NoL, float vanillaDiffuse,
                  float parallaxShadow, float emission, float subsurface) {
@@ -30,8 +31,17 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
     vec3 fullShadow = shadow * NoL;
     
     #ifdef OVERWORLD
+
+    #if NOISEMAP_SHADOWS == 1
+    float noiseMap = texture2D(noisetex, (cameraPosition.xz + worldPos.xz) * 0.0002).r;
+    #elif NOISEMAP_SHADOWS == 2
+    float noiseMap = texture2D(noisetex, (cameraPosition.xz + worldPos.xz) * 0.02).r + SHADING_REDUCTION_FACTOR;
+    #else
+    float noiseMap = 1;
+    #endif
+
     float shadowMult = (1.0 - 0.95 * rainStrength) * shadowFade;
-    vec3 sceneLighting = mix(ambientCol, lightCol, fullShadow * shadowMult);
+    vec3 sceneLighting = mix(ambientCol, lightCol * noiseMap, fullShadow * shadowMult);
     sceneLighting *= (4.0 - 3.0 * eBS) * lightmap.y * lightmap.y * (1.0 + scattering * shadow);
     #endif
 
@@ -64,36 +74,59 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
     float rWP = (cameraPosition.x + cameraPosition.x) * (worldPos.x + worldPos.x);
     float bWP = (cameraPosition.z + cameraPosition.z) * (worldPos.z + worldPos.z);
     float redCol    = rWP * 0.00004;
-    float greenCol  = mix(20, 180, 240) * 0.000039;
     float blueCol   = bWP * 0.000038;
-	vec3 blockLighting = newLightmap * newLightmap * vec3(redCol, greenCol, blueCol) * (BLOCKLIGHT_I);
+	float redColStatic    = texture2D(noisetex, (cameraPosition.xz + worldPos.xz) * 0.0004).r;
+	float greenColStatic  = texture2D(noisetex, (cameraPosition.xz + worldPos.xz) * 0.0006).r;
+	float blueColStatic   = texture2D(noisetex, (cameraPosition.xz + worldPos.xz) * 0.0008).r;
+    #if NOISEMAP_SHADOWS != 0
+    noiseMap = texture2D(noisetex, (cameraPosition.xz + worldPos.xz) * 0.01).r + (SHADING_REDUCTION_FACTOR * 1.5);
+    #else
+    noiseMap = 1;
+    #endif
+    blocklightCol   = vec3(redCol * redColStatic, greenColStatic, blueCol * blueColStatic) * BLOCKLIGHT_I;
+    vec3 blockLighting =  newLightmap * newLightmap * blocklightCol * x2(noiseMap);
     
     #elif CLM_MAINCOL == 1
     float rWP = (cameraPosition.x + cameraPosition.x) * (worldPos.x + worldPos.x);
     float bWP = (cameraPosition.z + cameraPosition.z) * (worldPos.z + worldPos.z);
     float redCol    = rWP * 0.000039;
-    float blueCol   = mix(20, 180, 240) * 0.000039 * 1.5;
     float greenCol  = bWP * 0.000038;
-	vec3 blockLighting = newLightmap * vec3(redCol, greenCol, blueCol) * (BLOCKLIGHT_I / 2);
+	float redColStatic    = texture2D(noisetex, (cameraPosition.xz + worldPos.xz) * 0.0004).r;
+	float greenColStatic  = texture2D(noisetex, (cameraPosition.xz + worldPos.xz) * 0.0006).r;
+	float blueColStatic   = texture2D(noisetex, (cameraPosition.xz + worldPos.xz) * 0.0006).r;
+    #if NOISEMAP_SHADOWS != 0
+    noiseMap = texture2D(noisetex, (cameraPosition.xz + worldPos.xz) * 0.01).r + (SHADING_REDUCTION_FACTOR * 1.5);
+    #else
+    noiseMap = 1;
+    #endif
+    blocklightCol   = vec3(redCol * redColStatic, greenCol * greenColStatic, blueColStatic) * BLOCKLIGHT_I;
+    vec3 blockLighting =  newLightmap * newLightmap * blocklightCol * x2(noiseMap);
 
     #elif CLM_MAINCOL == 2
     float rWP = (cameraPosition.x + cameraPosition.x) * (worldPos.x + worldPos.x);
     float bWP = (cameraPosition.z + cameraPosition.z) * (worldPos.z + worldPos.z);
     float blueCol    = rWP * 0.00004;
-    float redCol   = mix(20, 180, 240) * 0.000031 * 1.5;
     float greenCol  = bWP * 0.000038;
-	vec3 blockLighting = newLightmap * vec3(redCol, greenCol, blueCol) * (BLOCKLIGHT_I / 2);
+	float redColStatic    = texture2D(noisetex, (cameraPosition.xz + worldPos.xz) * 0.0006).r;
+	float greenColStatic  = texture2D(noisetex, (cameraPosition.xz + worldPos.xz) * 0.0006).r;
+	float blueColStatic   = texture2D(noisetex, (cameraPosition.xz + worldPos.xz) * 0.0008).r;
+    #if NOISEMAP_SHADOWS != 0
+    noiseMap = texture2D(noisetex, (cameraPosition.xz + worldPos.xz) * 0.01).r + (SHADING_REDUCTION_FACTOR * 1.5);
+    #else
+    noiseMap = 1;
+    #endif
+    blocklightCol   = vec3(redColStatic, greenCol * greenColStatic, blueCol * blueColStatic) * BLOCKLIGHT_I;
+    vec3 blockLighting =  newLightmap * newLightmap * blocklightCol * x2(noiseMap);
 
     #endif
     #endif
 
     //WORLD POSITION BASED - STATIC
     #if COLORED_LIGHTING_MODE == 3 && defined OVERWORLD
-	float redCol    = texture2D(noisetex, (cameraPosition.xz + worldPos.xz) * 0.0004).r;
-	float greenCol  = texture2D(noisetex, (cameraPosition.xz + worldPos.xz) * 0.0006).r;
-	float blueCol   = texture2D(noisetex, (cameraPosition.xz + worldPos.xz) * 0.0008).r;
-	blocklightCol   = vec3(redCol, greenCol, blueCol) * BLOCKLIGHT_I;
-
+	float redColStatic    = texture2D(noisetex, (cameraPosition.xz + worldPos.xz) * 0.0004).r;
+	float greenColStatic  = texture2D(noisetex, (cameraPosition.xz + worldPos.xz) * 0.0006).r;
+	float blueColStatic   = texture2D(noisetex, (cameraPosition.xz + worldPos.xz) * 0.0008).r;
+	blocklightCol   = vec3(redColStatic, greenColStatic, blueColStatic) * BLOCKLIGHT_I;
     vec3 blockLighting =  newLightmap * newLightmap * blocklightCol;
     #endif
 

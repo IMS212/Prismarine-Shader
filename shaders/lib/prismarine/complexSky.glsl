@@ -6,8 +6,8 @@ float getRayleighScatter(float ct) {
   	return phase;
 }
 float getMieScatter(float ct, float g) {
-    float MieScatter   = 1.0 + pow2(g) - 2.0* g * ct;
-          MieScatter   = (1.0 - pow2(g)) / ((4.0 * pi) * MieScatter * (MieScatter*0.5+0.5));
+    float MieScatter   = 1.0 + x2(g) - 2.0* g * ct;
+          MieScatter   = (1.0 - x2(g)) / ((4.0 * pi) * MieScatter * (MieScatter*0.5+0.5));
     return MieScatter;
 }
 float getDensity(float x) {

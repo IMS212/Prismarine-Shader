@@ -91,9 +91,9 @@ void SunGlare(inout vec3 color, vec3 viewPos, vec3 lightCol) {
 #include "/lib/color/lightColor.glsl"
 #include "/lib/color/skyColor.glsl"
 #include "/lib/util/dither.glsl"
+#include "/lib/prismarine/functions.glsl"
 #include "/lib/atmospherics/clouds.glsl"
 #include "/lib/atmospherics/sky.glsl"
-#include "/lib/prismarine/functions.glsl"
 #include "/lib/prismarine/complexSky.glsl"
 
 //Program//
@@ -147,7 +147,7 @@ void main() {
 	#endif
 	
 	#if NIGHT_SKY_MODE == 0 || NIGHT_SKY_MODE == 2
-		float NdotUhelios = pow2(pow2(clamp(NdotU * 3.0, 0.0, 1.0)));
+		float NdotUhelios = x2(x2(clamp(NdotU * 3.0, 0.0, 1.0)));
 		vec3 planeCoord = wpos / (wpos.y + length(wpos.xz) * 0.5);
 		vec3 moonPos = vec3(gbufferModelViewInverse * vec4(-sunVec, 1.0));
 		vec3 moonCoord = moonPos / (moonPos.y + length(moonPos.xz));
@@ -156,13 +156,13 @@ void main() {
 
 		if (moonVisibility > 0.0 && rainStrength == 0.0){
 			vec3 helios = texture2D(colortex15, hcoord * 0.8 + 0.6).rgb;
-			helios *= pow2(length(helios) + 0.6);
+			helios *= x2(length(helios) + 0.6);
 			albedo.rgb += helios * 0.05 * NdotUhelios * (1.0 - sunVisibility);
 		}
 	#endif
 
 	#if NIGHT_SKY_MODE == 1 || NIGHT_SKY_MODE == 2
-		float NdotUnebula = pow2(pow2(clamp(NdotU * 3.0, 0.0, 1.0)));
+		float NdotUnebula = x2(x2(clamp(NdotU * 3.0, 0.0, 1.0)));
 		vec3 planeCoord2 = wpos / (wpos.y + length(wpos.xz) * 0.5);
 		vec3 moonPos2 = vec3(gbufferModelViewInverse * vec4(-sunVec, 1.0));
 		vec3 moonCoord2 = moonPos2 / (moonPos2.y + length(moonPos2.xz));
@@ -171,7 +171,7 @@ void main() {
 
 		if (moonVisibility > 0.0 && rainStrength == 0.0){
 			vec3 nebula = texture2D(colortex14, ncoord * 0.8 + 0.6).rgb;
-			nebula *= pow2(length(nebula) + 0.6);
+			nebula *= x2(length(nebula) + 0.6);
 			albedo.rgb += nebula * 0.05 * NdotUnebula * (1.0 - sunVisibility);
 		}
 	#endif
