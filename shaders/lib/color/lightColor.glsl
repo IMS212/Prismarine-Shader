@@ -3,14 +3,14 @@ vec3 lightDay        = vec3(LIGHT_DR,   LIGHT_DG,   LIGHT_DB)   * LIGHT_DI / 255
 vec3 lightEvening    = vec3(LIGHT_ER,   LIGHT_EG,   LIGHT_EB)   * LIGHT_EI / 255.0;
 vec3 lightNight      = vec3(LIGHT_NR,   LIGHT_NG,   LIGHT_NB)   * LIGHT_NI * 0.3 / 255.0;
 
-vec3 cloudUpEvening    = vec3(LIGHT_ER * 1.6,   LIGHT_EG,   LIGHT_EB)   * LIGHT_EI * 0.85 / 255.0;
-vec3 cloudUpMorning    = vec3(LIGHT_MR * 1.5,   LIGHT_MG,   LIGHT_MB)   * LIGHT_MI * 0.85 / 255.0;
-vec3 cloudUpDay        = vec3(LIGHT_DR,  		  LIGHT_DG,   LIGHT_DB * 1.1)   * LIGHT_DI * 0.9 / 255.0;
+vec3 cloudUpEvening    = vec3(LIGHT_ER,   LIGHT_EG,   LIGHT_EB)   * LIGHT_EI * 0.85 / 255.0;
+vec3 cloudUpMorning    = vec3(LIGHT_MR,   LIGHT_MG,   LIGHT_MB)   * LIGHT_MI * 0.85 / 255.0;
+vec3 cloudUpDay        = vec3(LIGHT_DR,   LIGHT_DG,   LIGHT_DB * 1.1)   * LIGHT_DI * 0.9 / 255.0;
 vec3 cloudUpNight      = vec3(LIGHT_NR * 1.1,   LIGHT_NG * 0.75, LIGHT_NB * 1.05) * LIGHT_NI * 0.5 / 255.0;
 
-vec3 cloudDownMorning  = vec3(AMBIENT_MR * 1.5, AMBIENT_MG, AMBIENT_MB) * AMBIENT_MI / 255.0;
+vec3 cloudDownEvening  = vec3(AMBIENT_ER * 1.2, AMBIENT_EG * 1.1, AMBIENT_EB) * AMBIENT_EI / 255.0;
+vec3 cloudDownMorning  = vec3(AMBIENT_MR * 1.2, AMBIENT_MG * 1.1, AMBIENT_MB) * AMBIENT_MI / 255.0;
 vec3 cloudDownDay      = vec3(AMBIENT_DR, AMBIENT_DG, AMBIENT_DB) * AMBIENT_DI / 255.0;
-vec3 cloudDownEvening  = vec3(AMBIENT_ER * 1.6, AMBIENT_EG, AMBIENT_EB) * AMBIENT_EI / 255.0;
 vec3 cloudDownNight    = vec3(AMBIENT_NR, AMBIENT_NG, AMBIENT_NB) * AMBIENT_NI * 0.3 / 255.0;
 
 vec3 ambientMorning  = vec3(AMBIENT_MR, AMBIENT_MG, AMBIENT_MB) * AMBIENT_MI / 255.0;

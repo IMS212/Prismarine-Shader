@@ -45,7 +45,7 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 	vec3 vl = vec3(0.0);
 
 	#ifdef TAA
-	dither = fract(dither + frameCounter / 32.0);
+	dither = fract(dither + frameCounter / 64.0);
 	#endif
 	
 	//LOLOLOLOLOL

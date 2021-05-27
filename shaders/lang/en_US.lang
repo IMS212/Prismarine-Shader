@@ -75,6 +75,14 @@ screen.PLANAR_CLOUDS=Planar Clouds Config
 screen.VOLUMETRIC_CLOUDS=Volumetric Clouds Config
 screen.FOG_COLOR=Fog Color
 screen.LIGHTSHAFT_COLOR=Light Shafts Color
+screen.LENSFLARE_CONFIG=Lens Flare Config
+screen.OTHERLENS=Other
+screen.BASELENS=Base Lens
+screen.OVERLAPLENS=Overlap Lens
+screen.RINGLENS=Rings
+screen.BASERINGS=Base Rings 
+screen.SUNRINGS=Rings Around Sun
+screen.POINTLENS=Points
 
 screen.WORLD=World
 screen.WAVING=Waving Blocks
@@ -251,45 +259,6 @@ value.CLOUDS.1=Planar
 value.CLOUDS.2=Vanilla
 value.CLOUDS.3=Volumetric
 
-option.VFOG_NOISE_QUALITY=Noise Quality
-value.VFOG_NOISE_QUALITY.0=Low
-value.VFOG_NOISE_QUALITY.1=High
-option.VFOG_AMOUNT=Amount
-option.VFOG_RANGE=Range
-option.VFOG_RANGE.comment=Changes the maximum render distance
-option.VFOG_OPACITY=Opacity
-option.VFOG_SPEED=Speed
-option.VFOG_QUALITY=Dithering Quality
-value.VFOG_QUALITY.6=Potato
-value.VFOG_QUALITY.5=Low 
-value.VFOG_QUALITY.4=Medium
-value.VFOG_QUALITY.3=High
-value.VFOG_QUALITY.2=Ultra
-option.VFOG_HEIGHT=Height
-option.VFOG_VERTICAL_THICKNESS=Vertcial Thickness
-option.VFOG_HORIZONTAL_THICKNESS=Horizontal Thickness
-
-option.VCLOUDS_NOISE_QUALITY=Noise Quality
-value.VCLOUDS_NOISE_QUALITY.0=Low
-value.VCLOUDS_NOISE_QUALITY.1=Medium
-value.VCLOUDS_NOISE_QUALITY.2=High
-option.VCLOUDS_AMOUNT=Amount
-option.VCLOUDS_RANGE=Range
-option.VCLOUDS_RANGE.comment=Changes the maximum render distance
-option.VCLOUDS_OPACITY=Opacity
-option.VCLOUDS_SPEED=Speed
-option.VCLOUDS_QUALITY=Dithering Quality
-value.VCLOUDS_QUALITY.16=Where is my dither?
-value.VCLOUDS_QUALITY.14=Potato
-value.VCLOUDS_QUALITY.12=Very Low
-value.VCLOUDS_QUALITY.10=Low
-value.VCLOUDS_QUALITY.8=Medium
-value.VCLOUDS_QUALITY.6=High
-value.VCLOUDS_QUALITY.4=Ultra
-option.VCLOUDS_HEIGHT=Height
-option.VCLOUDS_VERTICAL_THICKNESS=Vertcial Thickness
-option.VCLOUDS_HORIZONTAL_THICKNESS=Horizontal Thickness
-
 option.FOG_ALTITUDE_INCREASE_FACTOR=Height-Based Increasing
 option.FOG_ALTITUDE_INCREASE_FACTOR.comment=Increases fog density depending on how high you are.
 
@@ -445,6 +414,7 @@ option.WATER_NORMALS.comment=Enables realtime-generated normal mapping for water
 value.WATER_NORMALS.0=§cOFF
 value.WATER_NORMALS.1=Worley
 value.WATER_NORMALS.2=Perlin
+value.WATER_NORMALS.3=Custom
 
 option.WATER_PARALLAX=Parallax
 option.WATER_PARALLAX.comment=Enables water displacement.
@@ -787,3 +757,50 @@ option.WORLD_CURVATURE.comment=Enables world curvature. §e[*]§rWorks in overwo
 
 option.WORLD_CURVATURE_SIZE=World Curvature Size
 option.WORLD_CURVATURE_SIZE.comment=Adjusts world curvature size. Negative values will bend the world upwards.
+
+#lens flare
+option.BASELENS1=Base Lens 1
+option.BASELENS2=Base Lens 2
+option.BASELENS3=Base Lens 3
+option.BASELENS4=Base Lens 4
+option.BASELENS5=Base Lens 5
+option.BASELENS6=Base Lens 6
+
+option.OVERLAPLENS1=Overlap Lens 1
+option.OVERLAPLENS2=Overlap Lens 2
+option.OVERLAPLENS3=Overlap Lens 3
+option.OVERLAPLENS4=Overlap Lens 4
+option.OVERLAPLENS5=Overlap Lens 5
+
+option.RAINBOW1=Ring 1
+option.RAINBOW2=Ring 2
+option.RAINBOW3=Ring 3
+
+option.RING1=Ring 1
+option.RING2=Ring 2
+option.RING3=Ring 3
+option.RING4=Ring 4
+option.RING5=Ring 5
+option.RING6=Ring 6
+option.RING7=Ring 7
+option.RING8=Ring 8
+option.RING9=Ring 9
+option.RING10=Ring 10
+option.RING11=Ring 11
+option.RING12=Ring 12
+option.RING13=Ring 13
+option.RING14=Ring 14
+
+option.POINT1=Point 1
+option.POINT2=Point 2
+option.POINT3=Point 3
+option.POINT4=Point 4
+option.POINT5=Point 5
+option.POINT6=Point 6
+option.POINT7=Point 7
+option.POINT8=Point 8
+option.POINT9=Point 9
+option.POINT10=Point 10
+option.POINT11=Point 11
+
+option.ANAMORPHICLENS=Anamorphic Lens

@@ -6,12 +6,12 @@ float CloudSample(vec2 coord, vec2 wind, float currentStep, float sampleStep, fl
 	noiseCoverage = noiseCoverage * noiseCoverage * 4.0;
 	float noise = texture2D(noisetex, coord*1        + wind * 0.55).x;
 		  noise+= texture2D(noisetex, coord*0.5      + wind * 0.45).x * -2.0;
-		  noise+= texture2D(noisetex, coord*0.25     + wind * 0.35).x * 2.0;
-		  noise+= texture2D(noisetex, coord*0.125    + wind * 0.25).x * 5.0;
-		  noise+= texture2D(noisetex, coord*0.0625   + wind * 0.15).x * 9.0;
-		  noise+= texture2D(noisetex, coord*0.03125  + wind * 0.05).x * 10.0;
-		  noise+= texture2D(noisetex, coord*0.015625 + wind * 0.05).x * -12.0;
-	noise = noise - s2(noiseCoverage) + s2(rainStrength);
+		  noise+= texture2D(noisetex, coord*0.25     + wind * 0.35).x * 3.0;
+		  noise+= texture2D(noisetex, coord*0.125    + wind * 0.25).x * 4.0;
+		  noise+= texture2D(noisetex, coord*0.0625   + wind * 0.15).x * 8.0;
+		  noise+= texture2D(noisetex, coord*0.03125  + wind * 0.05).x * 11.0;
+		  noise+= texture2D(noisetex, coord*0.015625 + wind * 0.05).x * -10.0;
+	noise = (noise * 1) - s2(s4(noiseCoverage)) + s2(rainStrength);
 	float multiplier = (CLOUD_THICKNESS * 1.5) * sampleStep * (1.0 - 0.75 * rainStrength);
 
 	noise = max(noise - (sunCoverage * 3.0 + CLOUD_AMOUNT), 0.0) * multiplier;
@@ -22,7 +22,7 @@ float CloudSample(vec2 coord, vec2 wind, float currentStep, float sampleStep, fl
 
 vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol) {
 	#ifdef TAA
-		dither = fract(16.0 * frameTimeCounter + dither);
+		dither = fract(64.0 * frameTimeCounter + dither);
 	#endif
 
 	int samples = CLOUDS_NOISE_SAMPLES;
@@ -37,7 +37,7 @@ vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol) {
 	float VoU = dot(normalize(viewPos), upVec);
 	float VoL = dot(normalize(viewPos), lightVec);
 	float cloudHeightFactor = max(1.2 - 0.002 * CLOUDS_HEIGHT_FACTOR * eyeAltitude, 0.0) * max(1.2 - 0.002 * CLOUDS_HEIGHT_FACTOR * eyeAltitude, 0.0);
-	float cloudHeight = CLOUD_HEIGHT * cloudHeightFactor * CLOUD_HEIGHT_MULTIPLIER * 0.1;
+	float cloudHeight = CLOUD_HEIGHT * cloudHeightFactor * CLOUD_HEIGHT_MULTIPLIER * 0.05;
 	float sunCoverage = pow(clamp(abs(VoL) * 2.0 - 1.0, 0.0, 1.0), 12.0) * (1.0 - rainStrength);
 
 	vec2 wind = vec2(
@@ -50,15 +50,14 @@ vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol) {
 	if (VoU > 0.025) {
 		vec3 wpos = normalize((gbufferModelViewInverse * vec4(viewPos, 1.0)).xyz);
 		for(int i = 0; i < samples; i++) {
-			if (cloud > 0.99) break;
-			vec3 planeCoord = wpos * ((cloudHeight + currentStep * 8.0) / wpos.y) * CLOUD_VERTICAL_THICKNESS;
+			vec3 planeCoord = wpos * ((cloudHeight + currentStep * 2.0) / wpos.y) * CLOUD_VERTICAL_THICKNESS * 4;
 			vec2 coord = cameraPosition.xz * 0.0001 + planeCoord.xz;
 
 			float noise = CloudSample(coord, wind, currentStep, sampleStep, sunCoverage);
 
 			float halfVoL = VoL * shadowFade * 0.5 + 0.5;
 			float halfVoLSqr = halfVoL * halfVoL;
-			float noiseLightFactor = (2.0 - 1.5 * VoL * shadowFade) * CLOUD_THICKNESS / 2.0;
+			float noiseLightFactor = (2.0 - 1.5 * VoL * shadowFade) * CLOUD_THICKNESS * 1.5;
 			float sampleLighting = pow(currentStep, 1.125 * halfVoLSqr + 0.875) * 0.8 + 0.2;
 			sampleLighting *= 1.0 - pow(noise, noiseLightFactor);
 

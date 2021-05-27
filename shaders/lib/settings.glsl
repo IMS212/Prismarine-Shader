@@ -33,11 +33,9 @@ https://bitslablab.com
 
   #define SHADING_REDUCTION_FACTOR 0.6 //[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
   #define NOISEMAP_SHADOWS 2 //[0 1 2]
-  #define CLOUDS_DOWN_COLOR_MULT 0.0 //[0.0 0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00]
-  #define CLOUDS_UP_COLOR_MULT 6.0 //[1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0]
-  #define CLOUD_VERTICAL_THICKNESS 0.016 //[0.001 0.002 0.003 0.004 0.005 0.006 0.007 0.008 0.009 0.010 0.011 0.012 0.013 0.014 0.015 0.016 0.017 0.018 0.019 0.020 0.021 0.022 0.023 0.024 0.025 0.026 0.027 0.028 0.029 0.030 0.031 0.032]
+  #define CLOUD_VERTICAL_THICKNESS 0.020 //[0.001 0.002 0.003 0.004 0.005 0.006 0.007 0.008 0.009 0.010 0.011 0.012 0.013 0.014 0.015 0.016 0.017 0.018 0.019 0.020 0.021 0.022 0.023 0.024 0.025 0.026 0.027 0.028 0.029 0.030 0.031 0.032]
   #define CLOUDS_NOISE_SAMPLES 8 //[2 4 6 8 10 12 14 16 18 20 22 24 26 28 30 32]
-  #define CLOUD_HEIGHT_MULTIPLIER 8.0 //[2.0 4.0 6.0 8.0 10.0 12.0 14.0 16.0 18.0 20.0 22.0 24.0 26.0 28.0 30.0 32.0]
+  #define CLOUD_HEIGHT_MULTIPLIER 2.0 //[2.0 4.0 6.0 8.0 10.0 12.0 14.0 16.0 18.0 20.0 22.0 24.0 26.0 28.0 30.0 32.0]
   #define CLOUDS_HEIGHT_FACTOR 1 //[0.5 1.0 1.5 2.0 2.5 3.0]
 
   #define WATER_CAUSTICS_AMOUNT 1024 //[1024 512 256 128]
@@ -84,6 +82,70 @@ https://bitslablab.com
   #define MOONLIGHTCOL_G 80 //[0 4 8 12 16 20 24 28 32 36 40 44 48 52 56 60 64 68 72 76 80 84 88 92 96 100 104 108 112 116 120 124 128 132 136 140 144 148 152 156 160 164 168 172 176 180 184 188 192 196 200 204 208 212 216 220 224 228 232 236 240 244 248 252 255]
   #define MOONLIGHTCOL_B 140 //[0 4 8 12 16 20 24 28 32 36 40 44 48 52 56 60 64 68 72 76 80 84 88 92 96 100 104 108 112 116 120 124 128 132 136 140 144 148 152 156 160 164 168 172 176 180 184 188 192 196 200 204 208 212 216 220 224 228 232 236 240 244 248 252 255]
   #define MOONLIGHTCOL_I 1.50 //[0.05 0.10 0.15 0.20 0.25 0.30 0.35 0.40 0.45 0.50 0.55 0.60 0.65 0.70 0.75 0.80 0.85 0.90 0.95 1.00 1.05 1.10 1.15 1.20 1.25 1.30 1.35 1.40 1.45 1.50 1.55 1.60 1.65 1.70 1.75 1.80 1.85 1.90 1.95 2.00 2.05 2.10 2.15 2.20 2.25 2.30 2.35 2.40 2.45 2.50 2.55 2.60 2.65 2.70 2.75 2.80 2.85 2.90 2.95 3.00 3.05 3.10 3.15 3.20 3.25 3.30 3.35 3.40 3.45 3.50 3.55 3.60 3.65 3.70 3.75 3.80 3.85 3.90 3.95 4.00]
+
+////////////////////////////////////////////////////// MLGIMPOSTER'S DUMB SETTINGS //////////////////////////////////////////////////////
+
+  ///// Lens Flares Customization /////
+
+  // Base Lens (basically useless) //
+
+  #define BASELENS1
+  #define BASELENS2
+  #define BASELENS3
+  #define BASELENS4
+  #define BASELENS5
+  #define BASELENS6
+
+  // Overlap Lens //
+
+  #define OVERLAPLENS1
+  #define OVERLAPLENS2
+  #define OVERLAPLENS3
+  #define OVERLAPLENS4
+  #define OVERLAPLENS5
+
+  // Point Lens //
+
+  #define POINT1
+  #define POINT2
+  #define POINT3
+  #define POINT4
+  #define POINT5
+  #define POINT6
+  #define POINT7
+  #define POINT8
+  #define POINT9
+  #define POINT10
+  #define POINT11
+
+  // Rings (Not around sun) //
+
+  #define RING1
+  #define RING2
+  #define RING3
+  #define RING4
+  #define RING5
+  #define RING6
+  #define RING7
+  #define RING8
+  #define RING9
+  #define RING10
+  #define RING11
+  #define RING12
+  #define RING13
+  #define RING14
+
+  // Rings (Around Sun) //
+
+  #define RAINBOW1
+  #define RAINBOW2
+  #define RAINBOW3
+
+  // Other Lens Flares //
+
+  #define ANAMORPHICLENS
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -156,16 +218,16 @@ https://bitslablab.com
   #define CLOUD_HEIGHT 7.5 //[5.0 7.5 10.0 12.5 15.0]
   #define CLOUD_SPEED 0.50 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.50 3.00 3.50 4.00]
   #define CLOUD_OPACITY 0.6 //[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0]
-  #define CLOUD_BRIGHTNESS 2.00 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00 3.25 3.50 3.75 4.00]
+  #define CLOUD_BRIGHTNESS 1.50 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00 3.25 3.50 3.75 4.00]
 
 //Water//
   #define WATER_MODE 0 //[0 1 2 3]
   #define WATER_FOG_DENSITY 1.50 //[0.00 0.25 0.35 0.50 0.75 1.00 1.50 2.00 2.50 3.00 3.50 4.00]
-  #define WATER_NORMALS 1 //[0 1 2]
+  #define WATER_NORMALS 1 //[0 1 2 3]
   #define WATER_PARALLAX
   #define WATER_BUMP 1.00 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.25 2.50 2.75 3.00]
-  #define WATER_DETAIL 0.30 //[0.05 0.10 0.15 0.20 0.25 0.30 0.35 0.40 0.45 0.50 0.55 0.60 0.65 0.70 0.75 0.80 0.85 0.90 0.95 1.00]
-  #define WATER_SHARPNESS 0.2 //[1.2 0.8 0.6 0.2]
+  #define WATER_DETAIL 0.30 //[0.05 0.10 0.15 0.20 0.25 0.30 0.35 0.40 0.45 0.50]
+  #define WATER_SHARPNESS 0.2 //[0.8 0.5 0.2]
   #define WATER_SPEED 1.50 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.50 3.00 3.50 4.00]
   #define WATER_PIXEL 0 //[0 16 32 64 128]
 

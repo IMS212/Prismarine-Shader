@@ -118,10 +118,18 @@ float GetWaterHeightMap(vec3 worldPos, vec2 offset) {
 	float noiseA = texture2D(noisetex, (worldPos.xz - wind) / 256.0 + offset).r;
 	float noiseB = texture2D(noisetex, (worldPos.xz + wind) / 96.0 + offset).r;
 	noiseA *= noiseA; noiseB *= noiseB;
+	#elif WATER_NORMALS == 3
+	offset /= 156.0;
+	float noiseA = texture2D(noisetex, (worldPos.xz + wind) / 256.0 + offset).r;
+	float noiseB = texture2D(noisetex, (worldPos.xz + wind) / 256.0 + offset).r;
+	float noiseC = texture2D(noisetex, (worldPos.xz + wind) / 1.0 + offset).r;
+	noiseA *= noiseA; noiseB *= noiseB; noiseC *= noiseC;
 	#endif
 	
 	#if WATER_NORMALS > 0
 	noise = mix(noiseA, noiseB, WATER_DETAIL);
+	#elif WATER_NORMALS > 2
+	noise = mix(noiseA, noiseB, noiseC, WATER_DETAIL);
 	#endif
 
     return noise * WATER_BUMP;
@@ -266,7 +274,7 @@ void main() {
 							  tangent.y, binormal.y, normal.y,
 							  tangent.z, binormal.z, normal.z);
 
-		#if WATER_NORMALS == 1 || WATER_NORMALS == 2
+		#if WATER_NORMALS == 1 || WATER_NORMALS == 2 || WATER_NORMALS == 3
 		if (water > 0.5) {
 			normalMap = GetWaterNormal(worldPos, viewPos, viewVector);
 			newNormal = clamp(normalize(normalMap * tbnMatrix), vec3(-1.0), vec3(1.0));
@@ -298,7 +306,7 @@ void main() {
 			float waterLuma = length(albedo.rgb / pow(color.rgb, vec3(2.2))) * 2.0;
 			albedo.rgb = waterLuma * waterColor.rgb * waterColor.a * albedo.a;
 			#elif WATER_MODE == 3
-			albedo.rgb = color.rgb * color.rgb * 0.35;
+			float rtxNormal = length(albedo.rgb = color.rgb * color.rgb * 0.35) * 1.0;
 			#endif
 			albedo.a = waterAlpha;
 			baseReflectance = vec3(0.02);
