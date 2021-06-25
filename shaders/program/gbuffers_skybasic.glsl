@@ -35,8 +35,8 @@ uniform vec3 cameraPosition;
 uniform mat4 gbufferModelViewInverse;
 uniform mat4 gbufferProjectionInverse;
 
-uniform sampler2D colortex15;
-uniform sampler2D colortex14;
+uniform sampler2D colortex8;
+uniform sampler2D colortex7;
 uniform sampler2D noisetex;
 
 //Common Variables//
@@ -94,7 +94,7 @@ void SunGlare(inout vec3 color, vec3 viewPos, vec3 lightCol) {
 #include "/lib/prismarine/functions.glsl"
 #include "/lib/atmospherics/clouds.glsl"
 #include "/lib/atmospherics/sky.glsl"
-#include "/lib/prismarine/complexSky.glsl"
+#include "/lib/prismarine/simpleSky.glsl"
 
 //Program//
 void main() {
@@ -117,17 +117,19 @@ void main() {
         light_vec[1] = -sun_vec;
 
     vec3 albedo = renderAtmosphere(worldvec, light_vec);
+
 	#elif SKY_MODE == 1
 	vec3 albedo = GetSkyColor(viewPos.xyz, false);
+
 	#elif SKY_MODE == 0
+	vec3 albedo = GetSkyColor(viewPos.xyz, false);
+
     vec3 worldvec = normalize(mat3(gbufferModelViewInverse) * (viewPos.xyz));
     vec3 sun_vec = normalize(mat3(gbufferModelViewInverse) * sunVec);
     mat2x3 light_vec;
         light_vec[0] = sun_vec;
         light_vec[1] = -sun_vec;
-
-    vec3 albedo = renderAtmosphere(worldvec, light_vec);
-	albedo += GetSkyColor(viewPos.xyz, false);
+	if (rainStrength < 1) albedo += renderAtmosphere(worldvec, light_vec);
 	#endif
 	
 	#ifdef ROUND_SUN_MOON
@@ -155,7 +157,7 @@ void main() {
 		hcoord *= 0.2;
 
 		if (moonVisibility > 0.0 && rainStrength == 0.0){
-			vec3 helios = texture2D(colortex15, hcoord * 0.8 + 0.6).rgb;
+			vec3 helios = texture2D(colortex8, hcoord * 0.8 + 0.6).rgb;
 			helios *= x2(length(helios) + 0.6);
 			albedo.rgb += helios * 0.05 * NdotUhelios * (1.0 - sunVisibility);
 		}
@@ -170,15 +172,23 @@ void main() {
 		ncoord *= 0.2;
 
 		if (moonVisibility > 0.0 && rainStrength == 0.0){
-			vec3 nebula = texture2D(colortex14, ncoord * 0.8 + 0.6).rgb;
+			vec3 nebula = texture2D(colortex7, ncoord * 0.8 + 0.6).rgb;
 			nebula *= x2(length(nebula) + 0.6);
 			albedo.rgb += nebula * 0.05 * NdotUnebula * (1.0 - sunVisibility);
 		}
 	#endif
 
 	#if CLOUDS == 1
-	vec4 cloud = DrawCloud(viewPos.xyz, dither, lightCol, ambientCol);
+	vec4 cloud = vec4(0.0);
+	#ifdef CLOUD_UPPER_LAYER
+	cloud += DrawCloud(viewPos.xyz, dither, lightCol, ambientCol);
 	albedo.rgb = mix(albedo.rgb, cloud.rgb, cloud.a);
+	#endif
+
+	#ifdef CLOUD_LOWER_LAYER
+	cloud += DrawLowerCloud(viewPos.xyz, dither, lightCol, ambientCol);
+	albedo.rgb = mix(albedo.rgb, cloud.rgb, cloud.a);
+	#endif
 	#endif
 
 	SunGlare(albedo, viewPos.xyz, lightCol);

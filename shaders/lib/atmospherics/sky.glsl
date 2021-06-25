@@ -18,7 +18,7 @@ vec3 GetSkyColor(vec3 viewPos, bool isReflection) {
 
     #if SKY_GROUND > 0
     float groundVoU = clamp(-VoU * 1.015 - 0.015, 0.0, 1.0);
-    float ground = 1.0 - exp(-groundDensity * FOG_DENSITY / groundVoU);
+    float ground = 1.0 - exp(-groundDensity * SKY_GROUND_I / groundVoU);
     #if SKY_GROUND == 1
     if (!isReflection) ground = 1.0;
     #endif
@@ -37,7 +37,7 @@ vec3 GetSkyColor(vec3 viewPos, bool isReflection) {
     float horizonMix = pow(1.0 - abs(VoU), 1.0) * HORIZON_EXPONENT * (1.0 - timeBrightness * 0.5);
     float lightMix = (1.0 - (1.0 - sunMix) * (1.0 - horizonMix));
 
-    vec3 lightSky = pow(lightSun, vec3(4.0 - sunVisibility)) * baseGradient;
+    vec3 lightSky = pow(skylightSun, vec3(4.0 - sunVisibility)) * baseGradient;
     lightSky = lightSky / (1.0 + lightSky * rainStrength);
 
     sky = mix(
@@ -48,7 +48,7 @@ vec3 GetSkyColor(vec3 viewPos, bool isReflection) {
     sky *= sky;
 
     float nightGradient = exp(-max(VoU, 0.0) / SKY_DENSITY_N);
-    vec3 nightSky = lightNight * lightNight * nightGradient * nightExposure;
+    vec3 nightSky = skylightNight * skylightNight * nightGradient * nightExposure;
     sky = mix(nightSky, sky, sunVisibility * sunVisibility);
 
     float rainGradient = exp(-max(VoU, 0.0) / SKY_DENSITY_W);
@@ -57,8 +57,6 @@ vec3 GetSkyColor(vec3 viewPos, bool isReflection) {
     sky = mix(sky, weatherSky * rainGradient, rainStrength);
 
     sky *= ground;
-
-    if (cameraPosition.y < 1.0) sky *= exp(2.0 * cameraPosition.y - 2.0);
 
     return sky;
 }

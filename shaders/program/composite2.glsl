@@ -19,6 +19,7 @@ uniform float viewWidth, viewHeight, aspectRatio;
 uniform float far, near;
 uniform float rainStrength;
 uniform float isEyeInWater;
+uniform float worldTime;
 
 varying vec3 sunVec, upVec;
 uniform vec3 cameraPosition, previousCameraPosition;

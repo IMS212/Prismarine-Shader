@@ -85,6 +85,7 @@ void main() {
 		albedo.rgb = waterColor.rgb * WATER_I;
 		#ifdef WATER_LIGHT_FLICKERING
 		albedo.rgb *= getCaustics(vec3(1,1,1));
+		if (isEyeInWater == 1) albedo.rgb *= WATER_I;
 		#endif
 		#endif
 		}

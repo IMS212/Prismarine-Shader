@@ -122,22 +122,20 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
     #endif
 
     //WORLD POSITION BASED - STATIC
-    #if COLORED_LIGHTING_MODE == 3 && defined OVERWORLD
-	float redColStatic    = texture2D(noisetex, (cameraPosition.xz + worldPos.xz) * 0.0004).r;
-	float greenColStatic  = texture2D(noisetex, (cameraPosition.xz + worldPos.xz) * 0.0006).r;
-	float blueColStatic   = texture2D(noisetex, (cameraPosition.xz + worldPos.xz) * 0.0008).r;
-	blocklightCol   = vec3(redColStatic, greenColStatic, blueColStatic) * BLOCKLIGHT_I;
+    #ifdef OVERWORLD
+    #if COLORED_LIGHTING_MODE == 3
+    vec2 pos = (cameraPosition.xz + worldPos.xz);
+    blocklightCol = x4(ntmix(pos, pos, pos, 0.0004)) * BLOCKLIGHT_I * 4;
     vec3 blockLighting =  newLightmap * newLightmap * blocklightCol;
-    #endif
 
     //TIME BASED
-    #if COLORED_LIGHTING_MODE == 2 && defined OVERWORLD
+    #elif COLORED_LIGHTING_MODE == 2
     vec3 blockLighting = newLightmap * newLightmap * lightCol;
-    #endif
 
     //NORMAL
-    #if COLORED_LIGHTING_MODE == 0 && defined OVERWORLD
+    #elif COLORED_LIGHTING_MODE == 0
     vec3 blockLighting =  newLightmap * newLightmap * blocklightCol;
+    #endif
     #endif
 
     vec3 minLighting = minLightCol * (1.0 - eBS);

@@ -59,6 +59,7 @@ float GetLuminance(vec3 color) {
 #include "/lib/color/lightColor.glsl"
 #endif
 #if defined CLOUDS && defined END
+#include "/lib/prismarine/functions.glsl"
 #include "/lib/color/endColor.glsl"
 #include "/lib/color/lightColor.glsl"
 #include "/lib/color/skyColor.glsl"
@@ -85,11 +86,6 @@ void main() {
 		albedo.a *= 1.0 - cloudAlpha / (alphaMult * alphaMult);
 	}
 	#endif
-	
-	#ifdef SKY_DESATURATION
-    vec3 desat = GetLuminance(albedo.rgb) * pow(lightNight,vec3(1.6)) * 4.0;
-	albedo.rgb = mix(desat, albedo.rgb, sunVisibility);
-	#endif
 	#endif
 
 	#ifdef END
@@ -110,7 +106,9 @@ void main() {
 	#endif
 
 	#ifdef SKY_DESATURATION
+	#ifdef END
 	albedo.rgb = GetLuminance(albedo.rgb) * endCol.rgb;
+	#endif
 	#endif
 
 	albedo.rgb *= SKYBOX_BRIGHTNESS * 0.02;

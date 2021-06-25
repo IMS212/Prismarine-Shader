@@ -55,7 +55,7 @@ uniform sampler2D gaux2;
 uniform sampler2D depthtex1;
 uniform sampler2D depthtex2;
 uniform sampler2D noisetex;
-uniform sampler2D colortex14, colortex15;
+uniform sampler2D colortex7, colortex8;
 
 #ifdef ADVANCED_MATERIALS
 uniform ivec2 atlasSize;
@@ -187,7 +187,7 @@ vec3 GetWaterNormal(vec3 worldPos, vec3 viewPos, vec3 viewVector) {
 #include "/lib/reflections/raytrace.glsl"
 #include "/lib/reflections/simpleReflections.glsl"
 #include "/lib/surface/ggx.glsl"
-#include "/lib/prismarine/complexSky.glsl"
+#include "/lib/prismarine/simpleSky.glsl"
 
 #ifdef OVERWORLD
 #include "/lib/atmospherics/clouds.glsl"
@@ -427,7 +427,7 @@ void main() {
 					light_vec[0] = sun_vec;
 					light_vec[1] = -sun_vec;
 
-				skyReflection += renderAtmosphere(worldvec, light_vec);
+				if (rainStrength < 1) skyReflection += renderAtmosphere(worldvec, light_vec);
 				#endif
 				
 				#if NIGHT_SKY_MODE == 0 || NIGHT_SKY_MODE == 2
@@ -439,7 +439,7 @@ void main() {
 					hcoord *= 0.2;
 
 					if (moonVisibility > 0.0 && rainStrength == 0.0){
-						vec3 helios = texture2D(colortex15, hcoord * 0.8 + 0.6).rgb;
+						vec3 helios = texture2D(colortex8, hcoord * 0.8 + 0.6).rgb;
 						helios *= pow2(length(helios) + 0.6);
 						skyReflection += helios * 0.05 * NdotUhelios * (1.0 - sunVisibility);
 					}
@@ -454,7 +454,7 @@ void main() {
 					ncoord *= 0.2;
 
 					if (moonVisibility > 0.0 && rainStrength == 0.0){
-						vec3 nebula = texture2D(colortex14, ncoord * 0.8 + 0.6).rgb;
+						vec3 nebula = texture2D(colortex7, ncoord * 0.8 + 0.6).rgb;
 						nebula *= pow2(length(nebula) + 0.6);
 						skyReflection += nebula * 0.05 * NdotUnebula * (1.0 - sunVisibility);
 					}
@@ -556,7 +556,7 @@ void main() {
 						light_vec[0] = sun_vec;
 						light_vec[1] = -sun_vec;
 
-					skyReflection += renderAtmosphere(worldvec, light_vec);
+					if (rainStrength < 1) skyReflection += renderAtmosphere(worldvec, light_vec);
 					#endif
 
 					#if NIGHT_SKY_MODE == 0 || NIGHT_SKY_MODE == 2
@@ -568,7 +568,7 @@ void main() {
 						hcoord *= 0.2;
 
 						if (moonVisibility > 0.0 && rainStrength == 0.0){
-							vec3 helios = texture2D(colortex15, hcoord * 0.8 + 0.6).rgb;
+							vec3 helios = texture2D(colortex8, hcoord * 0.8 + 0.6).rgb;
 							helios *= pow2(length(helios) + 0.6);
 							skyReflection.rgb += helios * 0.05 * NdotUhelios * (1.0 - sunVisibility);
 						}
@@ -583,7 +583,7 @@ void main() {
 						ncoord *= 0.2;
 
 						if (moonVisibility > 0.0 && rainStrength == 0.0){
-							vec3 nebula = texture2D(colortex14, ncoord * 0.8 + 0.6).rgb;
+							vec3 nebula = texture2D(colortex7, ncoord * 0.8 + 0.6).rgb;
 							nebula *= pow2(length(nebula) + 0.6);
 							skyReflection.rgb += nebula * 0.05 * NdotUnebula * (1.0 - sunVisibility);
 						}

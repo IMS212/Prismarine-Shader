@@ -99,7 +99,6 @@ float InterleavedGradientNoise() {
 #include "/lib/lighting/forwardLighting.glsl"
 #include "/lib/surface/ggx.glsl"
 #include "/lib/color/waterColor.glsl"
-#include "/lib/prismarine/caustics.glsl"
 
 #ifdef TAA
 #include "/lib/util/jitter.glsl"
@@ -268,16 +267,6 @@ void main() {
 		#if defined ADVANCED_MATERIALS && defined REFLECTION_SPECULAR && defined REFLECTION_ROUGH
 		normalMap = mix(vec3(0.0, 0.0, 1.0), normalMap, smoothness);
 		newNormal = clamp(normalize(normalMap * tbnMatrix), vec3(-1.0), vec3(1.0));
-		#endif
-
-		#if defined OVERWORLD && defined WATER_TINT
-		if (isEyeInWater == 1.0){
-			float causticsFactor = pow(x2(lightmap.y), 0.5) * (1.0 - pow(x2(lightmap.y), 0.5)) * (1.0 - rainStrength*0.5) * (1.0 - lightmap.x) * WATER_CAUSTICS_STRENGTH;
-			vec3 pos = worldPos.xyz+cameraPosition.xyz;
-			vec3 caustic = getCaustics(pos) * causticsFactor * waterColor.rgb * shadow * shadowFade;
-			albedo.rgb += (1 - lightmap.x) * (albedo.rgb * x2(waterColor.rgb) * WATER_CAUSTICS_STRENGTH + WATER_CAUSTICS_STRENGTH * shadow * albedo.rgb * x2(waterColor.rgb));
-			albedo.rgb *= (1.0 + caustic) * (0.2 + lightmap.x);
-		}
 		#endif
 	}
 

@@ -115,7 +115,7 @@ void Bloom(inout vec3 color, vec2 coord) {
 
 	vec3 blur = (blur1 + blur2 + blur3 + blur4 + blur5 + blur6 + blur7) * 0.14;
 	
-	color = mix(color, blur, 0.18 * BLOOM_STRENGTH);
+	color = mix(color, blur, 0.05 * BLOOM_STRENGTH);
 }
 
 void AutoExposure(inout vec3 color, inout float exposure, float tempExposure) {

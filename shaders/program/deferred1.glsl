@@ -37,6 +37,7 @@ uniform mat4 gbufferModelView, gbufferPreviousModelView, gbufferModelViewInverse
 uniform sampler2D colortex0;
 uniform sampler2D colortex3;
 uniform sampler2D depthtex0;
+uniform sampler2D noisetex;
 
 #ifdef AO
 uniform sampler2D colortex4;
@@ -48,7 +49,6 @@ uniform vec3 previousCameraPosition;
 uniform sampler2D colortex5;
 uniform sampler2D colortex6;
 uniform sampler2D colortex7;
-uniform sampler2D noisetex;
 #endif
 
 //Optifine Constants//
@@ -158,7 +158,7 @@ float GetAmbientOcclusion(float z){
 #include "/lib/atmospherics/fog.glsl"
 #ifdef OVERWORLD
 #include "/lib/prismarine/functions.glsl"
-#include "/lib/prismarine/complexSky.glsl"
+#include "/lib/prismarine/simpleSky.glsl"
 #endif
 
 #ifdef OUTLINE_ENABLED
@@ -215,6 +215,7 @@ void main() {
 			if (reflection.a < 1.0) {
 				#ifdef OVERWORLD
 				vec3 skyRefPos = reflect(normalize(viewPos.xyz), normal);
+				
 				#if SKY_MODE == 2
 				vec3 worldvec = normalize(mat3(gbufferModelViewInverse) * (skyRefPos.xyz));
 						
@@ -241,7 +242,7 @@ void main() {
 					light_vec[0] = sun_vec;
 					light_vec[1] = -sun_vec;
 
-				skyReflection += renderAtmosphere(worldvec, light_vec);
+				if (rainStrength < 1) skyReflection += renderAtmosphere(worldvec, light_vec);
 				#endif
 
 				#ifdef REFLECTION_ROUGH

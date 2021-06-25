@@ -17,8 +17,8 @@ screen.PARALLAX=Parallax
 
 screen.ATMOSPHERICS=Atmospherics
 screen.SKY=Sky Config
+screen.DEFAULT_SKY_OPTIONS=Default Sky Config
 screen.SIMPLE_SKY_OPTIONS=Simple Sky Config
-screen.COMPLEX_SKY_OPTIONS=Complex Sky Config
 screen.CLOUDS=Cloud Config
 screen.FOGWEATHER=Fog & Weather Config
 
@@ -36,6 +36,27 @@ screen.CG_T=Tint
 screen.LIGHTSHAFT_OPTIONS=Volumetric Rays Config 
 screen.COLOR=Color
 screen.LIGHT_COLOR=Lighting Color
+screen.CLOUDS_COLOR=Clouds Color
+screen.CLOUDLIGHT_M=Clouds Upper (Morning)
+screen.CLOUDLIGHT_D=Clouds Upper (Day)
+screen.CLOUDLIGHT_E=Clouds Upper (Evening)
+screen.CLOUDLIGHT_N=Clouds Upper (Night)
+screen.FOGCOLOR_M=Fog (Morning)
+screen.FOGCOLOR_D=Fog (Day)
+screen.FOGCOLOR_E=Fog (Evening)
+screen.FOGCOLOR_N=Fog (Night)
+screen.LIGHTSHAFT_M=Light Shafts (Morning)
+screen.LIGHTSHAFT_D=Light Shafts (Day)
+screen.LIGHTSHAFT_E=Light Shafts (Evening)
+screen.LIGHTSHAFT_N=Light Shafts (Night)
+screen.SKYLIGHT_M=Sky (Morning)
+screen.SKYLIGHT_D=Sky (Day)
+screen.SKYLIGHT_E=Sky (Evening)
+screen.SKYLIGHT_N=Sky (Night)
+screen.CLOUDAMBIENT_M=Clouds Lower (Morning)
+screen.CLOUDAMBIENT_D=Clouds Lower (Day)
+screen.CLOUDAMBIENT_E=Clouds Lower (Evening)
+screen.CLOUDAMBIENT_N=Clouds Lower (Night)
 screen.LIGHT_M=Light (Morning)
 screen.AMBIENT_M=Ambient (Morning)
 screen.LIGHT_D=Light (Day)
@@ -47,8 +68,9 @@ screen.AMBIENT_N=Ambient (Night)
 screen.MINLIGHT=Minimum Light
 screen.BLOCKLIGHT_COLOR=Blocklight Color
 screen.SKY_COLOR_SIMPLE=Simple Sky Color
-screen.SKY_COLOR_COMPLEX=Complex Sky Color
+screen.SKY_COLOR_DEFAULT=Default Sky Color
 screen.SKY_COLOR=Sky Color
+screen.FOG_TINT=Tint
 screen.WATER_COLOR=Water Color
 screen.WEATHER_COLOR=Weather Color
 screen.WEATHER_R=Rain (Normal)
@@ -240,10 +262,11 @@ option.HELIOS.comment=Helios & Nebula appear on sky at night and early morning/e
 value.NIGHT_SKY_MODE.0=Helios
 value.NIGHT_SKY_MODE.1=Nebula
 value.NIGHT_SKY_MODE.2=Mixed
+value.NIGHT_SKY_MODE.3=OFF
 option.SKY_MODE=Overworld Sky
-option.SKY_MODE.comment=Changes the overworld sky. Simple sky is less realistic and supports perbiome weather. Complex sky is realistic but supports custom weather only in cold biomes. §e[*]§f Affects overall lighting, fog, water and etc.
-value.SKY_MODE.1=Simple
-value.SKY_MODE.2=Complex
+option.SKY_MODE.comment=Changes the overworld sky. §e[*]§f Affects overall lighting, fog, water and etc.
+value.SKY_MODE.1=Default (BSL Sky)
+value.SKY_MODE.2=Simple
 value.SKY_MODE.0=Mixed
 option.CLOUDS=Clouds
 option.END_SKY=End Sky
@@ -258,6 +281,8 @@ value.CLOUDS.0=§cOFF
 value.CLOUDS.1=Planar
 value.CLOUDS.2=Vanilla
 value.CLOUDS.3=Volumetric
+option.CLOUD_UPPER_LAYER=Upper Layer
+option.CLOUD_LOWER_LAYER=Lower Layer
 
 option.FOG_ALTITUDE_INCREASE_FACTOR=Height-Based Increasing
 option.FOG_ALTITUDE_INCREASE_FACTOR.comment=Increases fog density depending on how high you are.
@@ -305,6 +330,10 @@ option.LIGHTSHAFT_SAMPLES=Sample Count
 option.LIGHTSHAFT_SAMPLE_INTENSITY=Sample Intensity
 option.LIGHTSHAFT_ALTITUDE_DECREASE_FACTOR=Altitude Decrease Factor
 option.LIGHTSHAFT_TIME_DECREASE_FACTOR=Time Decrease Factor
+option.LIGHTSHAFT_FIXED_ALTITUDE=Fixed Altitude
+option.LIGHTSHAFT_FIXED_ALTITUDE.comment=Enables the static altitude for volumetric fog / rays. Disable it if you want it to be everywhere. This option is experimental and may cause bugs!
+option.LIGHTSHAFT_ALTITUDE=Altitude
+
 option.FOG_DENSITY=Fog Density
 option.FOG_DENSITY.comment=Adjusts fog density. §e[*]§rThis option is ignored in the nether.
 
@@ -342,6 +371,7 @@ value.HORIZON_DISTANCE.2.0=Medium
 value.HORIZON_DISTANCE.2.5=Far
 value.HORIZON_DISTANCE.3.0=Very Far
 value.HORIZON_DISTANCE.4.0=Far Far Away
+option.SKY_HORIZON_E=Horizon Exposure
 
 option.SKYBOX_BRIGHTNESS=Skybox Brightness
 option.SKYBOX_BRIGHTNESS.comment=Adjusts skybox brightness. §e[*]§rSet to 1.00 when subtractive skybox exists.
@@ -561,6 +591,106 @@ option.LIGHTSHAFT_R=Red
 option.LIGHTSHAFT_G=Green
 option.LIGHTSHAFT_B=Blue
 option.LIGHTSHAFT_I=Intensity
+
+option.CLOUDLIGHT_MR=Red
+option.CLOUDLIGHT_MG=Green
+option.CLOUDLIGHT_MB=Blue
+option.CLOUDLIGHT_MI=Intensity
+
+option.CLOUDLIGHT_DR=Red
+option.CLOUDLIGHT_DG=Green
+option.CLOUDLIGHT_DB=Blue
+option.CLOUDLIGHT_DI=Intensity
+
+option.CLOUDLIGHT_ER=Red
+option.CLOUDLIGHT_EG=Green
+option.CLOUDLIGHT_EB=Blue
+option.CLOUDLIGHT_EI=Intensity
+
+option.CLOUDLIGHT_NR=Red
+option.CLOUDLIGHT_NG=Green
+option.CLOUDLIGHT_NB=Blue
+option.CLOUDLIGHT_NI=Intensity
+
+option.FOGCOLOR_MR=Red
+option.FOGCOLOR_MG=Green
+option.FOGCOLOR_MB=Blue
+option.FOGCOLOR_MI=Intensity
+
+option.FOGCOLOR_DR=Red
+option.FOGCOLOR_DG=Green
+option.FOGCOLOR_DB=Blue
+option.FOGCOLOR_DI=Intensity
+
+option.FOGCOLOR_ER=Red
+option.FOGCOLOR_EG=Green
+option.FOGCOLOR_EB=Blue
+option.FOGCOLOR_EI=Intensity
+
+option.FOGCOLOR_NR=Red
+option.FOGCOLOR_NG=Green
+option.FOGCOLOR_NB=Blue
+option.FOGCOLOR_NI=Intensity
+
+option.LIGHTSHAFT_MR=Red
+option.LIGHTSHAFT_MG=Green
+option.LIGHTSHAFT_MB=Blue
+option.LIGHTSHAFT_MI=Intensity
+
+option.LIGHTSHAFT_DR=Red
+option.LIGHTSHAFT_DG=Green
+option.LIGHTSHAFT_DB=Blue
+option.LIGHTSHAFT_DI=Intensity
+
+option.LIGHTSHAFT_ER=Red
+option.LIGHTSHAFT_EG=Green
+option.LIGHTSHAFT_EB=Blue
+option.LIGHTSHAFT_EI=Intensity
+
+option.LIGHTSHAFT_NR=Red
+option.LIGHTSHAFT_NG=Green
+option.LIGHTSHAFT_NB=Blue
+option.LIGHTSHAFT_NI=Intensity
+
+option.SKYLIGHT_MR=Red
+option.SKYLIGHT_MG=Green
+option.SKYLIGHT_MB=Blue
+option.SKYLIGHT_MI=Intensity
+
+option.SKYLIGHT_DR=Red
+option.SKYLIGHT_DG=Green
+option.SKYLIGHT_DB=Blue
+option.SKYLIGHT_DI=Intensity
+
+option.SKYLIGHT_ER=Red
+option.SKYLIGHT_EG=Green
+option.SKYLIGHT_EB=Blue
+option.SKYLIGHT_EI=Intensity
+
+option.SKYLIGHT_NR=Red
+option.SKYLIGHT_NG=Green
+option.SKYLIGHT_NB=Blue
+option.SKYLIGHT_NI=Intensity
+
+option.CLOUDAMBIENT_MR=Red
+option.CLOUDAMBIENT_MG=Green
+option.CLOUDAMBIENT_MB=Blue
+option.CLOUDAMBIENT_MI=Intensity
+
+option.CLOUDAMBIENT_DR=Red
+option.CLOUDAMBIENT_DG=Green
+option.CLOUDAMBIENT_DB=Blue
+option.CLOUDAMBIENT_DI=Intensity
+
+option.CLOUDAMBIENT_ER=Red
+option.CLOUDAMBIENT_EG=Green
+option.CLOUDAMBIENT_EB=Blue
+option.CLOUDAMBIENT_EI=Intensity
+
+option.CLOUDAMBIENT_NR=Red
+option.CLOUDAMBIENT_NG=Green
+option.CLOUDAMBIENT_NB=Blue
+option.CLOUDAMBIENT_NI=Intensity
 
 option.LIGHT_MR=Red
 option.LIGHT_MG=Green

@@ -67,7 +67,11 @@ void main() {
 	vl *= vl;
 
 	#ifdef OVERWORLD
+	#ifdef LIGHTSHAFT_AUTOCOLOR
     vl *= lightCol * 0.25;
+	#else
+	vl *= lightshaftCol * 0.25;
+	#endif
 	if (cameraPosition.y < 1.0) vl *= exp(2.0 * cameraPosition.y - 2.0);
 	#endif
 

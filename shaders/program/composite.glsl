@@ -74,6 +74,7 @@ float GetLinearDepth(float depth) {
 #include "/lib/atmospherics/waterFog.glsl"
 
 #if FOG_MODE == 1 || FOG_MODE == 2
+#include "/lib/prismarine/functions.glsl"
 #include "/lib/atmospherics/volumetricLight.glsl"
 #endif
 

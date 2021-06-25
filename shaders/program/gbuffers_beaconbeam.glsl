@@ -24,12 +24,10 @@ uniform sampler2D texture;
 void main() {
 	vec4 albedo = texture2D(texture, texCoord) * color;
 	
-	#ifdef EMISSIVE_RECOLOR
 	if (dot(color.rgb, vec3(1.0)) > 2.66) {
 		float ec = length(albedo.rgb);
 		albedo.rgb = blocklightCol * (ec * 0.63 / BLOCKLIGHT_I) + ec * 0.07;
 	}
-	#endif
     
 	albedo.rgb = pow(albedo.rgb,vec3(2.2)) * 4.0;
 	
