@@ -33,6 +33,8 @@ uniform vec3 cameraPosition;
 
 uniform mat4 gbufferProjection, gbufferPreviousProjection, gbufferProjectionInverse;
 uniform mat4 gbufferModelView, gbufferPreviousModelView, gbufferModelViewInverse;
+uniform mat4 shadowProjection;
+uniform mat4 shadowModelView;
 
 uniform sampler2D colortex0;
 uniform sampler2D colortex3;
@@ -155,6 +157,7 @@ float GetAmbientOcclusion(float z){
 #include "/lib/color/waterColor.glsl"
 #include "/lib/util/dither.glsl"
 #include "/lib/atmospherics/sky.glsl"
+#include "/lib/util/spaceConversion.glsl"
 #include "/lib/atmospherics/fog.glsl"
 #ifdef OVERWORLD
 #include "/lib/prismarine/functions.glsl"

@@ -10,6 +10,7 @@ profile.comment=Low : low shadows, simple sky, no extra effects. Medium : medium
 
 #Screens
 screen.LIGHTING=Lighting
+screen.SHADOW_CONFIG=Shadow Config
 
 screen.MATERIAL=Material
 screen.REFLECTION=Reflections
@@ -41,6 +42,11 @@ screen.CLOUDLIGHT_M=Clouds Upper (Morning)
 screen.CLOUDLIGHT_D=Clouds Upper (Day)
 screen.CLOUDLIGHT_E=Clouds Upper (Evening)
 screen.CLOUDLIGHT_N=Clouds Upper (Night)
+screen.DISTFADECOL_M=Distant Fade (Morning)
+screen.DISTFADECOL_D=Distant Fade (Day)
+screen.DISTFADECOL_E=Distant Fade (Evening)
+screen.DISTFADECOL_N=Distant Fade (Night)
+screen.DISTFADE_COLOR=Distant Fade Color
 screen.FOGCOLOR_M=Fog (Morning)
 screen.FOGCOLOR_D=Fog (Day)
 screen.FOGCOLOR_E=Fog (Evening)
@@ -284,9 +290,6 @@ value.CLOUDS.3=Volumetric
 option.CLOUD_UPPER_LAYER=Upper Layer
 option.CLOUD_LOWER_LAYER=Lower Layer
 
-option.FOG_ALTITUDE_INCREASE_FACTOR=Height-Based Increasing
-option.FOG_ALTITUDE_INCREASE_FACTOR.comment=Increases fog density depending on how high you are.
-
 option.SKY_DESATURATION=Sky Desaturation
 option.SKY_DESATURATION.comment=Reduces saturation while adding some tint to the skybox at night
 
@@ -300,10 +303,16 @@ option.ADVANCED_FOG=Advanced Fog
 option.ADVANCED_FOG.comment=Enables advanced fog density modifiers such as player's altitude and time brightness.
 option.COLORED_FOG=Colored Fog
 option.DISTANT_FADE=Distant Fade
-option.DISTANT_FADE.comment=Fades far chunk borders. Spherical works like vanilla fog. Cylindrical ignores Y axis. §e[*]§rThis option is affected by fog density.
-value.DISTANT_FADE.0=OFF
-value.DISTANT_FADE.1=Spherical
-value.DISTANT_FADE.2=Cylindrical
+option.DISTANT_FADE.comment=Fades far chunk borders. §e[*]§rThis option is affected by fog density.
+value.DISTANT_FADE.0=§cOFF
+value.DISTANT_FADE.1=Overworld Only
+value.DISTANT_FADE.2=Nether & End Only
+value.DISTANT_FADE.3=Full
+
+option.DISTANT_FADE_STYLE=Distant Fade Style
+option.DISTANT_FADE_STYLE.comment=Spherical works like vanilla fog. Cylindrical ignores Y axis.
+value.DISTANT_FADE_STYLE.0=Spherical
+value.DISTANT_FADE_STYLE.1=Cylindrical
 
 option.WEATHER_PERBIOME=Per Biome Weather
 option.WEATHER_PERBIOME.comment=Use varied weather color for different biomes. §c[-]§rMay not work under unknown conditions.
@@ -462,8 +471,9 @@ value.WATER_DETAIL.0.40=40%
 value.WATER_DETAIL.0.45=45%
 value.WATER_DETAIL.0.50=50%
 
-option.WATER_LIGHT_FLICKERING=Light Flickering
-option.WATER_LIGHT_FLICKERING.comment=Enables slight flickering of tinted surface beneath the water. Affects volumetric fog/rays as well.
+option.BLOCKLIGHT_FLICKERING=Blocklight Flickering
+option.BLOCKLIGHT_FLICKERING.comment=Enables flickering of blocklight.
+option.BLOCKLIGHT_FLICKERING_STRENGTH=Flickering Strength
 
 option.WATER_BUMP=Bumpiness
 option.WATER_BUMP.comment=Adjusts the intensity of water normals.
@@ -612,6 +622,26 @@ option.CLOUDLIGHT_NG=Green
 option.CLOUDLIGHT_NB=Blue
 option.CLOUDLIGHT_NI=Intensity
 
+option.DISTFADE_MR=Red
+option.DISTFADE_MG=Green
+option.DISTFADE_MB=Blue
+option.DISTFADE_MI=Intensity
+
+option.DISTFADE_DR=Red
+option.DISTFADE_DG=Green
+option.DISTFADE_DB=Blue
+option.DISTFADE_DI=Intensity
+
+option.DISTFADE_ER=Red
+option.DISTFADE_EG=Green
+option.DISTFADE_EB=Blue
+option.DISTFADE_EI=Intensity
+
+option.DISTFADE_NR=Red
+option.DISTFADE_NG=Green
+option.DISTFADE_NB=Blue
+option.DISTFADE_NI=Intensity
+
 option.FOGCOLOR_MR=Red
 option.FOGCOLOR_MG=Green
 option.FOGCOLOR_MB=Blue
@@ -753,8 +783,8 @@ value.COLORED_LIGHTING_MODE.0=§cOFF
 value.COLORED_LIGHTING_MODE.1=XZ-pos (Dynamic)
 value.COLORED_LIGHTING_MODE.2=Light Color
 value.COLORED_LIGHTING_MODE.3=XZ-pos (Static)
-option.CLM_MAINCOL=Main Color
-option.CLM_MAINCOL.comment=Selects the main color for world position based colored lighting.
+option.CLM_MAINCOL=D.W.P. Main Color
+option.CLM_MAINCOL.comment=Selects the main color for dynamic world position based colored lighting.
 value.CLM_MAINCOL.0=Green
 value.CLM_MAINCOL.1=Blue
 value.CLM_MAINCOL.2=Red

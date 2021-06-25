@@ -49,6 +49,7 @@ float frametime = frameTimeCounter * ANIMATION_SPEED;
 #include "/lib/color/waterColor.glsl"
 #include "/lib/util/spaceConversion.glsl"
 #include "/lib/util/jitter.glsl"
+#include "/lib/prismarine/functions.glsl"
 #include "/lib/prismarine/caustics.glsl"
 
 //Common Functions//
@@ -79,12 +80,11 @@ void main() {
     #ifdef SHADOW_COLOR
 	albedo.rgb = mix(vec3(1),albedo.rgb,pow(albedo.a,(1.0-albedo.a)*0.5)*2);
 	albedo.rgb *= 1.0-pow(albedo.a,128.0);
-
 	if (water > 0.9){
 		#if defined OVERWORLD
 		albedo.rgb = waterColor.rgb * WATER_I;
-		#ifdef WATER_LIGHT_FLICKERING
-		albedo.rgb *= getCaustics(vec3(1,1,1));
+		#ifdef BLOCKLIGHT_FLICKERING
+		albedo.rgb *= getFlickering(vec3(0.1,0.1,0.1));
 		if (isEyeInWater == 1) albedo.rgb *= WATER_I;
 		#endif
 		#endif

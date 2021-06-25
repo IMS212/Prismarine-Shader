@@ -1,7 +1,7 @@
 #if defined OVERWORLD || defined END
 #include "/lib/lighting/shadows.glsl"
 #endif
-
+#include "/lib/prismarine/caustics.glsl"
 #include "/lib/prismarine/functions.glsl"
 
 void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos,
@@ -54,14 +54,21 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
     #endif
     
     float newLightmap  = pow(lightmap.x, 10.0) * 1.5 + lightmap.x * 0.7;
+
+    float blocklightStrength = BLOCKLIGHT_I;
+
+    #ifdef BLOCKLIGHT_FLICKERING
+    blocklightStrength += getFlickering(vec3(0.1,0.1,0.1));
+    #endif
+
     #ifdef NETHER
-    vec3 blocklightColSqrtNether = vec3(BLOCKLIGHT_R_NETHER, BLOCKLIGHT_G_NETHER, BLOCKLIGHT_B_NETHER) * BLOCKLIGHT_I / 300.0;
+    vec3 blocklightColSqrtNether = vec3(BLOCKLIGHT_R_NETHER, BLOCKLIGHT_G_NETHER, BLOCKLIGHT_B_NETHER) * blocklightStrength / 300.0;
     vec3 blocklightColNether = blocklightColSqrtNether * blocklightColSqrtNether;
     vec3 blockLighting = blocklightColNether * newLightmap * newLightmap;
     #endif
 
     #ifdef END
-    vec3 blocklightColSqrtEnd = vec3(BLOCKLIGHT_R_END, BLOCKLIGHT_G_END, BLOCKLIGHT_B_END) * BLOCKLIGHT_I / 300.0;
+    vec3 blocklightColSqrtEnd = vec3(BLOCKLIGHT_R_END, BLOCKLIGHT_G_END, BLOCKLIGHT_B_END) * blocklightStrength / 300.0;
     vec3 blocklightColEnd = blocklightColSqrtEnd * blocklightColSqrtEnd;
     vec3 blockLighting = blocklightColEnd * newLightmap * newLightmap;
     #endif
@@ -83,7 +90,7 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
     #else
     noiseMap = 1;
     #endif
-    blocklightCol   = vec3(redCol * redColStatic, greenColStatic, blueCol * blueColStatic) * BLOCKLIGHT_I;
+    blocklightCol   = vec3(redCol * redColStatic, greenColStatic, blueCol * blueColStatic) * blocklightStrength;
     vec3 blockLighting =  newLightmap * newLightmap * blocklightCol * x2(noiseMap);
     
     #elif CLM_MAINCOL == 1
@@ -99,7 +106,7 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
     #else
     noiseMap = 1;
     #endif
-    blocklightCol   = vec3(redCol * redColStatic, greenCol * greenColStatic, blueColStatic) * BLOCKLIGHT_I;
+    blocklightCol   = vec3(redCol * redColStatic, greenCol * greenColStatic, blueColStatic) * blocklightStrength;
     vec3 blockLighting =  newLightmap * newLightmap * blocklightCol * x2(noiseMap);
 
     #elif CLM_MAINCOL == 2
@@ -115,7 +122,7 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
     #else
     noiseMap = 1;
     #endif
-    blocklightCol   = vec3(redColStatic, greenCol * greenColStatic, blueCol * blueColStatic) * BLOCKLIGHT_I;
+    blocklightCol   = vec3(redColStatic, greenCol * greenColStatic, blueCol * blueColStatic) * blocklightStrength;
     vec3 blockLighting =  newLightmap * newLightmap * blocklightCol * x2(noiseMap);
 
     #endif
@@ -125,7 +132,7 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
     #ifdef OVERWORLD
     #if COLORED_LIGHTING_MODE == 3
     vec2 pos = (cameraPosition.xz + worldPos.xz);
-    blocklightCol = x4(ntmix(pos, pos, pos, 0.0004)) * BLOCKLIGHT_I * 4;
+    blocklightCol = x4(ntmix(pos, pos, pos, 0.0004)) * blocklightStrength * 4;
     vec3 blockLighting =  newLightmap * newLightmap * blocklightCol;
 
     //TIME BASED

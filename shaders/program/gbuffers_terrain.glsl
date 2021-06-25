@@ -105,7 +105,6 @@ float InterleavedGradientNoise() {
 #include "/lib/lighting/forwardLighting.glsl"
 #include "/lib/surface/ggx.glsl"
 #include "/lib/color/waterColor.glsl"
-#include "/lib/prismarine/caustics.glsl"
 
 #ifdef TAA
 #include "/lib/util/jitter.glsl"

@@ -66,7 +66,7 @@ void UnderwaterDistort(inout vec2 texCoord) {
 	texCoord += vec2(
 		cos(texCoord.y * 32.0 + frameTimeCounter * 3.0),
 		sin(texCoord.x * 32.0 + frameTimeCounter * 1.7)
-	) * 0.0005;
+	) * 0.001;
 
 	float mask = float(
 		texCoord.x > 0.0 && texCoord.x < 1.0 &&
@@ -89,7 +89,7 @@ void RetroDither(inout vec3 color, float dither) {
 
 vec3 GetBloomTile(float lod, vec2 coord, vec2 offset) {
 	vec3 bloom = texture2D(colortex1, coord / exp2(lod) + offset).rgb;
-	return pow(bloom, vec3(4.0)) * 128.0;
+	return pow(bloom, vec3(4.0)) * 256.0;
 }
 
 void Bloom(inout vec3 color, vec2 coord) {

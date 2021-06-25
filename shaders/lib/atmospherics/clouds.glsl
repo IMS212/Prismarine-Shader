@@ -116,7 +116,6 @@ vec4 DrawLowerCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol) 
 vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol) {
 	#ifdef TAA
 		dither = fract(dither + frameCounter * 256.0);
-		dither = p4(dither);
 	#endif
 
 	int samples = CLOUDS_NOISE_SAMPLES;
@@ -168,7 +167,7 @@ vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol) {
 		cloudLighting = min(cloudLighting, 1.0) * cloud;
 		cloudColor = mix(
 			cloudDownCol * (0.35 * sunVisibility + 0.5),
-			cloudUpCol * (0.85 + 1.15 * scattering),
+			cloudUpCol * (0.75 + 1.15 * scattering),
 			cloudLighting
 		);
 
@@ -201,7 +200,7 @@ void DrawStars(inout vec3 color, vec3 viewPos) {
 	coord = floor(coord * 1024.0) / 1024.0;
 	
 	float VoU = clamp(dot(normalize(viewPos), normalize(upVec)), 0.0, 1.0);
-	float multiplier = sqrt(sqrt(VoU)) * 5.0 * (1.0 - rainStrength) * moonVisibility;
+	float multiplier = sqrt(sqrt(VoU)) * 5.0 * (1.0 - rainStrength);
 	
 	float star = 1.0;
 	if (VoU > 0.0) {
@@ -217,8 +216,8 @@ void DrawStars(inout vec3 color, vec3 viewPos) {
 }
 
 float AuroraSample(vec2 coord, vec2 wind, float VoU) {
-	float noise = texture2D(noisetex, coord * 0.0625  + wind * 0.25).b * 3.0;
-		  noise+= texture2D(noisetex, coord * 0.03125 + wind * 0.15).b * 3.0;
+	float noise = texture2D(noisetex, coord * 0.0625  + wind * 0.25).b * 6.0;
+		  noise+= texture2D(noisetex, coord * 0.03125 + wind * 0.15).b * 6.0;
 
 	noise = max(1.0 - 4.0 * (0.5 * VoU + 0.5) * abs(noise - 3.0), 0.0);
 
@@ -237,7 +236,7 @@ vec3 DrawAurora(vec3 viewPos, float dither, int samples) {
 
 	float visibility = moonVisibility * (1.0 - rainStrength) * (1.0 - rainStrength);
 
-	#if	(defined WEATHER_PERBIOME && SKY_MODE == 1) || (defined WEATHER_PERBIOME && SKY_MODE == 2) || SKY_MODE == 2
+	#if	(defined WEATHER_PERBIOME && SKY_MODE == 1) || (defined WEATHER_PERBIOME && SKY_MODE == 2) || SKY_MODE == 0
 	visibility *= isCold * isCold;
 	#else
 	visibility = 0.0;
@@ -267,7 +266,7 @@ vec3 DrawAurora(vec3 viewPos, float dither, int samples) {
 			if(noise > 0.0) {
 				noise *= texture2D(noisetex, coord * 0.125 + wind * 0.25).b;
 				noise *= 1.0 * texture2D(noisetex, coord + wind * 16.0).b + 0.75;
-				noise = noise * noise * 1.5 * sampleStep;
+				noise = noise * noise * 6 * sampleStep;
 				noise *= max(sqrt(1.0 - length(planeCoord.xz) * 2.75), 0.0);
 
 				vec3 auroraColor = mix(auroraLowCol, auroraHighCol, pow(currentStep, 0.4));

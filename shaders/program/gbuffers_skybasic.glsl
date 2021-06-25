@@ -104,6 +104,7 @@ void main() {
 
 	vec3 nViewPos = normalize(viewPos.xyz);
 	float NdotU = dot(nViewPos, upVec);
+	float clampNdotU = x2(x2(clamp(NdotU * 3.0, 0.0, 1.0)));
 	float dither = Bayer64(gl_FragCoord.xy);
 	vec3 wpos = normalize((gbufferModelViewInverse * viewPos).xyz);
 
@@ -149,7 +150,6 @@ void main() {
 	#endif
 	
 	#if NIGHT_SKY_MODE == 0 || NIGHT_SKY_MODE == 2
-		float NdotUhelios = x2(x2(clamp(NdotU * 3.0, 0.0, 1.0)));
 		vec3 planeCoord = wpos / (wpos.y + length(wpos.xz) * 0.5);
 		vec3 moonPos = vec3(gbufferModelViewInverse * vec4(-sunVec, 1.0));
 		vec3 moonCoord = moonPos / (moonPos.y + length(moonPos.xz));
@@ -159,12 +159,11 @@ void main() {
 		if (moonVisibility > 0.0 && rainStrength == 0.0){
 			vec3 helios = texture2D(colortex8, hcoord * 0.8 + 0.6).rgb;
 			helios *= x2(length(helios) + 0.6);
-			albedo.rgb += helios * 0.05 * NdotUhelios * (1.0 - sunVisibility);
+			albedo.rgb += helios * 0.05 * clampNdotU * (1.0 - sunVisibility);
 		}
 	#endif
 
 	#if NIGHT_SKY_MODE == 1 || NIGHT_SKY_MODE == 2
-		float NdotUnebula = x2(x2(clamp(NdotU * 3.0, 0.0, 1.0)));
 		vec3 planeCoord2 = wpos / (wpos.y + length(wpos.xz) * 0.5);
 		vec3 moonPos2 = vec3(gbufferModelViewInverse * vec4(-sunVec, 1.0));
 		vec3 moonCoord2 = moonPos2 / (moonPos2.y + length(moonPos2.xz));
@@ -174,7 +173,7 @@ void main() {
 		if (moonVisibility > 0.0 && rainStrength == 0.0){
 			vec3 nebula = texture2D(colortex7, ncoord * 0.8 + 0.6).rgb;
 			nebula *= x2(length(nebula) + 0.6);
-			albedo.rgb += nebula * 0.05 * NdotUnebula * (1.0 - sunVisibility);
+			albedo.rgb += nebula * 0.05 * clampNdotU * (1.0 - sunVisibility);
 		}
 	#endif
 

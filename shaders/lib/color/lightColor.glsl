@@ -8,6 +8,11 @@ vec3 ambientDay      = vec3(AMBIENT_DR, AMBIENT_DG, AMBIENT_DB) * AMBIENT_DI / 2
 vec3 ambientEvening  = vec3(AMBIENT_ER, AMBIENT_EG, AMBIENT_EB) * AMBIENT_EI / 255.0;
 vec3 ambientNight    = vec3(AMBIENT_NR, AMBIENT_NG, AMBIENT_NB) * AMBIENT_NI * 0.3 / 255.0;
 
+vec3 distfadeMorning    = vec3(DISTFADE_MR,   DISTFADE_MG,   DISTFADE_MB)   * DISTFADE_MI / 255.0;
+vec3 distfadeDay        = vec3(DISTFADE_DR,   DISTFADE_DG,   DISTFADE_DB)   * DISTFADE_DI / 255.0;
+vec3 distfadeEvening    = vec3(DISTFADE_ER,   DISTFADE_EG,   DISTFADE_EB)   * DISTFADE_EI / 255.0;
+vec3 distfadeNight      = vec3(DISTFADE_NR,   DISTFADE_NG,   DISTFADE_NB)   * DISTFADE_NI * 0.3 / 255.0;
+
 vec3 fogcolorMorning    = vec3(FOGCOLOR_MR,   FOGCOLOR_MG,   FOGCOLOR_MB)   * FOGCOLOR_MI / 255.0;
 vec3 fogcolorDay        = vec3(FOGCOLOR_DR,   FOGCOLOR_DG,   FOGCOLOR_DB)   * FOGCOLOR_DI / 255.0;
 vec3 fogcolorEvening    = vec3(FOGCOLOR_ER,   FOGCOLOR_EG,   FOGCOLOR_EB)   * FOGCOLOR_EI / 255.0;
@@ -90,11 +95,13 @@ vec3 CalcLightColor(vec3 sun, vec3 night, vec3 weatherCol) {
 vec3 lightSun     	   = CalcSunColor(lightMorning, lightDay, lightEvening);
 vec3 ambientSun   	   = CalcSunColor(ambientMorning, ambientDay, ambientEvening);
 vec3 fogcolorSun       = CalcSunColor(fogcolorMorning, fogcolorDay, fogcolorEvening);
+vec3 distfadeSun       = CalcSunColor(distfadeMorning, distfadeDay, distfadeEvening);
 vec3 skylightSun       = CalcSunColor(skylightMorning, skylightDay, skylightEvening);
 vec3 lightshaftSun     = CalcSunColor(lightshaftMorning, lightshaftDay, lightshaftEvening);
 vec3 cloudlightSun     = CalcSunColor(cloudlightMorning, cloudlightDay, cloudlightEvening);
 vec3 cloudambientSun   = CalcSunColor(cloudambientMorning, cloudambientDay, cloudambientEvening);
 
+vec3 distfadeCol   = CalcLightColor(distfadeSun, distfadeNight, weatherCol.rgb);
 vec3 lightCol      = CalcLightColor(lightSun, lightNight, weatherCol.rgb);
 vec3 ambientCol    = CalcLightColor(ambientSun, ambientNight, weatherCol.rgb);
 vec3 lightshaftCol = CalcLightColor(lightshaftSun, lightshaftNight, weatherCol.rgb);
