@@ -74,8 +74,10 @@ float GetLinearDepth(float depth) {
 #include "/lib/atmospherics/waterFog.glsl"
 
 #if FOG_MODE == 1 || FOG_MODE == 2
+#if defined OVERWORLD || defined END
 #include "/lib/prismarine/functions.glsl"
 #include "/lib/atmospherics/volumetricLight.glsl"
+#endif
 #endif
 
 #ifdef OUTLINE_ENABLED
@@ -121,7 +123,11 @@ void main() {
 	
 	#if FOG_MODE == 1 || FOG_MODE == 2
 	float dither = Bayer64(gl_FragCoord.xy);
+	#if defined OVERWORLD || defined END
 	vec3 vl = GetLightShafts(z0, z1, translucent, dither);
+	#else
+	vec3 vl = vec3(0.0);
+	#endif
 	#else
 	vec3 vl = vec3(0.0);
     #endif

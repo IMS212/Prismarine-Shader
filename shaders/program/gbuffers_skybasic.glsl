@@ -130,7 +130,8 @@ void main() {
     mat2x3 light_vec;
         light_vec[0] = sun_vec;
         light_vec[1] = -sun_vec;
-	if (rainStrength < 1) albedo += renderAtmosphere(worldvec, light_vec);
+	vec3 atmRain = renderAtmosphere(worldvec, light_vec) * rainStrength;
+	albedo += renderAtmosphere(worldvec, light_vec) - atmRain;
 	#endif
 	
 	#ifdef ROUND_SUN_MOON
@@ -142,7 +143,7 @@ void main() {
 	#endif
 
 	#ifdef STARS
-	if (moonVisibility > 0.0) DrawStars(albedo.rgb, viewPos.xyz);
+	DrawStars(albedo.rgb, viewPos.xyz);
 	#endif
 
 	#ifdef AURORA
@@ -196,12 +197,29 @@ void main() {
 	#endif
 	
 	#ifdef END
-	vec3 albedo = vec3(0.0);
+	vec3 albedo = vec3(190, 120, 255) / 255;
+
+	#ifndef SKY_DESATURATION
+	albedo.rgb = endCol.rgb;
+	#endif
+
+	#ifdef STARS
+	DrawStars(albedo.rgb, viewPos.xyz);
+	#endif
+
+	#if END_SKY == 2 || END_SKY == 3
+	vec4 cloud = DrawCloud(viewPos.xyz, dither, lightCol, ambientCol);
+	albedo.rgb += mix(albedo.rgb, cloud.rgb, cloud.a);
+	#endif
+
+	#if END_SKY == 1 || END_SKY == 3
+	albedo.rgb += DrawAurora(viewPos.xyz, dither, 24);
+	#endif
 	#endif
 	
     /* DRAWBUFFERS:0 */
 	gl_FragData[0] = vec4(albedo, 1.0 - star);
-    #if (CLOUDS == 1 && defined OVERWORLD)
+    #if (CLOUDS == 1 && defined OVERWORLD) || (CLOUDS == 1 && (defined END_SKY == 2 || defined END_SKY == 3) && defined END)
     /* DRAWBUFFERS:04 */
 	gl_FragData[1] = vec4(cloud.a, 0.0, 0.0, 0.0);
     #endif

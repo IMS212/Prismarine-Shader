@@ -94,9 +94,6 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 	VoL = pow(VoL * 0.5 + 0.5, 16.0) * 0.75 + 0.25;
 	float visibility = VoL;
 	visibility = visibility / 4;
-
-	#elif defined NETHER //////////// N E T H E R ////////////
-	float visibility = .0;
 	#endif
 
 	if (visibility > 0.0) {
@@ -159,11 +156,15 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 				shadow *= noise;
 				#endif
 
+				#ifdef OVERWORLD
+				if (isEyeInWater == 0) visibility *= 0.95;
+				#endif
+
 				#ifdef LIGHTSHAFT_FIXED_ALTITUDE
 				#ifdef OVERWORLD
 				if (isEyeInWater == 0){
 					vl *= ground;
-					vl *= 0.75;
+					vl *= 0.50;
 				}
 				#endif
 				#endif

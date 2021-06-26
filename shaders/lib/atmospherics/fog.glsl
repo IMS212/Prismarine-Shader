@@ -112,6 +112,9 @@ void NormalFog(inout vec3 color, vec3 viewPos) {
 	#endif
 	fog = 1.0 - exp(-0.8 * fog * fog);
 	vec3 fogColor = endCol.rgb * 0.00625;
+	#ifndef SKY_DESATURATION
+	fogColor = (vec3(160, 120, 255) / 255) * 0.00625;
+	#endif
 	#ifndef LIGHT_SHAFT
 	fogColor *= 2.5;
 	#endif

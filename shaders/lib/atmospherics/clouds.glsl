@@ -11,7 +11,7 @@ float CloudSample(vec2 coord, vec2 wind, float currentStep, float sampleStep, fl
 		  noise+= texture2D(noisetex, coord*0.0625   + wind * 0.15).x * 9.0;
 		  noise+= texture2D(noisetex, coord*0.03125  + wind * 0.05).x * 10.0;
 		  noise+= texture2D(noisetex, coord*0.015625 + wind * 0.05).x * -12.0;
-	noise = (noise * 0.7) - p2(p4(noiseCoverage)) + p2(rainStrength) + timeBrightness;
+	noise = (noise * 0.7) - p2(p4(noiseCoverage)) + p3(rainStrength) + timeBrightness;
 	float multiplier = (CLOUD_THICKNESS * 1.5) * sampleStep * (1.0 - 0.75 * rainStrength);
 
 	noise = max(noise - (sunCoverage * 3.0 + CLOUD_AMOUNT), 0.0) * multiplier;
@@ -32,7 +32,7 @@ float LowCloudSample(vec2 coord, vec2 wind, float currentStep, float sampleStep,
 		  noise+= texture2D(noisetex, coord*0.0425   + wind * 0.15).x * 8.0;
 		  noise+= texture2D(noisetex, coord*0.03125  + wind * 0.05).x * 11.0;
 		  noise+= texture2D(noisetex, coord*0.021625 + wind * 0.05).x * -10.0;
-	noise = (noise * 0.5) - p2(p4(noiseCoverage)) + p2(rainStrength);
+	noise = (noise * 0.5) - p2(p4(noiseCoverage)) + p3(rainStrength);
 	float multiplier = (CLOUD_THICKNESS * 2) * sampleStep * (1.0 - 0.75 * rainStrength);
 
 	noise = max(noise - (sunCoverage * 3.0 + CLOUD_AMOUNT), 0.0) * multiplier;
@@ -122,7 +122,7 @@ vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol) {
 	
 	float cloud = 0.0, cloudLighting = 0.0;
 
-	float sampleStep = 1.0 / samples;
+	float sampleStep = 1.2 / samples;
 	float currentStep = dither * sampleStep;
 	
 	float brightness = CLOUD_BRIGHTNESS - rainStrength;
@@ -148,7 +148,7 @@ vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol) {
 			vec2 coord = cameraPosition.xz * 0.0003 + planeCoord.xz;
 				 coord += cos(mix(vec2(cos(iDither * 0.75), sin(iDither * 1.75)), vec2(cos(iDither * 2.75), sin(iDither * 3.75)), iDither) * 0.0025);
 				 coord += sin(mix(vec2(cos(iDither * 1.75), sin(iDither * 2.75)), vec2(cos(iDither * 3.25), sin(iDither * 4.75)), iDither) * 0.0015);
-				 coord += tan(mix(vec2(cos(iDither * 2.75), sin(iDither * 3.75)), vec2(cos(iDither * 4.25), sin(iDither * 5.75)), iDither) * 0.0005);
+				 coord += cos(mix(vec2(cos(iDither * 2.75), sin(iDither * 3.75)), vec2(cos(iDither * 4.25), sin(iDither * 5.75)), iDither) * 0.0005);
 			float noise = CloudSample(coord, wind, currentStep, sampleStep, sunCoverage);
 
 			float halfVoL = VoL * shadowFade * 0.5 + 0.5;
@@ -173,8 +173,8 @@ vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol) {
 
 		#ifdef END
 		cloudColor = mix(
-			x2(cloudambientEnd) * ((0.5 * sunVisibility + 0.5) * 0.1 * cloudambientEnd),
-			cloudlightEnd * (0.85 + 1.25 * scattering),
+			cloudambientEnd * (0.35 * sunVisibility + 0.5),
+			cloudlightEnd * (0.75 + 1.15 * scattering),
 			cloudLighting
 		);
 		#endif
@@ -213,11 +213,14 @@ void DrawStars(inout vec3 color, vec3 viewPos) {
 	if (cameraPosition.y < 1.0) star *= exp(2.0 * cameraPosition.y - 2.0);
 		
 	color += star * pow(lightNight, vec3(0.8));
+	#ifdef END
+	color += star * pow(lightNight * 16, vec3(0.8));
+	#endif
 }
 
 float AuroraSample(vec2 coord, vec2 wind, float VoU) {
 	float noise = texture2D(noisetex, coord * 0.0625  + wind * 0.25).b * 6.0;
-		  noise+= texture2D(noisetex, coord * 0.03125 + wind * 0.15).b * 6.0;
+		  noise+= texture2D(noisetex, coord * 0.03125 + wind * 0.15).b * 6.0;	
 
 	noise = max(1.0 - 4.0 * (0.5 * VoU + 0.5) * abs(noise - 3.0), 0.0);
 
@@ -256,7 +259,7 @@ vec3 DrawAurora(vec3 viewPos, float dither, int samples) {
 	if (VoU > 0.0 && visibility > 0.0) {
 		vec3 wpos = normalize((gbufferModelViewInverse * vec4(viewPos, 1.0)).xyz);
 		for(int i = 0; i < samples; i++) {
-			vec3 planeCoord = wpos * ((8.0 + currentStep * 7.0) / wpos.y) * 0.006;
+			vec3 planeCoord = wpos * ((11.0 + currentStep * 9.0) / wpos.y) * 0.009;
 
 			vec2 coord = cameraPosition.xz * 0.00008 + planeCoord.xz;
 			coord += vec2(coord.y, -coord.x) * 1.0;
@@ -271,7 +274,7 @@ vec3 DrawAurora(vec3 viewPos, float dither, int samples) {
 
 				vec3 auroraColor = mix(auroraLowCol, auroraHighCol, pow(currentStep, 0.4));
 				#ifdef END
-				auroraColor = mix(auroraLowCol, auroraHighCol, pow(currentStep, 0.4)) * vec3(END_R * 6.0, END_G * 0.5, END_B * 2.0) / 16;
+				auroraColor = mix(auroraLowCol, auroraHighCol, pow(currentStep, 0.4)) * vec3(END_R * 6.0, END_G * 0.5, END_B * 2.0) / 12;
 				#endif
 				aurora += noise * auroraColor * exp2(-6.0 * i * sampleStep);
 			}

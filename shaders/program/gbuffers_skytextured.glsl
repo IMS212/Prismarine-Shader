@@ -89,13 +89,21 @@ void main() {
 	#endif
 
 	#ifdef END
-	albedo.rgb = pow(albedo.rgb,vec3(2.2));
+	albedo.rgb = pow(albedo.rgb,vec3(1.1));
+
+	#ifndef SKY_DESATURATION
+	albedo.rgb = vec3(190, 120, 255) / 255;
+	#endif
 
 	vec3 nViewPos = normalize(viewPos.xyz);
 	float NdotU = dot(nViewPos, upVec);
 	float dither = Bayer64(gl_FragCoord.xy);
 	vec3 wpos = normalize((gbufferModelViewInverse * viewPos).xyz);
 	
+	#ifdef STARS
+	DrawStars(albedo.rgb, viewPos.xyz);
+	#endif
+
 	#if END_SKY == 2 || END_SKY == 3
 	vec4 cloud = DrawCloud(viewPos.xyz, dither, lightCol, ambientCol);
 	albedo.rgb += mix(albedo.rgb, cloud.rgb, cloud.a);
