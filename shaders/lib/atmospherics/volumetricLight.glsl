@@ -93,7 +93,7 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 	#elif defined END //////////// E N D ////////////
 	VoL = pow(VoL * 0.5 + 0.5, 16.0) * 0.75 + 0.25;
 	float visibility = VoL;
-	visibility = visibility / 4;
+	visibility = visibility / 3;
 	#endif
 
 	if (visibility > 0.0) {
@@ -104,7 +104,7 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 		
 		vec3 watercol = mix(vec3(1.0), vec3(waterColor.r, waterColor.g * 0.4, waterColor.b * 8) / (waterColor.a * waterColor.a), pow(waterAlpha, 0.5));
 
-		for(int i = 0; i < 10; i++) {
+		for(int i = 0; i < 6; i++) {
 			float maxDist = LIGHTSHAFT_MAX_DISTANCE;
 			float minDist = (i + dither) * 2 * LIGHTSHAFT_MIN_DISTANCE;
 			if (isEyeInWater == 1) minDist = (pow(i + dither + 0.5, 2.0))* 2.05;
