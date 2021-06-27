@@ -118,7 +118,7 @@ screen.CURVATURE=Curvature
 
 #Settings
 option.ABOUT=Prismarine
-option.ABOUT.comment=by Capt Tatsu and Septonious. bitslablab.com
+option.ABOUT.comment=Based on BSL by Capt Tatsu - bitslablab.com. Prismarine shader by Septonious and mlgimposter.
 value.ABOUT.0=BSL Edit
 
 #Lighting

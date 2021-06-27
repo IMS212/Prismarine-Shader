@@ -115,7 +115,7 @@ vec4 DrawLowerCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol) 
 
 vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol) {
 	#ifdef TAA
-		dither = fract(dither + frameCounter * 256.0);
+		dither = fract(16.0 * frameTimeCounter + dither);
 	#endif
 
 	int samples = CLOUDS_NOISE_SAMPLES;

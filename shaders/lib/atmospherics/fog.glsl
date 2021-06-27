@@ -1,3 +1,7 @@
+#if (WATER_MODE == 1 || WATER_MODE == 3) && !defined SKY_VANILLA && !defined NETHER
+uniform vec3 fogColor;
+#endif
+
 #ifdef OVERWORLD
 vec3 GetFogColor(vec3 viewPos) {
 	vec3 nViewPos = normalize(viewPos);
@@ -71,12 +75,22 @@ void NormalFog(inout vec3 color, vec3 viewPos) {
 	vec3 fogColor = GetFogColor(viewPos);
 
 	#if DISTANT_FADE == 1 || DISTANT_FADE == 3
-	if(isEyeInWater == 0.0){
+	if(isEyeInWater != 2.0){
 		float vanillaFog = 1.0 - (far - (fogFactor + 20.0)) * 5.0 / (FOG_DENSITY * far);
 		vanillaFog = clamp(vanillaFog, 0.0, 1.0);
 	
 		if(vanillaFog > 0.0){
-			vec3 vanillaFogColor = distfadeCol * 0.15;
+			vec3 vanillaFogColor = vec3(0.0);
+			if (isEyeInWater == 0.0) vanillaFogColor = distfadeCol * 0.2;
+			if (isEyeInWater == 1.0){
+				#if WATER_MODE == 0 || WATER_MODE == 2
+				vec3 waterFogColor = vec3(waterColor.r, waterColor.g * 0.8, waterColor.b) * waterAlpha;
+				#elif  WATER_MODE == 1 || WATER_MODE == 3
+				vec3 waterFogColor = fogColor * fogColor * 0.5;
+				#endif
+				waterFogColor *= 0.5 * (1.0 - blindFactor);
+				vanillaFogColor = waterFogColor;
+			}
 			#ifdef COLORED_FOG
 			vec3 worldPos = ToWorld(viewPos);
 			float redCol = (cameraPosition.z + cameraPosition.z) * (worldPos.x + worldPos.x) * 0.000015;

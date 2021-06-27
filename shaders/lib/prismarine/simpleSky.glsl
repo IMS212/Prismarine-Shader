@@ -1,4 +1,4 @@
-//from PhysicalSL by RRE36 (modified)
+//from PhysicalSL by RRE36 (modified) [UNUSED]
 
 float getRayleighScatter(float ct) {
     float phase  = 0.8 * (1.4 + 0.5 * ct);
