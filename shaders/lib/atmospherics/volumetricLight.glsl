@@ -45,7 +45,7 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 	vec3 vl = vec3(0.0);
 
 	#ifdef TAA
-	dither = fract(dither + frameCounter);
+	dither = fract(dither + frameCounter / 32.0);
 	#endif
 	
 	//LOLOLOLOLOL
@@ -93,7 +93,7 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 	#elif defined END //////////// E N D ////////////
 	VoL = pow(VoL * 0.5 + 0.5, 16.0) * 0.75 + 0.25;
 	float visibility = VoL;
-	visibility = visibility / 3;
+	visibility = visibility / 5;
 	#endif
 
 	if (visibility > 0.0) {
@@ -102,9 +102,13 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 		float depth0 = getDepth(pixeldepth0);
 		float depth1 = getDepth(pixeldepth1);
 		
-		vec3 watercol = mix(vec3(1.0), vec3(waterColor.r, waterColor.g * 0.4, waterColor.b * 8) / (waterColor.a * waterColor.a), pow(waterAlpha, 0.5));
+		#ifdef OVERWORLD
+		vec3 watercol = mix(vec3(1.0), waterColor.rgb * lightCol.rgb / (waterColor.a * waterColor.a), pow(waterAlpha, 0.5));
+		#else
+		vec3 watercol = mix(vec3(1.0), waterColor.rgb / (waterColor.a * waterColor.a), pow(waterAlpha, 0.5));
+		#endif
 
-		for(int i = 0; i < 6; i++) {
+		for(int i = 0; i < 7; i++) {
 			float maxDist = LIGHTSHAFT_MAX_DISTANCE;
 			float minDist = (i + dither) * 2 * LIGHTSHAFT_MIN_DISTANCE;
 			if (isEyeInWater == 1) minDist = (pow(i + dither + 0.5, 2.0))* 2.05;
@@ -145,7 +149,7 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 				vec3 shadow = clamp(shadowCol * (1.0 - shadow0) + shadow0, vec3(0.0), vec3(1.0));
 
 				if (depth0 < minDist) shadow *= color;
-				else if (isEyeInWater == 1.0) shadow *= watercol * 512 * (1.0 + eBS) * sqrt(minDist / maxDist);
+				else if (isEyeInWater == 1.0) shadow *= watercol * 256 * (1.0 + eBS) * sqrt(minDist / maxDist);
 
 				#if (defined LIGHTSHAFT_CLOUDY_NOISE && defined OVERWORLD) || (defined END && defined END_VOLUMETRIC_FOG)
 				vec3 npos = worldposition.xyz + cameraPosition.xyz + vec3(frameTimeCounter * 4.0, 0, 0);

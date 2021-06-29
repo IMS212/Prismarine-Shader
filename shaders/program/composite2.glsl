@@ -10,43 +10,18 @@ https://bitslablab.com
 #ifdef FSH
 
 //Varyings//
-varying vec4 texCoord;
+varying vec2 texCoord;
 
 //Uniforms//
-uniform float frameTimeCounter;
-uniform float timeAngle, timeBrightness;
 uniform float viewWidth, viewHeight, aspectRatio;
-uniform float far, near;
-uniform float rainStrength;
-uniform float isEyeInWater;
-uniform float worldTime;
 
-varying vec3 sunVec, upVec;
 uniform vec3 cameraPosition, previousCameraPosition;
 
-uniform mat4 gbufferPreviousProjection, gbufferProjectionInverse, gbufferProjection;
+uniform mat4 gbufferPreviousProjection, gbufferProjectionInverse;
 uniform mat4 gbufferModelView, gbufferPreviousModelView, gbufferModelViewInverse;
 
 uniform sampler2D colortex0;
-uniform sampler2D colortex1;
-uniform sampler2D colortex2;
-uniform sampler2D colortex3;
-uniform sampler2D depthtex0;
 uniform sampler2D depthtex1;
-uniform sampler2D noisetex;
-
-float moonVisibility = clamp(dot(-sunVec, upVec) + 0.05, 0.0, 0.1) * 10.0;
-float sunVisibility = clamp(dot(sunVec, upVec) + 0.05, 0.0, 0.1) * 10.0;
-
-#ifdef WORLD_TIME_ANIMATION
-float frametime = float(worldTime)/20.0*ANIMATION_SPEED;
-#else
-float frametime = frameTimeCounter*ANIMATION_SPEED;
-#endif
-
-//Optifine Constants//
-const bool colortex0MipmapEnabled = false;
-const bool colortex1MipmapEnabled = true;
 
 //Common Functions//
 vec3 MotionBlur(vec3 color, float z, float dither) {
@@ -58,7 +33,7 @@ vec3 MotionBlur(vec3 color, float z, float dither) {
 		vec2 doublePixel = 2.0 / vec2(viewWidth, viewHeight);
 		vec3 mblur = vec3(0.0);
 		
-		vec4 currentPosition = vec4(texCoord.xy, z, 1.0) * 2.0 - 1.0;
+		vec4 currentPosition = vec4(texCoord, z, 1.0) * 2.0 - 1.0;
 		
 		vec4 viewPos = gbufferProjectionInverse * currentPosition;
 		viewPos = gbufferModelViewInverse * viewPos;
@@ -91,7 +66,6 @@ vec3 MotionBlur(vec3 color, float z, float dither) {
 
 //Includes//
 #include "/lib/util/dither.glsl"
-#include "/lib/color/dimensionColor.glsl"
 
 #ifdef OUTLINE_OUTER
 #include "/lib/util/outlineOffset.glsl"
@@ -100,11 +74,11 @@ vec3 MotionBlur(vec3 color, float z, float dither) {
 
 //Program//
 void main() {
-    vec3 color = texture2DLod(colortex0, texCoord.xy, 0.0).rgb;
-	float dither = Bayer64(gl_FragCoord.xy);
-
+    vec3 color = texture2DLod(colortex0, texCoord, 0.0).rgb;
+	
 	#ifdef MOTION_BLUR
 	float z = texture2D(depthtex1, texCoord.st).x;
+	float dither = Bayer64(gl_FragCoord.xy);
 
 	#ifdef OUTLINE_OUTER
 	DepthOutline(z);
@@ -112,8 +86,8 @@ void main() {
 
 	color = MotionBlur(color, z, dither);
 	#endif
-
-	/*DRAWBUFFERS:07*/
+	
+	/*DRAWBUFFERS:0*/
 	gl_FragData[0] = vec4(color,1.0);
 }
 
@@ -123,11 +97,11 @@ void main() {
 #ifdef VSH
 
 //Varyings//
-varying vec4 texCoord;
+varying vec2 texCoord;
 
 //Program//
 void main() {
-	texCoord = gl_MultiTexCoord0;
+	texCoord = gl_MultiTexCoord0.xy;
 	
 	gl_Position = ftransform();
 }

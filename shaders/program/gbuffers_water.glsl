@@ -182,8 +182,8 @@ vec3 GetWaterNormal(vec3 worldPos, vec3 viewPos, vec3 viewVector) {
 #include "/lib/util/dither.glsl"
 #include "/lib/util/spaceConversion.glsl"
 #include "/lib/atmospherics/sky.glsl"
-#include "/lib/atmospherics/fog.glsl"
 #include "/lib/lighting/forwardLighting.glsl"
+#include "/lib/atmospherics/fog.glsl"
 #include "/lib/reflections/raytrace.glsl"
 #include "/lib/reflections/simpleReflections.glsl"
 #include "/lib/surface/ggx.glsl"
@@ -299,7 +299,7 @@ void main() {
 		
 		if (water > 0.5) {
 			#if WATER_MODE == 0
-			albedo.rgb = waterColor.rgb * 0.5 * waterColor.a;
+			albedo.rgb = waterColor.rgb * 0.75 * waterColor.a;
 			#elif WATER_MODE == 1
 			albedo.rgb *= albedo.a;
 			#elif WATER_MODE == 2
