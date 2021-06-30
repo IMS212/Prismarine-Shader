@@ -12,11 +12,7 @@ vec3 GetFogColor(vec3 viewPos) {
     float VoL = clamp(dot(nViewPos, sunVec), -1.0, 1.0);
 	float VoS = dot(nViewPos, sunVec);
 
-	#if FOG_COLOR_MODE == 0
-	float density = 1.00;
-	#elif FOG_COLOR_MODE == 1
-	float density = 1.00;
-	#endif
+	float density = 0.75;
 
     float nightDensity = 0.75;
     float weatherDensity = 1.5;

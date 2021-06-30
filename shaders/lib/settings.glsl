@@ -46,6 +46,16 @@ https://bitslablab.com
   #define CLOUD_UPPER_LAYER
 //#define CLOUD_LOWER_LAYER
 
+  #define VCLOUDS_NOISE_QUALITY 1 //[0 1 2]
+  #define VCLOUDS_HEIGHT 130 //[50 60 70 80 90 100 110 120 130 140 150 160 170 180 190 200]
+  #define VCLOUDS_AMOUNT 1.4 //[2.5 2.4 2.3 2.2 2.1 2.0 1.9 1.8 1.7 1.6 1.5 1.4 1.3 1.2 1.1 1.0 0.9 0.8 0.7 0.6 0.5 0.4 0.3 0.2 0.1]
+  #define VCLOUDS_VERTICAL_THICKNESS 16 //[2 4 6 8 10 12 14 16]
+  #define VCLOUDS_QUALITY 10 //[16 14 12 10 8 6 4]
+  #define VCLOUDS_SPEED 0.25 //[0.25 0.50 0.75 1.00 1.25 1.50 1.75 2.00 2.50 3.00 3.50 4.00]
+  #define VCLOUDS_OPACITY 1.0 //[0.1 0.15 0.2 0.25 0.3 0.35 0.4 0.45 0.5 0.55 0.6 0.65 0.7 0.75 0.8 0.85 0.9 0.95 1.0]
+  #define VCLOUDS_RANGE 1.0 //[0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2 1.3 1.4 1.5]
+  #define VCLOUDS_HORIZONTAL_THICKNESS 1.5 //[1.0 1.1 1.2 1.3 1.4 1.5 1.6 1.7 1.8 1.9 2.0]
+
   #define WATER_CAUSTICS_AMOUNT 1024 //[1024 512 256 128]
   #define WATER_CAUSTICS_STRENGTH 100 //[100 200 300 400 500]  
   #define WATER_TINT
@@ -318,7 +328,7 @@ https://bitslablab.com
   #define TEMPORARY_FIX
 
 //Atmospherics//
-  #define CLOUDS 1 //[0 2 1] 
+  #define CLOUDS 3 //[0 2 1 3] 
   #define STARS
 //#define SKY_DESATURATION
   #define AURORA
