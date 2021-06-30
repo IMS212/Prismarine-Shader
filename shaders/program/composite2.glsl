@@ -136,12 +136,6 @@
 		vec3 vcCol 		 = lightCol.rgb / 8 + timeBrightnessLowered;
 		color 			 += mix(color, mix(vcCol, lightCol.rgb, scattering) * (VCLOUDS_OPACITY - rainStrengthLowered), vc);
 		#endif
-
-		#if defined END && defined END_VOLUMETRIC_FOG
-		float vc 		 = texture2DLod(colortex5, texcoord.xy, 1.0).a;
-		vec3 vfCol 		 = vec3(CLOUDS_END_R * 4, CLOUDS_END_G, CLOUDS_END_B * 8) * CLOUDS_END_I * 0.00001;
-		color			 += mix(color, mix(vfCol, vfCol, vc.x) * VFOG_OPACITY, vc);
-		#endif
 		
 	/* DRAWBUFFERS:07 */
 		gl_FragData[0] = vec4(color, 1.0);
