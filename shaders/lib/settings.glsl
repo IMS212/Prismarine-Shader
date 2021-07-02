@@ -12,7 +12,7 @@ https://bitslablab.com
 //#define SUN_GLARE
   #define SKY_MODE 1 //[0 1 2]
   #define NIGHT_SKY_MODE 3 //[0 1 2 3]
-//#define END_VOLUMETRIC_FOG
+  #define END_VOLUMETRIC_FOG
   #define END_SKY 2 //[0 1 2 3]
 
   #define FOG_COLOR_MODE 0 //[0 1]
