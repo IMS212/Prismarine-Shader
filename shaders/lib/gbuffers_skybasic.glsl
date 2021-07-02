@@ -11,7 +11,7 @@ https://bitslablab.com
 
 //Varyings//
 varying float star;
-
+varying vec2 texCoord;
 varying vec3 upVec, sunVec;
 
 //Uniforms//
@@ -26,6 +26,7 @@ uniform float rainStrength;
 uniform float shadowFade;
 uniform float timeAngle, timeBrightness;
 uniform float viewWidth, viewHeight;
+uniform float far, near;
 
 uniform ivec2 eyeBrightnessSmooth;
 
@@ -34,9 +35,9 @@ uniform vec3 cameraPosition;
 uniform mat4 gbufferModelViewInverse;
 uniform mat4 gbufferProjectionInverse;
 
+uniform sampler2D colortex8;
+uniform sampler2D colortex7;
 uniform sampler2D noisetex;
-uniform sampler2D colortex15;
-uniform sampler2D colortex16;
 
 //Common Variables//
 #ifdef WORLD_TIME_ANIMATION
@@ -86,13 +87,14 @@ void SunGlare(inout vec3 color, vec3 viewPos, vec3 lightCol) {
 }
 
 //Includes//
-#include "/lib/color/lightColor.glsl"
 #include "/lib/color/endColor.glsl"
+#include "/lib/color/lightColor.glsl"
 #include "/lib/color/skyColor.glsl"
 #include "/lib/util/dither.glsl"
 #include "/lib/prismarine/functions.glsl"
 #include "/lib/atmospherics/clouds.glsl"
 #include "/lib/atmospherics/sky.glsl"
+#include "/lib/prismarine/simpleSky.glsl"
 
 //Program//
 void main() {
@@ -107,7 +109,30 @@ void main() {
 	vec3 wpos = normalize((gbufferModelViewInverse * viewPos).xyz);
 
 	#ifdef OVERWORLD
+	
+	#if SKY_MODE == 2
+    vec3 worldvec = normalize(mat3(gbufferModelViewInverse) * (viewPos.xyz));
+    vec3 sun_vec = normalize(mat3(gbufferModelViewInverse) * sunVec);
+    mat2x3 light_vec;
+        light_vec[0] = sun_vec;
+        light_vec[1] = -sun_vec;
+
+    vec3 albedo = renderAtmosphere(worldvec, light_vec);
+
+	#elif SKY_MODE == 1
 	vec3 albedo = GetSkyColor(viewPos.xyz, false);
+
+	#elif SKY_MODE == 0
+	vec3 albedo = GetSkyColor(viewPos.xyz, false);
+
+    vec3 worldvec = normalize(mat3(gbufferModelViewInverse) * (viewPos.xyz));
+    vec3 sun_vec = normalize(mat3(gbufferModelViewInverse) * sunVec);
+    mat2x3 light_vec;
+        light_vec[0] = sun_vec;
+        light_vec[1] = -sun_vec;
+	vec3 atmRain = renderAtmosphere(worldvec, light_vec) * rainStrength;
+	albedo += renderAtmosphere(worldvec, light_vec) - atmRain;
+	#endif
 	
 	#ifdef ROUND_SUN_MOON
 	vec3 lightMA = mix(lightMorning, lightEvening, mefade);
@@ -117,6 +142,14 @@ void main() {
 	RoundSunMoon(albedo, viewPos.xyz, sunColor, moonColor);
 	#endif
 
+	#ifdef STARS
+	DrawStars(albedo.rgb, viewPos.xyz);
+	#endif
+
+	#ifdef AURORA
+	albedo.rgb += DrawAurora(viewPos.xyz, dither, 24);
+	#endif
+	
 	#if NIGHT_SKY_MODE == 0 || NIGHT_SKY_MODE == 2
 		vec3 planeCoord = wpos / (wpos.y + length(wpos.xz) * 0.5);
 		vec3 moonPos = vec3(gbufferModelViewInverse * vec4(-sunVec, 1.0));
@@ -125,7 +158,7 @@ void main() {
 		hcoord *= 0.2;
 
 		if (moonVisibility > 0.0 && rainStrength == 0.0){
-			vec3 helios = texture2D(colortex15, hcoord * 0.8 + 0.6).rgb;
+			vec3 helios = texture2D(colortex8, hcoord * 0.8 + 0.6).rgb;
 			helios *= x2(length(helios) + 0.6);
 			albedo.rgb += helios * 0.05 * clampNdotU * (1.0 - sunVisibility);
 		}
@@ -139,21 +172,12 @@ void main() {
 		ncoord *= 0.2;
 
 		if (moonVisibility > 0.0 && rainStrength == 0.0){
-			vec3 nebula = texture2D(colortex16, ncoord * 0.8 + 0.6).rgb;
+			vec3 nebula = texture2D(colortex7, ncoord * 0.8 + 0.6).rgb;
 			nebula *= x2(length(nebula) + 0.6);
 			albedo.rgb += nebula * 0.05 * clampNdotU * (1.0 - sunVisibility);
 		}
 	#endif
 
-	#ifdef STARS
-	DrawStars(albedo.rgb, viewPos.xyz);
-	DrawBigStars(albedo.rgb, viewPos.xyz);
-	#endif
-
-	#ifdef AURORA
-	albedo.rgb += DrawAurora(viewPos.xyz, dither, 24);
-	#endif
-	
 	#if CLOUDS == 1
 	vec4 cloud = vec4(0.0);
 	#ifdef CLOUD_UPPER_LAYER
@@ -195,7 +219,7 @@ void main() {
 	
     /* DRAWBUFFERS:0 */
 	gl_FragData[0] = vec4(albedo, 1.0 - star);
-    #if (defined OVERWORLD && CLOUDS == 1) || (defined END && END_SKY == 2) || (defined END && END_SKY == 3)
+    #if (CLOUDS == 1 && defined OVERWORLD) || (CLOUDS == 1 && (defined END_SKY == 2 || defined END_SKY == 3) && defined END)
     /* DRAWBUFFERS:04 */
 	gl_FragData[1] = vec4(cloud.a, 0.0, 0.0, 0.0);
     #endif
@@ -208,7 +232,7 @@ void main() {
 
 //Varyings//
 varying float star;
-
+varying vec2 texCoord;
 varying vec3 sunVec, upVec;
 
 //Uniforms//
@@ -218,6 +242,8 @@ uniform mat4 gbufferModelView;
 
 //Program//
 void main() {
+	texCoord = (gl_TextureMatrix[0] * gl_MultiTexCoord0).xy;
+
 	const vec2 sunRotationData = vec2(cos(sunPathRotation * 0.01745329251994), -sin(sunPathRotation * 0.01745329251994));
 	float ang = fract(timeAngle - 0.25);
 	ang = (ang + (cos(ang * 3.14159265358979) * -0.5 + 0.5 - ang) / 3.0) * 6.28318530717959;

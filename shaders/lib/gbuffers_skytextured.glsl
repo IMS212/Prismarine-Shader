@@ -102,7 +102,6 @@ void main() {
 	
 	#ifdef STARS
 	DrawStars(albedo.rgb, viewPos.xyz);
-	DrawBigStars(albedo.rgb, viewPos.xyz);
 	#endif
 
 	#if END_SKY == 2 || END_SKY == 3

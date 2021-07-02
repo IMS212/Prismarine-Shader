@@ -31,7 +31,7 @@ float getVerticalNoise(vec2 pos){
 }
 
 float getHorizontalNoise(vec3 pos){
-	float YOffset = 16.0;
+	float YOffset = 64.0;
 	vec3 flr = floor(pos);
 	vec3 frc = fract(pos);
 	frc = frc * frc * (3.0 - 2.0 * frc);
@@ -74,7 +74,7 @@ float getUltraQualityVCSample(vec3 pos, float height, float verticalThickness, f
 		noise+= getHorizontalNoise(pos / samples * 0.00108 - wind*0.1) * 2.5 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
 
 	}
-	noise = clamp(mix(noise, 21.0, 0.25 * 0.0 * VCLOUDS_AMOUNT) - (10.0 + 5.0 * ymult), 0.0, 1.0) * (VCLOUDS_OPACITY - rainStrengthLowered) * far;
+	noise = clamp(mix(noise, 21.0, 0) - (10.0 + 5.0 * ymult), 0.0, 1.0) * (VCLOUDS_OPACITY - rainStrengthLowered) * far;
 	return noise;
 }
 
@@ -93,7 +93,7 @@ float getHighQualityVCSample(vec3 pos, float height, float verticalThickness, fl
 		noise+= getHorizontalNoise(pos / samples * 0.016125) * 3.5 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
 
 	}
-	noise = clamp(mix(noise, 21.0, 0.25 * 0.0 * VCLOUDS_AMOUNT) - (10.0 + 5.0 * ymult), 0.0, 1.0) * (VCLOUDS_OPACITY - rainStrengthLowered) * far;
+	noise = clamp(mix(noise, 21.0, 0) - (10.0 + 5.0 * ymult), 0.0, 1.0) * (VCLOUDS_OPACITY - rainStrengthLowered) * far;
 	return noise;
 }
 
@@ -107,7 +107,7 @@ float getLowQualityVCSample(vec3 pos, float height, float verticalThickness, flo
 		noise+= getHorizontalNoise(pos / samples * 0.1 - wind * 0.3) * 16 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
 	}
 
-	noise = clamp(mix(noise, 0, 0.25 * 0.0 * VCLOUDS_AMOUNT) - (10.0 + 1.0 * ymult), 0.0, 1.0) * (VCLOUDS_OPACITY - rainStrengthLowered);
+	noise = clamp(mix(noise, 0, 0) - (10.0 + 1.0 * ymult), 0.0, 1.0) * (VCLOUDS_OPACITY - rainStrengthLowered);
 	return noise;
 }
 
@@ -115,29 +115,30 @@ float getLowQualityVCSample(vec3 pos, float height, float verticalThickness, flo
 
 //FINAL
 
-vec2 getVolumetricCloud(float pixeldepth0, float pixeldepth1) {
+vec2 getVolumetricCloud(float pixeldepth, float pixeldepthw) {
 	vec2 vc 		= vec2(0.0);
 	vec4 wpos 		= vec4(0.0);
 
 	float quality	= VCLOUDS_QUALITY / 2;
-	float dither 	= Bayer8(gl_FragCoord.xy) * quality;
+	float dither 	= (Bayer8(gl_FragCoord.xy) * quality);
 	float maxDist 	= VCLOUDS_RANGE*far;
-	float minDist 	= 0.01f+dither;
-
+	float minDist 	= 0.01+dither;
 
 	for (minDist; minDist < maxDist; ) {
-		if (getDepth(pixeldepth0) < minDist || vc.y > 0.999){
+		if (getDepth(pixeldepth) < minDist || vc.y > 0.999){
 			break;
 		}
-		wpos = getWorldPos(getFragPos(texCoord.xy, distx(minDist)));
-		if (length(wpos.xz) < maxDist){
-			float verticalNoise = getVerticalNoise((wpos.xz + cameraPosition.xz + frametime) * 0.001 * VCLOUDS_SPEED);
-			wpos.xyz += cameraPosition.xyz + vec3(frametime*4.0,-verticalNoise*32.0,0.0);
+		wpos = getWorldPos(getFragPos(texCoord.xy,distx(minDist)));
+		if (length(wpos.xz) < maxDist && getDepth(pixeldepthw) > minDist){
+			float iDither 	= minDist + dither;
+			float verticalNoise = getVerticalNoise((wpos.xz + cameraPosition.xz + frametime) * 0.002 * VCLOUDS_SPEED);		
 
 			#ifdef WORLD_CURVATURE
 			if (length(wpos.xz) < WORLD_CURVATURE_SIZE) wpos.y += length(wpos.xz) * length(wpos.xyz) / WORLD_CURVATURE_SIZE;
 			else break;
 			#endif
+
+			wpos.xyz += cameraPosition.xyz + vec3(frametime*4.0,-verticalNoise*32.0,0.0);
 
 			#if VCLOUDS_NOISE_QUALITY == 0
 			float noise = getLowQualityVCSample(wpos.xyz, VCLOUDS_HEIGHT, VCLOUDS_VERTICAL_THICKNESS, VCLOUDS_AMOUNT);
@@ -146,10 +147,12 @@ vec2 getVolumetricCloud(float pixeldepth0, float pixeldepth1) {
 			#elif VCLOUDS_NOISE_QUALITY == 2
 			float noise = getUltraQualityVCSample(wpos.xyz, VCLOUDS_HEIGHT, VCLOUDS_VERTICAL_THICKNESS, VCLOUDS_AMOUNT);
 			#endif
-			
-			float col = pow(smoothstep(VCLOUDS_HEIGHT - VCLOUDS_VERTICAL_THICKNESS * noise, VCLOUDS_HEIGHT + VCLOUDS_VERTICAL_THICKNESS * noise, wpos.y), dither);
-			vc.x 	  = max(noise * col, vc.x);
-			vc.y 	  = max(noise, vc.y);
+
+			wpos.xz += cos(mix(vec2(cos(iDither * 0.75), sin(iDither * 1.75)), vec2(cos(iDither * 2.75), sin(iDither * 3.75)), iDither) * 0.0025);
+
+			float col = pow(smoothstep(VCLOUDS_HEIGHT - VCLOUDS_VERTICAL_THICKNESS * noise, VCLOUDS_HEIGHT + VCLOUDS_VERTICAL_THICKNESS * noise, wpos.y), 1.5);
+			vc.x = max(noise * col, vc.x);
+			vc.y = max(noise, vc.y);
 		}
 		minDist = minDist + quality;
 	}

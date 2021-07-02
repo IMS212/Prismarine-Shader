@@ -209,12 +209,34 @@ void DrawStars(inout vec3 color, vec3 viewPos) {
 		star *= GetNoise(coord.xy + 0.23);
 	}
 	star = clamp(star - 0.7125, 0.0, 1.0) * multiplier;
-
-	if (cameraPosition.y < 1.0) star *= exp(2.0 * cameraPosition.y - 2.0);
 		
 	color += star * pow(lightNight, vec3(0.8));
 	#ifdef END
 	color += star * pow(lightNight * 16, vec3(0.8));
+	#endif
+}
+
+void DrawBigStars(inout vec3 color, vec3 viewPos) {
+	vec3 wpos = vec3(gbufferModelViewInverse * vec4(viewPos, 1.0));
+	vec3 planeCoord = wpos / (wpos.y + length(wpos.xz));
+	vec2 wind = vec2(frametime, 0.0);
+	vec2 coord = planeCoord.xz + cameraPosition.xz * 0.0001 + wind * 0.00125;
+	coord = floor(coord * 1024.0) / 1024.0;
+	
+	float VoU = clamp(dot(normalize(viewPos), normalize(upVec)), 0.0, 1.0);
+	float multiplier = sqrt(sqrt(VoU)) * 3.0 * (1.0 - rainStrength);
+	
+	float star = 1.0;
+	if (VoU > 0.0) {
+		star *= GetNoise(coord.xy);
+		star *= GetNoise(coord.xy + 0.10);
+		star *= GetNoise(coord.xy + 0.20);
+	}
+	star = clamp(star - 0.7125, 0.0, 1.0) * multiplier;
+		
+	color += star * pow(lightNight, vec3(0.8));
+	#ifdef END
+	color += star * pow(lightNight * 16 * endCol.rgb, vec3(1.0));
 	#endif
 }
 

@@ -12,7 +12,7 @@ vec3 GetFogColor(vec3 viewPos) {
     float VoL = clamp(dot(nViewPos, sunVec), -1.0, 1.0);
 	float VoS = dot(nViewPos, sunVec);
 
-	float density = 0.75;
+	float density = 1.25;
 
     float nightDensity = 0.75;
     float weatherDensity = 1.5;
@@ -71,10 +71,12 @@ void NormalFog(inout vec3 color, vec3 viewPos) {
 	vec3 fogColor = vec3(0.0);
 
 	#if FOG_COLOR_MODE == 0
-	fogColor = GetFogColor(viewPos) * GetSkyColor(viewPos, false);
+	fogColor = GetSkyColor(viewPos, false);
 	#elif FOG_COLOR_MODE == 1
 	fogColor = GetFogColor(viewPos);
 	#endif
+
+	if (isEyeInWater == 1) fogColor = waterColor.rgb;
 
 	#ifdef COLORED_FOG
 		vec2 pos = (cameraPosition.xz + worldPos.xz);
@@ -97,15 +99,6 @@ void NormalFog(inout vec3 color, vec3 viewPos) {
 				#elif FOG_COLOR_MODE == 1
 				vanillaFogColor distfadeCol * 0.2;
 				#endif
-			}
-			if (isEyeInWater == 1.0){
-				#if WATER_MODE == 0 || WATER_MODE == 2
-				vec3 waterFogColor = vec3(waterColor.r, waterColor.g * 0.8, waterColor.b) * waterAlpha;
-				#elif  WATER_MODE == 1 || WATER_MODE == 3
-				vec3 waterFogColor = fogColor * fogColor * 0.5;
-				#endif
-				waterFogColor *= 0.5 * (1.0 - blindFactor);
-				vanillaFogColor = waterFogColor;
 			}
 			vanillaFogColor *= (4.0 - 3.0 * eBS) * (1.0 + nightVision);
 

@@ -3,6 +3,11 @@ vec3 lightDay        = vec3(LIGHT_DR,   LIGHT_DG,   LIGHT_DB)   * LIGHT_DI / 255
 vec3 lightEvening    = vec3(LIGHT_ER,   LIGHT_EG,   LIGHT_EB)   * LIGHT_EI / 255.0;
 vec3 lightNight      = vec3(LIGHT_NR,   LIGHT_NG,   LIGHT_NB)   * LIGHT_NI * 0.3 / 255.0;
 
+vec3 vcMorning    = vec3(VCLOUD_MR,   VCLOUD_MG,   VCLOUD_MB)   * VCLOUD_MI / 255;
+vec3 vcDay        = vec3(VCLOUD_DR,   VCLOUD_DG,   VCLOUD_DB)   * VCLOUD_DI / 255;
+vec3 vcEvening    = vec3(VCLOUD_ER,   VCLOUD_EG,   VCLOUD_EB)   * VCLOUD_EI / 255;
+vec3 vcNight      = vec3(VCLOUD_NR,   VCLOUD_NG,   VCLOUD_NB)   * VCLOUD_NI * 0.3 / 255;
+
 vec3 ambientMorning  = vec3(AMBIENT_MR, AMBIENT_MG, AMBIENT_MB) * AMBIENT_MI / 255.0;
 vec3 ambientDay      = vec3(AMBIENT_DR, AMBIENT_DG, AMBIENT_DB) * AMBIENT_DI / 255.0;
 vec3 ambientEvening  = vec3(AMBIENT_ER, AMBIENT_EG, AMBIENT_EB) * AMBIENT_EI / 255.0;
@@ -98,6 +103,7 @@ vec3 fogcolorSun       = CalcSunColor(fogcolorMorning, fogcolorDay, fogcolorEven
 vec3 distfadeSun       = CalcSunColor(distfadeMorning, distfadeDay, distfadeEvening);
 vec3 skylightSun       = CalcSunColor(skylightMorning, skylightDay, skylightEvening);
 vec3 lightshaftSun     = CalcSunColor(lightshaftMorning, lightshaftDay, lightshaftEvening);
+vec3 vcSun     		   = CalcSunColor(vcMorning, vcDay, vcEvening);
 vec3 cloudlightSun     = CalcSunColor(cloudlightMorning, cloudlightDay, cloudlightEvening);
 vec3 cloudambientSun   = CalcSunColor(cloudambientMorning, cloudambientDay, cloudambientEvening);
 
@@ -105,5 +111,6 @@ vec3 distfadeCol   = CalcLightColor(distfadeSun, distfadeNight, weatherCol.rgb *
 vec3 lightCol      = CalcLightColor(lightSun, lightNight, weatherCol.rgb);
 vec3 ambientCol    = CalcLightColor(ambientSun, ambientNight, weatherCol.rgb);
 vec3 lightshaftCol = CalcLightColor(lightshaftSun, lightshaftNight, weatherCol.rgb);
+vec3 vcloudsCol    = CalcLightColor(vcSun, vcNight, weatherCol.rgb);
 vec3 cloudUpCol    = CalcLightColor(cloudlightSun, cloudlightNight, weatherCol.rgb * 2.5);
 vec3 cloudDownCol  = CalcLightColor(cloudambientSun, cloudambientNight, weatherCol.rgb * 0.5);

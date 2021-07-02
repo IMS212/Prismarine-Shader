@@ -129,11 +129,12 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
     #endif
 
     //WORLD POSITION BASED - STATIC
+
     #ifdef OVERWORLD
     #if COLORED_LIGHTING_MODE == 3
     vec2 pos = (cameraPosition.xz + worldPos.xz);
     blocklightCol = x4(ntmix(pos, pos, pos, 0.0005)) * blocklightStrength * 4;
-    vec3 blockLighting =  newLightmap * newLightmap * blocklightCol;
+    vec3 blockLighting =  newLightmap * newLightmap * blocklightCol * BLOCKLIGHT_I;
 
     //TIME BASED
     #elif COLORED_LIGHTING_MODE == 2

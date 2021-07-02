@@ -19,6 +19,7 @@ varying vec4 color;
 //Uniforms//
 uniform int blockEntityId;
 uniform float isEyeInWater;
+
 uniform sampler2D tex;
 
 #include "/lib/color/waterColor.glsl"
@@ -34,21 +35,15 @@ void main() {
 
     float premult = float(mat > 0.98 && mat < 1.02);
 	float disable = float(mat > 1.98 && mat < 2.02);
-	float water = float(mat > 666);
+	float water = float (mat > 2.98);
+	if (water > 0.9){
+		albedo.rgb = waterColor.rgb * (WATER_I * 2 - isEyeInWater);
+	}
 	if (disable > 0.5 || albedo.a < 0.01) discard;
 
     #ifdef SHADOW_COLOR
-	albedo.rgb = mix(vec3(1),albedo.rgb,pow(albedo.a,(1.0-albedo.a)*0.5)*2);
-	albedo.rgb *= 1.0-pow(albedo.a,128.0);
-	if (water > 0.5 && isEyeInWater < 0.5){
-		#if defined OVERWORLD
-		albedo.rgb = waterColor.rgb * WATER_I;
-		#ifdef BLOCKLIGHT_FLICKERING
-		albedo.rgb *= getFlickering(vec3(0.1,0.1,0.1));
-		if (isEyeInWater == 1) albedo.rgb *= WATER_I;
-		#endif
-		#endif
-		}
+	albedo.rgb = mix(vec3(1.0), albedo.rgb, 1.0 - pow(1.0 - albedo.a, 3.0));
+	albedo.rgb *= 1.0 - pow(albedo.a, 64.0);
 	#else
 	if ((premult > 0.5 && albedo.a < 0.98)) albedo.a = 0.0;
 	#endif
@@ -106,7 +101,7 @@ void main() {
 	mat = 0;
 	if (mc_Entity.x == 10301) mat = 1;
 	if (mc_Entity.x == 10249 || mc_Entity.x == 10252) mat = 2;
-	if (mc_Entity.x == 10300) mat = 667.0;
+	if (mc_Entity.x == 10300) mat = 3;
 	
 	vec4 position = shadowModelViewInverse * shadowProjectionInverse * ftransform();
 	

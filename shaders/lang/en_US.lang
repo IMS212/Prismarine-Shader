@@ -34,6 +34,8 @@ screen.CG_G=Green Channel
 screen.CG_B=Blue Channel
 screen.CG_T=Tint
 
+screen.PCLOUDS_COLOR=Planar Clouds
+screen.VCLOUDS_COLOR=Volumetric Clouds
 screen.LIGHTSHAFT_OPTIONS=Volumetric Rays Config 
 screen.COLOR=Color
 screen.LIGHT_COLOR=Lighting Color
@@ -42,6 +44,10 @@ screen.CLOUDLIGHT_M=Clouds Upper (Morning)
 screen.CLOUDLIGHT_D=Clouds Upper (Day)
 screen.CLOUDLIGHT_E=Clouds Upper (Evening)
 screen.CLOUDLIGHT_N=Clouds Upper (Night)
+screen.VCLOUD_M=3D Clouds (Morning)
+screen.VCLOUD_D=3D Clouds (Day)
+screen.VCLOUD_E=3D Clouds (Evening)
+screen.VCLOUD_N=3D Clouds (Night)
 screen.DISTFADECOL_M=Distant Fade (Morning)
 screen.DISTFADECOL_D=Distant Fade (Day)
 screen.DISTFADECOL_E=Distant Fade (Evening)
@@ -100,7 +106,8 @@ screen.END_COLOR=End Color
 screen.END_CLOUDS_COLOR=End Clouds Color
 screen.VOLUMETRIC_FOG=Volumetric Fog Config
 screen.PLANAR_CLOUDS=Planar Clouds Config
-screen.VOLUMETRIC_CLOUDS=Volumetric Clouds Config
+screen.VOLUMETRIC_CLOUDS_CONFIG=Volumetric Clouds Config
+screen.CLOUDS_CONFIG=Planar Clouds Config
 screen.FOG_COLOR=Fog Color
 screen.LIGHTSHAFT_COLOR=Light Shafts Color
 screen.LENSFLARE_CONFIG=Lens Flare Config
@@ -396,6 +403,27 @@ value.CLOUD_THICKNESS.16=Very High
 option.CLOUD_AMOUNT=Amount
 option.CLOUD_AMOUNT.comment=Adjusts cloud amount. Higher values decrease cloud amount.
 
+option.VCLOUDS_NOISE_QUALITY=Noise Quality
+value.VCLOUDS_NOISE_QUALITY.0=Low
+value.VCLOUDS_NOISE_QUALITY.1=Medium
+value.VCLOUDS_NOISE_QUALITY.2=High
+option.VCLOUDS_AMOUNT=Amount
+option.VCLOUDS_RANGE=Range
+option.VCLOUDS_RANGE.comment=Changes the maximum render distance
+option.VCLOUDS_OPACITY=Opacity
+option.VCLOUDS_SPEED=Speed
+option.VCLOUDS_QUALITY=Dithering Quality
+value.VCLOUDS_QUALITY.16=Where is my dither?
+value.VCLOUDS_QUALITY.14=Potato
+value.VCLOUDS_QUALITY.12=Very Low
+value.VCLOUDS_QUALITY.10=Low
+value.VCLOUDS_QUALITY.8=Medium
+value.VCLOUDS_QUALITY.6=High
+value.VCLOUDS_QUALITY.4=Ultra
+option.VCLOUDS_HEIGHT=Height
+option.VCLOUDS_VERTICAL_THICKNESS=Vertcial Thickness
+option.VCLOUDS_HORIZONTAL_THICKNESS=Horizontal Thickness
+
 option.CLOUD_HEIGHT=Height
 option.CLOUD_HEIGHT.comment=Adjusts cloud height.
 value.CLOUD_HEIGHT.5.0 =Very Low
@@ -620,6 +648,26 @@ option.CLOUDLIGHT_NR=Red
 option.CLOUDLIGHT_NG=Green
 option.CLOUDLIGHT_NB=Blue
 option.CLOUDLIGHT_NI=Intensity
+
+option.VCLOUD_MR=Red
+option.VCLOUD_MG=Green
+option.VCLOUD_MB=Blue
+option.VCLOUD_MI=Intensity
+
+option.VCLOUD_DR=Red
+option.VCLOUD_DG=Green
+option.VCLOUD_DB=Blue
+option.VCLOUD_DI=Intensity
+
+option.VCLOUD_ER=Red
+option.VCLOUD_EG=Green
+option.VCLOUD_EB=Blue
+option.VCLOUD_EI=Intensity
+
+option.VCLOUD_NR=Red
+option.VCLOUD_NG=Green
+option.VCLOUD_NB=Blue
+option.VCLOUD_NI=Intensity
 
 option.DISTFADE_MR=Red
 option.DISTFADE_MG=Green
