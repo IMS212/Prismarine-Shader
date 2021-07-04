@@ -35,8 +35,8 @@ uniform mat4 gbufferModelViewInverse;
 uniform mat4 gbufferProjectionInverse;
 
 uniform sampler2D noisetex;
-uniform sampler2D colortex15;
-uniform sampler2D colortex16;
+uniform sampler2D colortex12;
+uniform sampler2D colortex13;
 
 //Common Variables//
 #ifdef WORLD_TIME_ANIMATION
@@ -102,9 +102,18 @@ void main() {
 
 	vec3 nViewPos = normalize(viewPos.xyz);
 	float NdotU = dot(nViewPos, upVec);
-	float clampNdotU = x2(x2(clamp(NdotU * 3.0, 0.0, 1.0)));
 	float dither = Bayer64(gl_FragCoord.xy);
+
+	#if NIGHT_SKY_MODE != 3
+	float clampNdotU = x2(x2(clamp(NdotU * 4.0, 0.0, 1.0)));
 	vec3 wpos = normalize((gbufferModelViewInverse * viewPos).xyz);
+	vec3 planeCoord = wpos / (wpos.y + length(wpos.xz) * 0.5);
+	vec3 moonPos = vec3(gbufferModelViewInverse * vec4(-sunVec, 1.0));
+	vec3 moonCoord = moonPos / (moonPos.y + length(moonPos.xz));
+
+	vec2 scoord = planeCoord.xz - moonCoord.xz;
+		 scoord *= 0.2;
+	#endif
 
 	#ifdef OVERWORLD
 	vec3 albedo = GetSkyColor(viewPos.xyz, false);
@@ -118,30 +127,17 @@ void main() {
 	#endif
 
 	#if NIGHT_SKY_MODE == 0 || NIGHT_SKY_MODE == 2
-		vec3 planeCoord = wpos / (wpos.y + length(wpos.xz) * 0.5);
-		vec3 moonPos = vec3(gbufferModelViewInverse * vec4(-sunVec, 1.0));
-		vec3 moonCoord = moonPos / (moonPos.y + length(moonPos.xz));
-		vec2 hcoord = planeCoord.xz - moonCoord.xz;
-		hcoord *= 0.2;
-
 		if (moonVisibility > 0.0 && rainStrength == 0.0){
-			vec3 helios = texture2D(colortex15, hcoord * 0.8 + 0.6).rgb;
+			vec3 helios = texture2D(colortex12, scoord * 0.8 + 0.6).rgb;
 			helios *= x2(length(helios) + 0.6);
-			albedo.rgb += helios * 0.05 * clampNdotU * (1.0 - sunVisibility);
+			albedo.rgb += helios * 0.05 * clampNdotU * (1.0 - sunVisibility) * (1.0 - rainStrength);
 		}
 	#endif
-
 	#if NIGHT_SKY_MODE == 1 || NIGHT_SKY_MODE == 2
-		vec3 planeCoord2 = wpos / (wpos.y + length(wpos.xz) * 0.5);
-		vec3 moonPos2 = vec3(gbufferModelViewInverse * vec4(-sunVec, 1.0));
-		vec3 moonCoord2 = moonPos2 / (moonPos2.y + length(moonPos2.xz));
-		vec2 ncoord = planeCoord2.xz - moonCoord2.xz;
-		ncoord *= 0.2;
-
 		if (moonVisibility > 0.0 && rainStrength == 0.0){
-			vec3 nebula = texture2D(colortex16, ncoord * 0.8 + 0.6).rgb;
+			vec3 nebula = texture2D(colortex13, scoord * 0.8 + 0.6).rgb;
 			nebula *= x2(length(nebula) + 0.6);
-			albedo.rgb += nebula * 0.05 * clampNdotU * (1.0 - sunVisibility);
+			albedo.rgb += nebula * 0.05 * clampNdotU * (1.0 - sunVisibility) * (1.0 - rainStrength);
 		}
 	#endif
 
