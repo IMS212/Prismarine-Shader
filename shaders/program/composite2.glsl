@@ -12,6 +12,8 @@ https://bitslablab.com
 uniform int isEyeInWater;
 const bool colortex0MipmapEnabled = false;
 const bool colortex1MipmapEnabled = true;
+const bool colortex4MipmapEnabled = true;
+const bool colortex5MipmapEnabled = true;
 
 varying vec3 lightVec, sunVec, upVec;
 
@@ -20,11 +22,8 @@ varying vec4 texCoord;
 uniform float timeAngle, timeBrightness;
 uniform sampler2D colortex0;
 uniform sampler2D colortex1;
-uniform sampler2D colortex2;
-uniform sampler2D colortex3;
 uniform sampler2D colortex4;
 uniform sampler2D colortex5;
-uniform sampler2D colortex6;
 uniform sampler2D depthtex0;
 uniform sampler2D depthtex1;
 uniform sampler2D noisetex;
@@ -40,6 +39,7 @@ uniform vec3 cameraPosition, previousCameraPosition;
 uniform mat4 gbufferProjection, gbufferPreviousProjection, gbufferProjectionInverse;
 uniform mat4 gbufferModelView, gbufferPreviousModelView, gbufferModelViewInverse;
 uniform float far, near;
+uniform float shadowFade;
 
 #ifdef WORLD_TIME_ANIMATION
 float frametime = float(worldTime)/20.0*ANIMATION_SPEED;
@@ -135,12 +135,12 @@ void main() {
 	vec3 viewPos = ToNDC(screenPos);
 	#endif
 
-	float VoS 		 = dot(normalize(viewPos), sunVec);
-	float scattering = pow(VoS * 0.5 * (2.0 * sunVisibility - 1.0) + 0.5, 6.0);
+	float VoL = dot(normalize(viewPos), lightVec);
+	float scattering = pow(VoL * shadowFade * 0.5 + 0.5, 8.0);
 
 	vec2 vc = vec2(texture2DLod(colortex4,texCoord.xy,float(2.0)).a,texture2DLod(colortex5,texCoord.xy,float(2.0)).a);
 	float vcmult = 0.5*(1.0-moonVisibility*0.7)*(1.0-rainStrength*0.5);
-	color = mix(color, mix(vcloudsCol.rgb, vcloudsCol.rgb, scattering * scattering) * vcmult * vc.x, vc.x * vc.y * VCLOUDS_OPACITY);
+	color = mix(color, mix(vcloudsCol.rgb, vcloudsCol.rgb, scattering) * vcmult * vc.x, vc.x * vc.y * VCLOUDS_OPACITY);
 	#endif
 		
 	/* DRAWBUFFERS:07 */

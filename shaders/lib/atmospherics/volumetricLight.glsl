@@ -73,7 +73,7 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 
 	#ifdef LIGHTSHAFT_PERSISTENCE
 	if (isEyeInWater == 0) persistence 	   *= min(2.0 + rainStrength*rainStrength - sunVisibility * sunVisibility, 8.0) - (timeBrightness * LIGHTSHAFT_TIME_DECREASE_FACTOR);
-	if (isEyeInWater == 1) persistence     *= min(2.0 + rainStrength*rainStrength - sunVisibility * sunVisibility, 8.0) - (cameraPosition.y * LIGHTSHAFT_ALTITUDE_DECREASE_FACTOR * 0.5) * 0.5;
+	if (isEyeInWater == 1) persistence     *= min(2.0 + rainStrength*rainStrength - sunVisibility * sunVisibility, 8.0) - (cameraPosition.y * LIGHTSHAFT_ALTITUDE_DECREASE_FACTOR * 0.5) * 0.1;
 	if (persistence >= 1.25){
 		persistence = persistence - (timeBrightness * 16);
 	}
@@ -107,7 +107,7 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 		vec3 watercol = mix(vec3(1.0), waterColor.rgb / (waterColor.a * waterColor.a), pow(waterAlpha, 0.5));
 		#endif
 
-		for(int i = 0; i < 7; i++) {
+		for(int i = 0; i < 16; i++) {
 			float maxDist = LIGHTSHAFT_MAX_DISTANCE;
 			float minDist = (i + dither) * 2 * LIGHTSHAFT_MIN_DISTANCE;
 			if (isEyeInWater == 1) minDist = (pow(i + dither + 0.5, 2.0))* 2.05;
@@ -148,7 +148,7 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 				vec3 shadow = clamp(shadowCol * (1.0 - shadow0) + shadow0, vec3(0.0), vec3(1.0));
 
 				if (depth0 < minDist) shadow *= color;
-				else if (isEyeInWater == 1.0) shadow *= watercol * 128 * (1.0 + eBS) * sqrt(minDist / maxDist);
+				else if (isEyeInWater == 1.0) shadow *= watercol * 64 * (1.0 + eBS) * sqrt(minDist / maxDist);
 
 				#if (defined LIGHTSHAFT_CLOUDY_NOISE && defined OVERWORLD) || (defined END && defined END_VOLUMETRIC_FOG)
 				vec3 npos = worldposition.xyz + cameraPosition.xyz + vec3(frameTimeCounter * 4.0, 0, 0);

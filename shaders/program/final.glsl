@@ -28,7 +28,7 @@ const int gaux2Format = RGB10_A2; //reflection image
 const int gaux3Format = RGB16; //normals
 const int gaux4Format = RGB16; //fresnel
 */
-
+const bool colortex1MipmapEnabled = true;
 const bool shadowHardwareFiltering = true;
 const float shadowDistanceRenderMul = 1.0;
 
@@ -68,7 +68,7 @@ void main() {
 	newTexCoord = floor(newTexCoord * view) / view;
 	#endif
 
-	vec3 color = texture2DLod(colortex1, texCoord, 0).rgb;
+	vec3 color = texture2D(colortex1, texCoord).rgb;
 	
 	#ifdef TAA
 	SharpenFilter(color, newTexCoord);

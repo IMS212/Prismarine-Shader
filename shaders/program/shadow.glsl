@@ -18,7 +18,7 @@ varying vec4 color;
 
 //Uniforms//
 uniform int blockEntityId;
-uniform float isEyeInWater;
+uniform int isEyeInWater;
 
 uniform sampler2D tex;
 
