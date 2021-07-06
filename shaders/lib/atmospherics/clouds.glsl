@@ -249,6 +249,17 @@ float AuroraSample(vec2 coord, vec2 wind, float VoU) {
 	return noise;
 }
 
+float RiftSample(vec2 coord, vec2 wind, float VoU) {
+	float noise = texture2D(noisetex, coord * 0.0625  + wind * 0.25).b * 1.0;
+		  noise+= texture2D(noisetex, coord * 0.03125 + wind * 0.15).b * 2.0;	
+		  noise+= texture2D(noisetex, coord * 0.01575 + wind * 0.05).b * 3.0;
+		  noise+= texture2D(noisetex, coord * 0.00754).b * 4.0;
+
+	noise = max(1.0 - 4.0 * (0.5 * VoU + 0.5) * abs(noise - 3.0), 0.0);
+
+	return noise;
+}
+
 vec3 DrawAurora(vec3 viewPos, float dither, int samples) {
 	#ifdef TAA
 		dither = fract(16.0 * frameTimeCounter + dither);
@@ -261,14 +272,10 @@ vec3 DrawAurora(vec3 viewPos, float dither, int samples) {
 
 	float visibility = moonVisibility * (1.0 - rainStrength) * (1.0 - rainStrength);
 
-	#if	(defined WEATHER_PERBIOME && SKY_MODE == 1) || (defined WEATHER_PERBIOME && SKY_MODE == 2) || SKY_MODE == 0
+	#if	defined WEATHER_PERBIOME
 	visibility *= isCold * isCold;
 	#else
 	visibility = 0.0;
-	#endif
-
-	#ifdef END
-	visibility = 1.0;
 	#endif
 
 	vec2 wind = vec2(
@@ -295,9 +302,6 @@ vec3 DrawAurora(vec3 viewPos, float dither, int samples) {
 				noise *= max(sqrt(1.0 - length(planeCoord.xz) * 2.75), 0.0);
 
 				vec3 auroraColor = mix(auroraLowCol, auroraHighCol, pow(currentStep, 0.4));
-				#ifdef END
-				auroraColor = mix(auroraLowCol, auroraHighCol, pow(currentStep, 0.4)) * vec3(END_R * 6.0, END_G * 0.5, END_B * 2.0) / 12;
-				#endif
 				aurora += noise * auroraColor * exp2(-6.0 * i * sampleStep);
 			}
 			currentStep += sampleStep;
@@ -305,4 +309,52 @@ vec3 DrawAurora(vec3 viewPos, float dither, int samples) {
 	}
 
 	return aurora * visibility;
+}
+
+vec3 DrawRift(vec3 viewPos, float dither, int samples) {
+	#ifdef TAA
+		dither = fract(16.0 * frameTimeCounter + dither);
+	#endif
+	
+	float sampleStep = 1.0 / samples;
+	float currentStep = dither * sampleStep;
+
+	float VoU = dot(normalize(viewPos), upVec);
+
+	vec2 wind = vec2(
+		frametime * CLOUD_SPEED * 0.000525,
+		sin(frametime * CLOUD_SPEED * 0.05) * 0.00125
+	);
+
+	vec3 aurora = vec3(0.0);
+
+	if (VoU > 0.0) {
+		vec3 wpos = normalize((gbufferModelViewInverse * vec4(viewPos, 1.0)).xyz);
+		for(int i = 0; i < samples; i++) {
+			vec3 planeCoord = wpos * ((10.0 + currentStep * 10.0) / wpos.y) * 0.006;
+				 planeCoord.y *= 32;
+
+			float iDither = i + dither;
+
+			vec2 coord = cameraPosition.xz * 0.0002 + planeCoord.xz;
+				 coord += vec2(coord.y, -coord.x) * 1.0;
+				 coord += cos(mix(vec2(cos(iDither * 1), sin(iDither * 2.00)), vec2(cos(iDither * 3.0), sin(iDither * 4.00)), iDither) * 0.0025);
+				 coord += sin(mix(vec2(cos(iDither * 2), sin(iDither * 2.50)), vec2(cos(iDither * 3.0), sin(iDither * 3.50)), iDither) * 0.0020);
+				 coord += cos(mix(vec2(cos(iDither * 3), sin(iDither * 3.75)), vec2(cos(iDither * 4.5), sin(iDither * 5.25)), iDither) * 0.0015);
+
+			float noise = RiftSample(coord, wind, VoU);
+			
+			if (noise > 0.0) {
+				noise *= texture2D(noisetex, coord * 0.25 + wind * 0.25).b;
+				noise *= 1.0 * texture2D(noisetex, coord + wind * 16.0).b + 0.75;
+				noise = noise * noise * 8 * sampleStep;
+				noise *= max(sqrt(1.0 - length(planeCoord.xz) * 2.5), 0.0);
+				vec3 riftColor = mix(auroraLowCol, auroraHighCol, pow(currentStep, 0.4)) * vec3(END_R * 6.0, END_G * 0.5, END_B * 2.0) / 12;
+				aurora += noise * riftColor * exp2(-4.0 * i * sampleStep);
+			}
+			currentStep += sampleStep;
+		}
+	}
+
+	return aurora;
 }

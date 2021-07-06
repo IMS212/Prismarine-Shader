@@ -89,11 +89,7 @@ void main() {
 	#endif
 
 	#ifdef END
-	albedo.rgb = pow(albedo.rgb,vec3(1.1));
-
-	#ifndef SKY_DESATURATION
-	albedo.rgb = vec3(190, 120, 255) / 255;
-	#endif
+	albedo.rgb = pow(albedo.rgb, vec3(6.6)) * SKYBOX_BRIGHTNESS * 0.3;
 
 	vec3 nViewPos = normalize(viewPos.xyz);
 	float NdotU = dot(nViewPos, upVec);
@@ -111,7 +107,7 @@ void main() {
 	#endif
 
 	#if END_SKY == 1 || END_SKY == 3
-	albedo.rgb += DrawAurora(viewPos.xyz, dither, 24);
+	albedo.rgb += DrawRift(viewPos.xyz, dither, 32);
 	#endif
 
 	#ifdef SKY_DESATURATION

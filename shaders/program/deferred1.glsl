@@ -156,12 +156,9 @@ float GetAmbientOcclusion(float z){
 #include "/lib/color/blocklightColor.glsl"
 #include "/lib/color/waterColor.glsl"
 #include "/lib/util/dither.glsl"
+#include "/lib/prismarine/functions.glsl"
 #include "/lib/atmospherics/sky.glsl"
 #include "/lib/util/spaceConversion.glsl"
-#ifdef OVERWORLD
-#include "/lib/prismarine/functions.glsl"
-#include "/lib/prismarine/simpleSky.glsl"
-#endif
 #include "/lib/atmospherics/fog.glsl"
 
 #ifdef OUTLINE_ENABLED
@@ -176,9 +173,7 @@ float GetAmbientOcclusion(float z){
 #include "/lib/reflections/complexFresnel.glsl"
 #include "/lib/surface/materialDeferred.glsl"
 #include "/lib/reflections/roughReflections.glsl"
-#ifdef OVERWORLD
 #include "/lib/atmospherics/clouds.glsl"
-#endif
 #endif
 
 //Program//
@@ -218,35 +213,7 @@ void main() {
 			if (reflection.a < 1.0) {
 				#ifdef OVERWORLD
 				vec3 skyRefPos = reflect(normalize(viewPos.xyz), normal);
-				
-				#if SKY_MODE == 2
-				vec3 worldvec = normalize(mat3(gbufferModelViewInverse) * (skyRefPos.xyz));
-						
-				vec3 sun_vec = normalize(mat3(gbufferModelViewInverse) * sunVec);
-
-				mat2x3 light_vec;
-					light_vec[0] = sun_vec;
-					light_vec[1] = -sun_vec;
-
-				skyReflection = renderAtmosphere(worldvec, light_vec);
-				#endif
-
-				#if SKY_MODE == 1
                 skyReflection = GetSkyColor(skyRefPos, lightCol, true);
-				#endif
-				
-				#if SKY_MODE == 0
-				skyReflection = GetSkyColor(skyRefPos, true);
-				vec3 worldvec = normalize(mat3(gbufferModelViewInverse) * (skyRefPos.xyz));
-						
-				vec3 sun_vec = normalize(mat3(gbufferModelViewInverse) * sunVec);
-
-				mat2x3 light_vec;
-					light_vec[0] = sun_vec;
-					light_vec[1] = -sun_vec;
-
-				if (rainStrength < 1) skyReflection += renderAtmosphere(worldvec, light_vec);
-				#endif
 
 				#ifdef REFLECTION_ROUGH
 				float cloudMixRate = smoothness * smoothness * (3.0 - 2.0 * smoothness);

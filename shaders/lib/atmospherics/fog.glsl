@@ -97,7 +97,7 @@ void NormalFog(inout vec3 color, vec3 viewPos) {
 				#if FOG_COLOR_MODE == 0
 				vanillaFogColor = GetSkyColor(viewPos, false);
 				#elif FOG_COLOR_MODE == 1
-				vanillaFogColor distfadeCol * 0.2;
+				vanillaFogColor = distfadeCol * 0.2;
 				#endif
 			}
 			vanillaFogColor *= (4.0 - 3.0 * eBS) * (1.0 + nightVision);
@@ -127,10 +127,7 @@ void NormalFog(inout vec3 color, vec3 viewPos) {
 	fog += 6.0 * pow(fogFactor * 1 / far, 6.0);
 	#endif
 	fog = 1.0 - exp(-0.8 * fog * fog);
-	vec3 fogColor = endCol.rgb * 0.00625;
-	#ifndef SKY_DESATURATION
-	fogColor = (vec3(160, 120, 255) / 255) * 0.00625;
-	#endif
+	vec3 fogColor = endCol.rgb * 0.01;
 	#ifndef LIGHT_SHAFT
 	fogColor *= 2.5;
 	#endif

@@ -59,17 +59,17 @@ float getUltraQualityVCSample(vec3 pos, float height, float verticalThickness, f
 	float rainStrengthLowered = rainStrength / 3.0;
 	
 	if (ymult < 2.0){
-		noise+= getHorizontalNoise(pos / samples * 1.0 - wind*1.1) * 0.25 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
-		noise+= getHorizontalNoise(pos / samples * 0.5 - wind*1) * 0.25 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
-		noise+= getHorizontalNoise(pos / samples * 0.25 - wind*0.9) * 0.5 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
-		noise+= getHorizontalNoise(pos / samples * 0.125 - wind*0.8) * 0.75 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
-		noise+= getHorizontalNoise(pos / samples * 0.0625 - wind*0.7) * 1.0 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
-		noise+= getHorizontalNoise(pos / samples * 0.03125 - wind*0.6) * 1.25 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
-		noise+= getHorizontalNoise(pos / samples * 0.016125 - wind*0.5) * 1.5 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
-		noise+= getHorizontalNoise(pos / samples * 0.00862 - wind*0.4) * 1.75 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
-		noise+= getHorizontalNoise(pos / samples * 0.00431 - wind*0.3) * 2.0 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
-		noise+= getHorizontalNoise(pos / samples * 0.00216 - wind*0.2) * 2.25 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
-		noise+= getHorizontalNoise(pos / samples * 0.00108 - wind*0.1) * 2.5 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
+		noise+= getHorizontalNoise(pos * samples * 1.0 - wind*1.1) * 0.25 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
+		noise+= getHorizontalNoise(pos * samples * 0.5 - wind*1) * 0.25 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
+		noise+= getHorizontalNoise(pos * samples * 0.25 - wind*0.9) * 0.5 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
+		noise+= getHorizontalNoise(pos * samples * 0.125 - wind*0.8) * 0.75 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
+		noise+= getHorizontalNoise(pos * samples * 0.0625 - wind*0.7) * 1.0 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
+		noise+= getHorizontalNoise(pos * samples * 0.03125 - wind*0.6) * 1.25 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
+		noise+= getHorizontalNoise(pos * samples * 0.016125 - wind*0.5) * 1.5 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
+		noise+= getHorizontalNoise(pos * samples * 0.00862 - wind*0.4) * 1.75 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
+		noise+= getHorizontalNoise(pos * samples * 0.00431 - wind*0.3) * 2.0 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
+		noise+= getHorizontalNoise(pos * samples * 0.00216 - wind*0.2) * 2.25 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
+		noise+= getHorizontalNoise(pos * samples * 0.00108 - wind*0.1) * 2.5 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
 
 	}
 	noise = clamp(mix(noise * VCLOUDS_AMOUNT, 21.0, 0.25 * rainStrength) - (10.0 + 5.0 * ymult), 0.0, 1.0);
@@ -83,12 +83,12 @@ float getHighQualityVCSample(vec3 pos, float height, float verticalThickness, fl
 	float rainStrengthLowered = rainStrength / 3.0;
 	
 	if (ymult < 2.0){
-		noise+= getHorizontalNoise(pos / samples * 0.5 - wind*0.5) * 1 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
-		noise+= getHorizontalNoise(pos / samples * 0.25 - wind*0.4) * 2 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
-		noise+= getHorizontalNoise(pos / samples * 0.125 - wind*0.3) * 3 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
-		noise+= getHorizontalNoise(pos / samples * 0.0625 - wind*0.2) * 4 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
-		noise+= getHorizontalNoise(pos / samples * 0.03125 - wind*0.1) * 5 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
-		noise+= getHorizontalNoise(pos / samples * 0.016125) * 6 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
+		noise+= getHorizontalNoise(pos * samples * 0.5 - wind*0.5) * 1 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
+		noise+= getHorizontalNoise(pos * samples * 0.25 - wind*0.4) * 2 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
+		noise+= getHorizontalNoise(pos * samples * 0.125 - wind*0.3) * 3 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
+		noise+= getHorizontalNoise(pos * samples * 0.0625 - wind*0.2) * 4 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
+		noise+= getHorizontalNoise(pos * samples * 0.03125 - wind*0.1) * 5 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
+		noise+= getHorizontalNoise(pos * samples * 0.016125) * 6 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
 
 	}
 	noise = clamp(mix(noise * 0.7 * VCLOUDS_AMOUNT, 21.0, 0.25 * rainStrength) - (10.0 + 5.0 * ymult), 0.0, 1.0);
@@ -102,7 +102,7 @@ float getLowQualityVCSample(vec3 pos, float height, float verticalThickness, flo
 	float rainStrengthLowered = rainStrength / 3.0;
 
 	if (ymult < 2.0){
-		noise+= getHorizontalNoise(pos / samples * 0.1 - wind * 0.3) * 16 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
+		noise+= getHorizontalNoise(pos * samples * 0.1 - wind * 0.3) * 16 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
 	}
 
 	noise = clamp(mix(noise * 0.8 * VCLOUDS_AMOUNT, 21.0, 0.25 * rainStrength) - (10.0 + 5.0 * ymult), 0.0, 1.0);
@@ -117,7 +117,7 @@ vec2 getVolumetricCloud(float pixeldepth, float pixeldepthw) {
 	vec4 wpos 		= vec4(0.0);
 
 	float quality	= VCLOUDS_QUALITY / 2;
-	float dither 	= (Bayer8(gl_FragCoord.xy) * quality);
+	float dither 	= (Bayer256(gl_FragCoord.xy) * quality);
 	float maxDist 	= VCLOUDS_RANGE*far;
 	float minDist 	= 0.01 + dither;
 
@@ -127,7 +127,6 @@ vec2 getVolumetricCloud(float pixeldepth, float pixeldepthw) {
 		}
 		wpos = getWorldPos(getFragPos(texCoord.xy,distx(minDist)));
 		if (length(wpos.xz) < maxDist && getDepth(pixeldepthw) > minDist){
-			float iDither 	= minDist + dither;
 			float verticalNoise = getVerticalNoise((wpos.xz + cameraPosition.xz + (frametime * VCLOUDS_SPEED * 0.1)) * 0.004);		
 
 			#ifdef WORLD_CURVATURE
@@ -138,14 +137,12 @@ vec2 getVolumetricCloud(float pixeldepth, float pixeldepthw) {
 			wpos.xyz += cameraPosition.xyz + vec3(frametime * 4.0 * VCLOUDS_SPEED, -verticalNoise * 32.0, 0.0);
  
 			#if VCLOUDS_NOISE_QUALITY == 0
-			float noise = getLowQualityVCSample(wpos.xyz, VCLOUDS_HEIGHT, VCLOUDS_VERTICAL_THICKNESS, VCLOUDS_AMOUNT);
+			float noise = getLowQualityVCSample(wpos.xyz, VCLOUDS_HEIGHT, VCLOUDS_VERTICAL_THICKNESS, VCLOUDS_SAMPLES);
 			#elif VCLOUDS_NOISE_QUALITY == 1
-			float noise = getHighQualityVCSample(wpos.xyz, VCLOUDS_HEIGHT, VCLOUDS_VERTICAL_THICKNESS, VCLOUDS_AMOUNT);
+			float noise = getHighQualityVCSample(wpos.xyz, VCLOUDS_HEIGHT, VCLOUDS_VERTICAL_THICKNESS, VCLOUDS_SAMPLES);
 			#elif VCLOUDS_NOISE_QUALITY == 2
-			float noise = getUltraQualityVCSample(wpos.xyz, VCLOUDS_HEIGHT, VCLOUDS_VERTICAL_THICKNESS, VCLOUDS_AMOUNT);
+			float noise = getUltraQualityVCSample(wpos.xyz, VCLOUDS_HEIGHT, VCLOUDS_VERTICAL_THICKNESS, VCLOUDS_SAMPLES);
 			#endif
-
-			wpos.xz += cos(mix(vec2(cos(iDither * 0.75), sin(iDither * 1.75)), vec2(cos(iDither * 2.75), sin(iDither * 3.75)), iDither) * 0.0025);
 
 			float col = pow(smoothstep(VCLOUDS_HEIGHT - VCLOUDS_VERTICAL_THICKNESS * noise, VCLOUDS_HEIGHT + VCLOUDS_VERTICAL_THICKNESS * noise, wpos.y), 1.5);
 			vc.x = max(noise * col, vc.x);

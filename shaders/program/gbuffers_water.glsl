@@ -187,7 +187,6 @@ vec3 GetWaterNormal(vec3 worldPos, vec3 viewPos, vec3 viewVector) {
 #include "/lib/reflections/raytrace.glsl"
 #include "/lib/reflections/simpleReflections.glsl"
 #include "/lib/surface/ggx.glsl"
-#include "/lib/prismarine/simpleSky.glsl"
 
 #ifdef OVERWORLD
 #include "/lib/atmospherics/clouds.glsl"
@@ -299,7 +298,7 @@ void main() {
 		
 		if (water > 0.5) {
 			#if WATER_MODE == 0
-			albedo.rgb = waterColor.rgb * waterColor.a;
+			albedo.rgb = waterColor.rgb * 4 * waterColor.a;
 			#elif WATER_MODE == 1
 			albedo.rgb *= albedo.a;
 			#elif WATER_MODE == 2
@@ -401,64 +400,7 @@ void main() {
 				vec3 specularColor = GetSpecularColor(lightmap.y, 0.0, vec3(1.0));
 
 				#ifdef OVERWORLD
-				#if SKY_MODE == 2
-				vec3 worldvec = normalize(mat3(gbufferModelViewInverse) * (skyRefPos.xyz));
-						
-				vec3 sun_vec = normalize(mat3(gbufferModelViewInverse) * sunVec);
-
-				mat2x3 light_vec;
-					light_vec[0] = sun_vec;
-					light_vec[1] = -sun_vec;
-
-				skyReflection = renderAtmosphere(worldvec, light_vec);
-				#endif
-
-				#if SKY_MODE == 1
                 skyReflection = GetSkyColor(skyRefPos, true);
-				#endif
-
-				#if SKY_MODE == 0
-				skyReflection = GetSkyColor(skyRefPos, true);
-				vec3 worldvec = normalize(mat3(gbufferModelViewInverse) * (skyRefPos.xyz));
-						
-				vec3 sun_vec = normalize(mat3(gbufferModelViewInverse) * sunVec);
-
-				mat2x3 light_vec;
-					light_vec[0] = sun_vec;
-					light_vec[1] = -sun_vec;
-
-				if (rainStrength < 1) skyReflection += renderAtmosphere(worldvec, light_vec);
-				#endif
-				
-				#if NIGHT_SKY_MODE == 0 || NIGHT_SKY_MODE == 2
-					float NdotUhelios = pow2(pow2(clamp(NdotU * 3.0, 0.0, 1.0)));
-					vec3 planeCoord = wpos / (wpos.y + length(wpos.xz) * 0.5);
-					vec3 moonPos = vec3(gbufferModelViewInverse * vec4(-sunVec, 1.0));
-					vec3 moonCoord = moonPos / (moonPos.y + length(moonPos.xz));
-					vec2 hcoord = planeCoord.xz - moonCoord.xz;
-					hcoord *= 0.2;
-
-					if (moonVisibility > 0.0 && rainStrength == 0.0){
-						vec3 helios = texture2D(colortex8, hcoord * 0.8 + 0.6).rgb;
-						helios *= pow2(length(helios) + 0.6);
-						skyReflection += helios * 0.05 * NdotUhelios * (1.0 - sunVisibility);
-					}
-				#endif
-
-				#if NIGHT_SKY_MODE == 1 || NIGHT_SKY_MODE == 2
-					float NdotUnebula = pow2(pow2(clamp(NdotU * 3.0, 0.0, 1.0)));
-					vec3 planeCoord2 = wpos / (wpos.y + length(wpos.xz) * 0.5);
-					vec3 moonPos2 = vec3(gbufferModelViewInverse * vec4(-sunVec, 1.0));
-					vec3 moonCoord2 = moonPos2 / (moonPos2.y + length(moonPos2.xz));
-					vec2 ncoord = planeCoord2.xz - moonCoord2.xz;
-					ncoord *= 0.2;
-
-					if (moonVisibility > 0.0 && rainStrength == 0.0){
-						vec3 nebula = texture2D(colortex7, ncoord * 0.8 + 0.6).rgb;
-						nebula *= pow2(length(nebula) + 0.6);
-						skyReflection += nebula * 0.05 * NdotUnebula * (1.0 - sunVisibility);
-					}
-				#endif
 
 				vec3 specular = GetSpecularHighlight(newNormal, viewPos,  0.9, vec3(0.02),
 													 specularColor, shadow, color.a);
@@ -530,64 +472,8 @@ void main() {
 				if (reflection.a < 1.0) {
 					#ifdef OVERWORLD
 					vec3 skyRefPos = reflect(normalize(viewPos.xyz), newNormal);
-					#if SKY_MODE == 2
-					vec3 worldvec = normalize(mat3(gbufferModelViewInverse) * (skyRefPos.xyz));
-							
-					vec3 sun_vec = normalize(mat3(gbufferModelViewInverse) * sunVec);
 
-					mat2x3 light_vec;
-						light_vec[0] = sun_vec;
-						light_vec[1] = -sun_vec;
-
-					skyReflection = renderAtmosphere(worldvec, light_vec);
-					#endif
-
-					#if SKY_MODE == 1
 					skyReflection = GetSkyColor(skyRefPos, true);
-					#endif
-					
-					#if SKY_MODE == 0
-					skyReflection = GetSkyColor(skyRefPos, true);
-					vec3 worldvec = normalize(mat3(gbufferModelViewInverse) * (skyRefPos.xyz));
-							
-					vec3 sun_vec = normalize(mat3(gbufferModelViewInverse) * sunVec);
-
-					mat2x3 light_vec;
-						light_vec[0] = sun_vec;
-						light_vec[1] = -sun_vec;
-
-					if (rainStrength < 1) skyReflection += renderAtmosphere(worldvec, light_vec);
-					#endif
-
-					#if NIGHT_SKY_MODE == 0 || NIGHT_SKY_MODE == 2
-						float NdotUhelios = pow2(pow2(clamp(NdotU * 3.0, 0.0, 1.0)));
-						vec3 planeCoord = wpos / (wpos.y + length(wpos.xz) * 0.5);
-						vec3 moonPos = vec3(gbufferModelViewInverse * vec4(-sunVec, 1.0));
-						vec3 moonCoord = moonPos / (moonPos.y + length(moonPos.xz));
-						vec2 hcoord = planeCoord.xz - moonCoord.xz;
-						hcoord *= 0.2;
-
-						if (moonVisibility > 0.0 && rainStrength == 0.0){
-							vec3 helios = texture2D(colortex8, hcoord * 0.8 + 0.6).rgb;
-							helios *= pow2(length(helios) + 0.6);
-							skyReflection.rgb += helios * 0.05 * NdotUhelios * (1.0 - sunVisibility);
-						}
-					#endif
-
-					#if NIGHT_SKY_MODE == 1 || NIGHT_SKY_MODE == 2
-						float NdotUnebula = pow2(pow2(clamp(NdotU * 3.0, 0.0, 1.0)));
-						vec3 planeCoord2 = wpos / (wpos.y + length(wpos.xz) * 0.5);
-						vec3 moonPos2 = vec3(gbufferModelViewInverse * vec4(-sunVec, 1.0));
-						vec3 moonCoord2 = moonPos2 / (moonPos2.y + length(moonPos2.xz));
-						vec2 ncoord = planeCoord2.xz - moonCoord2.xz;
-						ncoord *= 0.2;
-
-						if (moonVisibility > 0.0 && rainStrength == 0.0){
-							vec3 nebula = texture2D(colortex7, ncoord * 0.8 + 0.6).rgb;
-							nebula *= pow2(length(nebula) + 0.6);
-							skyReflection.rgb += nebula * 0.05 * NdotUnebula * (1.0 - sunVisibility);
-						}
-					#endif
 
 					#ifdef AURORA
 					skyReflection += DrawAurora(skyRefPos * 100.0, dither, 12);

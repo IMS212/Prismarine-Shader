@@ -12,8 +12,6 @@ https://bitslablab.com
 uniform int isEyeInWater;
 const bool colortex0MipmapEnabled = false;
 const bool colortex1MipmapEnabled = true;
-const bool colortex4MipmapEnabled = true;
-const bool colortex5MipmapEnabled = true;
 
 varying vec3 lightVec, sunVec, upVec;
 
@@ -140,7 +138,7 @@ void main() {
 
 	vec2 vc = vec2(texture2DLod(colortex4,texCoord.xy,float(2.0)).a,texture2DLod(colortex5,texCoord.xy,float(2.0)).a);
 	float vcmult = 0.5*(1.0-moonVisibility*0.7)*(1.0-rainStrength*0.5);
-	color = mix(color, mix(vcloudsCol.rgb, vcloudsCol.rgb, scattering) * vcmult * vc.x, vc.x * vc.y * VCLOUDS_OPACITY);
+	color = mix(color, mix(vcloudsCol.rgb * 0.25, vcloudsCol.rgb * 1.25, vc.y) * vcmult * vc.x, vc.x * vc.y * VCLOUDS_OPACITY);
 	#endif
 		
 	/* DRAWBUFFERS:07 */

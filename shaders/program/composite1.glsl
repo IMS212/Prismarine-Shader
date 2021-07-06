@@ -91,15 +91,15 @@ void main() {
 	#ifdef OVERWORLD
 	if (isEyeInWater == 0){
 		#ifdef LIGHTSHAFT_AUTOCOLOR
-		vl *= lightCol * 0.5;
+		vl *= lightCol * 0.25;
 		#else
-		vl *= lightshaftCol * 0.5;
+		vl *= lightshaftCol * 0.25;
 		#endif
 	}
 	#endif
 
 	#ifdef END
-    vl *= endCol.rgb * 0.1;
+    vl *= endCol.rgb * 0.025;
 	#endif
 
     vl *= LIGHT_SHAFT_STRENGTH * (1.0 - rainStrength * eBS * 0.875) * shadowFade *
@@ -116,7 +116,7 @@ void main() {
 	gl_FragData[0] = color;
 	#if defined OVERWORLD && CLOUDS == 3
 	gl_FragData[2] = vec4(aux2, vc.x);
-	gl_FragData[3] = vec4(aux, vc.y);
+	gl_FragData[3] = vec4(aux * vec3(0,1,0), vc.y);
 	#endif
 }
 

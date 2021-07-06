@@ -169,11 +169,7 @@ void main() {
 	#endif
 	
 	#ifdef END
-	vec3 albedo = vec3(190, 120, 255) / 255;
-
-	#ifndef SKY_DESATURATION
-	albedo.rgb = endCol.rgb;
-	#endif
+	vec3 albedo = vec3(0.0);
 
 	#ifdef STARS
 	DrawStars(albedo.rgb, viewPos.xyz);
@@ -185,7 +181,7 @@ void main() {
 	#endif
 
 	#if END_SKY == 1 || END_SKY == 3
-	albedo.rgb += DrawAurora(viewPos.xyz, dither, 24);
+	albedo.rgb += DrawRift(viewPos.xyz, dither, 32);
 	#endif
 	#endif
 	

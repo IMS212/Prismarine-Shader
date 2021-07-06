@@ -12,7 +12,7 @@ https://bitslablab.com
 //Varyings//
 varying vec2 texCoord;
 
-varying vec3 sunVec, upVec;
+varying vec3 sunVec, upVec, lightVec;
 
 //Uniforms//
 uniform int frameCounter;
