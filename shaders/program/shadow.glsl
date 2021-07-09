@@ -37,7 +37,7 @@ void main() {
 	float disable = float(mat > 1.98 && mat < 2.02);
 	float water = float (mat > 2.98);
 	if (water > 0.9){
-		albedo.rgb = waterColor.rgb * (WATER_I * 2 - isEyeInWater);
+		albedo.rgb = waterShadowColor.rgb * (WATER_I * 16 - isEyeInWater - isEyeInWater - isEyeInWater - isEyeInWater);
 	}
 	if (disable > 0.5 || albedo.a < 0.01) discard;
 

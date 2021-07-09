@@ -20,8 +20,8 @@ varying vec4 texCoord;
 uniform float timeAngle, timeBrightness;
 uniform sampler2D colortex0;
 uniform sampler2D colortex1;
-uniform sampler2D colortex4;
 uniform sampler2D colortex5;
+uniform sampler2D colortex6;
 uniform sampler2D depthtex0;
 uniform sampler2D depthtex1;
 uniform sampler2D noisetex;
@@ -37,6 +37,7 @@ uniform vec3 cameraPosition, previousCameraPosition;
 uniform mat4 gbufferProjection, gbufferPreviousProjection, gbufferProjectionInverse;
 uniform mat4 gbufferModelView, gbufferPreviousModelView, gbufferModelViewInverse;
 uniform float far, near;
+uniform float eyeAltitude;
 uniform float shadowFade;
 
 #ifdef WORLD_TIME_ANIMATION
@@ -126,21 +127,12 @@ void main() {
 	vec4 fragpos = getFragPos(texCoord.xy,pixeldepth);
 		
 	#if defined OVERWORLD && CLOUDS == 3
-	vec3 screenPos = vec3(gl_FragCoord.xy / vec2(viewWidth, viewHeight), gl_FragCoord.z);
-	#ifdef TAA
-	vec3 viewPos = ToNDC(vec3(TAAJitter(screenPos.xy, -0.5), screenPos.z));
-	#else
-	vec3 viewPos = ToNDC(screenPos);
-	#endif
-
-	float VoL = dot(normalize(viewPos), lightVec);
-	float scattering = pow(VoL * shadowFade * 0.5 + 0.5, 8.0);
-
-	vec2 vc = vec2(texture2DLod(colortex4,texCoord.xy,float(2.0)).a,texture2DLod(colortex5,texCoord.xy,float(2.0)).a);
+	vec2 vc = vec2(texture2DLod(colortex5,texCoord.xy,float(2.0)).a,texture2DLod(colortex6,texCoord.xy,float(2.0)).a);
 	float vcmult = 0.5*(1.0-moonVisibility*0.7)*(1.0-rainStrength*0.5);
-	color = mix(color, mix(vcloudsCol.rgb * 0.25, vcloudsCol.rgb * 1.25, vc.y) * vcmult * vc.x, vc.x * vc.y * VCLOUDS_OPACITY);
+	float opacity = VCLOUDS_OPACITY;
+	color = mix(color, mix(vcloudsCol.rgb * 0.25, vcloudsCol.rgb * 1.25, vc.y) * vcmult * vc.x, vc.x * vc.y * opacity);
 	#endif
-		
+
 	/* DRAWBUFFERS:07 */
 	gl_FragData[0] = vec4(color, 1.0);
 }

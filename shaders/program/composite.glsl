@@ -57,6 +57,12 @@ float eBS = eyeBrightnessSmooth.y / 240.0;
 float sunVisibility = clamp(dot(sunVec, upVec) + 0.05, 0.0, 0.1) * 10.0;
 float moonVisibility = clamp(dot(-sunVec, upVec) + 0.05, 0.0, 0.1) * 10.0;
 
+#ifdef WORLD_TIME_ANIMATION
+float frametime = float(worldTime)/20.0*ANIMATION_SPEED;
+#else
+float frametime = frameTimeCounter*ANIMATION_SPEED;
+#endif
+
 //Common Functions//
 float GetLuminance(vec3 color) {
 	return dot(color,vec3(0.299, 0.587, 0.114));
@@ -76,6 +82,8 @@ float GetLinearDepth(float depth) {
 #if FOG_MODE == 1 || FOG_MODE == 2
 #if defined OVERWORLD || defined END
 #include "/lib/prismarine/functions.glsl"
+#include "/lib/util/spaceConversion.glsl"
+#include "/lib/prismarine/caustics.glsl"
 #include "/lib/atmospherics/volumetricLight.glsl"
 #endif
 #endif

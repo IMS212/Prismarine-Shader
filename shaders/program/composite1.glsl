@@ -25,6 +25,7 @@ uniform float timeAngle, timeBrightness;
 uniform float frameTimeCounter;
 uniform float far, near;
 uniform float viewHeight, viewWidth;
+uniform float eyeAltitude;
 
 uniform ivec2 eyeBrightnessSmooth;
 
@@ -40,8 +41,9 @@ uniform mat4 shadowModelView;
 uniform sampler2D depthtex0, depthtex1;
 uniform sampler2D colortex0;
 uniform sampler2D colortex1;
-uniform sampler2D colortex4;
 uniform sampler2D colortex5;
+uniform sampler2D colortex6;
+uniform sampler2D noisetex;
 
 //Optifine Constants//
 const bool colortex1MipmapEnabled = true;
@@ -71,12 +73,12 @@ float moonVisibility = clamp((dot(-sunVec, upVec) + 0.05) * 10.0, 0.0, 1.0);
 
 //Program//
 void main() {
-	vec3 aux = texture2D(colortex5, texCoord.st).rgb;
-	vec3 aux2 = texture2D(colortex4, texCoord.st).rgb;
+	vec3 aux = texture2D(colortex6, texCoord.st).rgb;
+	vec3 aux2 = texture2D(colortex5, texCoord.st).rgb;
 	vec4 color = texture2D(colortex0, texCoord.st);
 	float pixeldepth0 = texture2D(depthtex0, texCoord.xy).x;
 	float pixeldepth1 = texture2D(depthtex1, texCoord.xy).x;
-	float dither = Bayer64(gl_FragCoord.xy);
+	float dither = Bayer1024(gl_FragCoord.xy);
 
 	vec3 screenPos = vec3(gl_FragCoord.xy / vec2(viewWidth, viewHeight), gl_FragCoord.z);
 	#ifdef TAA
@@ -89,13 +91,12 @@ void main() {
 	vl *= vl;
 
 	#ifdef OVERWORLD
-	if (isEyeInWater == 0){
-		#ifdef LIGHTSHAFT_AUTOCOLOR
-		vl *= lightCol * 0.25;
-		#else
-		vl *= lightshaftCol * 0.25;
-		#endif
-	}
+	#ifdef LIGHTSHAFT_AUTOCOLOR
+	vl *= lightCol * 0.25;
+	#else
+	vl *= lightshaftCol * 0.25;
+	#endif
+	if (isEyeInWater == 1) vl *= waterColor.rgb * 0.25;
 	#endif
 
 	#ifdef END
@@ -115,7 +116,6 @@ void main() {
 	/* DRAWBUFFERS:0145 */
 	gl_FragData[0] = color;
 	#if defined OVERWORLD && CLOUDS == 3
-	gl_FragData[2] = vec4(aux2, vc.x);
 	gl_FragData[3] = vec4(aux * vec3(0,1,0), vc.y);
 	#endif
 }

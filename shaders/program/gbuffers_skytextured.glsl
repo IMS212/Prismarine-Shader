@@ -89,7 +89,7 @@ void main() {
 	#endif
 
 	#ifdef END
-	albedo.rgb = pow(albedo.rgb, vec3(6.6)) * SKYBOX_BRIGHTNESS * 0.3;
+	albedo.rgb = pow(albedo.rgb,vec3(2.2));
 
 	vec3 nViewPos = normalize(viewPos.xyz);
 	float NdotU = dot(nViewPos, upVec);

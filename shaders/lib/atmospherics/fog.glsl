@@ -122,18 +122,20 @@ void NormalFog(inout vec3 color, vec3 viewPos) {
 	#endif
 
 	#ifdef END
-	float fog = length(viewPos) * FOG_DENSITY / 128.0;
 	#if DISTANT_FADE == 2 || DISTANT_FADE == 3
+	float fog = length(viewPos) * FOG_DENSITY / 128.0;
 	fog += 6.0 * pow(fogFactor * 1 / far, 6.0);
-	#endif
 	fog = 1.0 - exp(-0.8 * fog * fog);
 	vec3 fogColor = endCol.rgb * 0.01;
-	#ifndef LIGHT_SHAFT
+	#if FOG_MODE != 2 || FOG_MODE != 1
 	fogColor *= 2.5;
 	#endif
 	#endif
+	#endif
 
+	#if (defined OVERWORLD || defined NETHER) || (defined END && (DISTANT_FADE == 2 || DISTANT_FADE == 3))
 	color = mix(color, fogColor, fog);
+	#endif
 }
 
 void BlindFog(inout vec3 color, vec3 viewPos) {

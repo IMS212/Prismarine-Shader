@@ -43,7 +43,7 @@ float LowCloudSample(vec2 coord, vec2 wind, float currentStep, float sampleStep,
 
 vec4 DrawLowerCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol) {
 	#ifdef TAA
-		dither = fract(dither + frameCounter / 256.0);
+		dither = fract(dither + frameTimeCounter / 256.0);
 	#endif
 
 	int samples = CLOUDS_NOISE_SAMPLES;
@@ -146,8 +146,8 @@ vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol) {
 			float iDither = i + dither;
 			vec3 planeCoord = wpos * ((cloudHeight + currentStep * 1.5) / wpos.y) * CLOUD_VERTICAL_THICKNESS * 16;
 			vec2 coord = cameraPosition.xz * 0.0003 + planeCoord.xz;
-				 coord += cos(mix(vec2(cos(iDither * 0.75), sin(iDither * 1.75)), vec2(cos(iDither * 2.75), sin(iDither * 3.75)), iDither) * 0.0025);
-				 coord += sin(mix(vec2(cos(iDither * 1.75), sin(iDither * 2.75)), vec2(cos(iDither * 3.25), sin(iDither * 4.75)), iDither) * 0.0015);
+				 coord += cos(mix(vec2(cos(iDither * 0.75), sin(iDither * 1.75)), vec2(cos(iDither * 2.75), sin(iDither * 3.75)), iDither) * 0.0015);
+				 coord += sin(mix(vec2(cos(iDither * 1.75), sin(iDither * 2.75)), vec2(cos(iDither * 3.25), sin(iDither * 4.75)), iDither) * 0.0010);
 				 coord += cos(mix(vec2(cos(iDither * 2.75), sin(iDither * 3.75)), vec2(cos(iDither * 4.25), sin(iDither * 5.75)), iDither) * 0.0005);
 			float noise = CloudSample(coord, wind, currentStep, sampleStep, sunCoverage);
 

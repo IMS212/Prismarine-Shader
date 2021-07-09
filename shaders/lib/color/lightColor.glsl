@@ -111,6 +111,6 @@ vec3 distfadeCol   = CalcLightColor(distfadeSun, distfadeNight, weatherCol.rgb *
 vec3 lightCol      = CalcLightColor(lightSun, lightNight, weatherCol.rgb);
 vec3 ambientCol    = CalcLightColor(ambientSun, ambientNight, weatherCol.rgb);
 vec3 lightshaftCol = CalcLightColor(lightshaftSun, lightshaftNight, weatherCol.rgb);
-vec3 vcloudsCol    = CalcLightColor(vcSun, vcNight, weatherCol.rgb);
+vec3 vcloudsCol    = CalcLightColor(vcSun, vcNight, weatherCol.rgb * 0.4);
 vec3 cloudUpCol    = CalcLightColor(cloudlightSun, cloudlightNight, weatherCol.rgb * 2.5);
 vec3 cloudDownCol  = CalcLightColor(cloudambientSun, cloudambientNight, weatherCol.rgb * 0.5);
