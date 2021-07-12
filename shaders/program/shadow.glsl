@@ -12,7 +12,7 @@ https://bitslablab.com
 //Varyings//
 varying float mat;
 
-varying vec2 texCoord;
+varying vec2 texCoord, lmCoord;
 
 varying vec4 color;
 
@@ -30,15 +30,27 @@ void main() {
 	if (blockEntityId == 10250) discard;
 	#endif
 
+	#ifdef TOON_LIGHTMAP
+	vec2 lightmap = floor(lmCoord * 14.999 * (0.75 + 0.25 * color.a)) / 14.0;
+	lightmap = clamp(lightmap, vec2(0.0), vec2(1.0));
+	#else
+	vec2 lightmap = clamp(lmCoord, vec2(0.0), vec2(1.0));
+	#endif
+
+	float newLightmap  = pow(lightmap.x, 10.0) * 1.5 + lightmap.x * 0.7;
+
     vec4 albedo = texture2D(tex, texCoord.xy);
 	albedo.rgb *= color.rgb;
 
     float premult = float(mat > 0.98 && mat < 1.02);
 	float disable = float(mat > 1.98 && mat < 2.02);
 	float water = float (mat > 2.98);
+	float lava = float(mat > 3.98);
+	#ifdef WATER_TINT
 	if (water > 0.9){
 		albedo.rgb = waterShadowColor.rgb * (WATER_I * 16 - isEyeInWater - isEyeInWater - isEyeInWater - isEyeInWater);
 	}
+	#endif
 	if (disable > 0.5 || albedo.a < 0.01) discard;
 
     #ifdef SHADOW_COLOR
@@ -59,7 +71,7 @@ void main() {
 //Varyings//
 varying float mat;
 
-varying vec2 texCoord;
+varying vec2 texCoord, lmCoord;
 
 varying vec4 color;
 
@@ -96,12 +108,16 @@ float frametime = frameTimeCounter * ANIMATION_SPEED;
 void main() {
 	texCoord = gl_MultiTexCoord0.xy;
 
+	lmCoord = (gl_TextureMatrix[1] * gl_MultiTexCoord1).xy;
+	lmCoord = clamp((lmCoord - 0.03125) * 1.06667, vec2(0.0), vec2(0.9333, 1.0));
+
 	color = gl_Color;
 	
 	mat = 0;
 	if (mc_Entity.x == 10301) mat = 1;
 	if (mc_Entity.x == 10249 || mc_Entity.x == 10252) mat = 2;
 	if (mc_Entity.x == 10300) mat = 3;
+	if (mc_Entity.x == 10203) mat = 4;
 	
 	vec4 position = shadowModelViewInverse * shadowProjectionInverse * ftransform();
 	

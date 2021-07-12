@@ -96,9 +96,13 @@ void main() {
 	float dither = Bayer64(gl_FragCoord.xy);
 	vec3 wpos = normalize((gbufferModelViewInverse * viewPos).xyz);
 	
-	#ifdef STARS
+	#if defined END_STARS
+	#ifdef SMALL_STARS
 	DrawStars(albedo.rgb, viewPos.xyz);
+	#endif
+	#ifdef BIG_STARS
 	DrawBigStars(albedo.rgb, viewPos.xyz);
+	#endif
 	#endif
 
 	#if END_SKY == 2 || END_SKY == 3

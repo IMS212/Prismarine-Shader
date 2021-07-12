@@ -68,6 +68,7 @@ float moonVisibility = clamp((dot(-sunVec, upVec) + 0.05) * 10.0, 0.0, 1.0);
 #include "/lib/util/dither.glsl"
 #include "/lib/util/jitter.glsl"
 #include "/lib/util/spaceConversion.glsl"
+#include "/lib/prismarine/functions.glsl"
 #include "/lib/prismarine/fragPos.glsl"
 #include "/lib/prismarine/volumetricClouds.glsl"
 
@@ -80,15 +81,22 @@ void main() {
 	float pixeldepth1 = texture2D(depthtex1, texCoord.xy).x;
 	float dither = Bayer1024(gl_FragCoord.xy);
 
-	vec3 screenPos = vec3(gl_FragCoord.xy / vec2(viewWidth, viewHeight), gl_FragCoord.z);
-	#ifdef TAA
-	vec3 viewPos = ToNDC(vec3(TAAJitter(screenPos.xy, -0.5), screenPos.z));
-	#else
-	vec3 viewPos = ToNDC(screenPos);
-	#endif
-
 	vec3 vl = texture2DLod(colortex1, texCoord.xy, 1.5).rgb;
 	vl *= vl;
+
+	#ifdef LIGHTSHAFT_GROUND
+	#ifdef OVERWORLD
+	if (isEyeInWater == 0){
+		vec4 viewPos = gbufferProjectionInverse * (vec4(texCoord.xy, pixeldepth0, 1.0) * 2.0 - 1.0);
+			 viewPos /= viewPos.w;
+		vec3 nViewPos = normalize(viewPos.xyz);
+		float VoU = clamp(dot(nViewPos, upVec), -1.0, 1.0);
+		VoU = 1 - VoU;
+		vl *= VoU * VoU;
+		vl *= 0.5;
+	}
+	#endif
+	#endif
 
 	#ifdef OVERWORLD
 	#ifdef LIGHTSHAFT_AUTOCOLOR

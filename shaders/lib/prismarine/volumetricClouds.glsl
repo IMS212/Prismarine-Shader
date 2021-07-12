@@ -122,7 +122,7 @@ vec2 getVolumetricCloud(float pixeldepth, float pixeldepthw) {
 		}
 		wpos = getWorldPos(getFragPos(texCoord.xy,distx(minDist)));
 		if (length(wpos.xz) < maxDist && getDepth(pixeldepthw) > minDist){
-			float verticalNoise = getVerticalNoise((wpos.xz + cameraPosition.xz + (frametime * VCLOUDS_SPEED * 0.1)) * 0.005);		
+			float verticalNoise = getVerticalNoise((wpos.xz + cameraPosition.xz + (frametime * VCLOUDS_SPEED * 0.1)) * 0.002);		
 
 			#ifdef WORLD_CURVATURE
 			if (length(wpos.xz) < WORLD_CURVATURE_SIZE) wpos.y += length(wpos.xz) * length(wpos.xyz) / WORLD_CURVATURE_SIZE;

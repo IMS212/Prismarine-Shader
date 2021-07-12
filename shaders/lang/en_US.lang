@@ -1,12 +1,13 @@
 #shaders/lang/en_us.lang
 
 #Profiles
+profile.POTATO=Potato
 profile.LOW=Low
 profile.MEDIUM=Medium
 profile.HIGH=High
 profile.ULTRA=Ultra
 profile.HEAVEN_LIGHTING=Heaven Lighting
-profile.comment=Low : low shadows, simple sky, no extra effects. Medium : medium shadows, clouds, complex sky. High : medium shadows, rain puddles, advanced materials, AO and light shafts. Ultra : high shadows, AO, and light shafts. Heaven Lighting : Bright overall lighting, high bloom strength and Depth of Field.
+profile.comment=Potato : minimum visual effects, maximum performance. Low : low shadows, no extra effects. Medium : medium shadows, clouds. High : medium shadows, rain puddles, advanced materials, AO and light shafts. Ultra : high shadows, AO, and light shafts. Heaven Lighting : bright overall lighting, high bloom strength and Depth of Field.
 
 #Screens
 screen.LIGHTING=Lighting
@@ -34,6 +35,7 @@ screen.CG_G=Green Channel
 screen.CG_B=Blue Channel
 screen.CG_T=Tint
 
+screen.STARS_CONFIG=Stars Config
 screen.PCLOUDS_COLOR=Planar Clouds
 screen.VCLOUDS_COLOR=Volumetric Clouds
 screen.LIGHTSHAFT_OPTIONS=Volumetric Rays Config 
@@ -95,6 +97,9 @@ screen.WEATHER_V=Savanna Cloudy
 screen.AURORA_COLOR=Aurora Color
 screen.AURORA_L=Low Section Color
 screen.AURORA_H=High Section Color
+screen.RIFT_COLOR=Rifts Color
+screen.RIFT_L=Low Section Color
+screen.RIFT_H=High Section Color
 screen.DIMENSION_COLOR=Dimension Color
 screen.NETHER_COLOR=Nether Color
 screen.NETHER_N=Nether Wastes
@@ -268,6 +273,13 @@ option.PARALLAX_DISTANCE=Parallax Distance*
 option.PARALLAX_DISTANCE.comment=Adjusts how far parallax occlusion mapping and self shadows can be rendered.
 
 #Atmospherics
+option.STARS=Stars 
+option.STARS_AMOUNT=Stars Amount 
+option.DAY_STARS=Day Stars 
+option.BIG_STARS=Big Stars 
+option.SMALL_STARS=Small Stars 
+option.END_STARS=End Stars
+
 option.ROUND_SUN_MOON_SIZE=Sun/Moon Size
 option.SUN_GLARE=Sun Glare 
 option.SUN_GLARE.comment=Adds a bright circle of light around sun/moon.
@@ -275,8 +287,9 @@ option.NIGHT_SKY_MODE=Night Sky
 option.HELIOS.comment=Helios & Nebula appear on sky at night and early morning/evening.
 value.NIGHT_SKY_MODE.0=Helios
 value.NIGHT_SKY_MODE.1=Nebula
-value.NIGHT_SKY_MODE.2=Mixed
-value.NIGHT_SKY_MODE.3=OFF
+value.NIGHT_SKY_MODE.2=Helios + Nebula
+value.NIGHT_SKY_MODE.3=Rifts
+value.NIGHT_SKY_MODE.4=OFF
 option.FOG_COLOR_MODE=Overworld Fog
 option.FOG_COLOR_MODE.comment=Changes the overworld fog. Dynamic fog has automatic coloring and has many different colors. Single Color fog has only one color which can be set manually.
 value.FOG_COLOR_MODE.1=Single Color
@@ -346,8 +359,8 @@ option.LIGHTSHAFT_SAMPLES=Sample Count
 option.LIGHTSHAFT_SAMPLE_INTENSITY=Sample Intensity
 option.LIGHTSHAFT_ALTITUDE_DECREASE_FACTOR=Altitude Decrease Factor
 option.LIGHTSHAFT_TIME_DECREASE_FACTOR=Time Decrease Factor
-option.LIGHTSHAFT_FIXED_ALTITUDE=Fixed Altitude
-option.LIGHTSHAFT_FIXED_ALTITUDE.comment=Enables the static altitude for volumetric fog / rays. Disable it if you want it to be everywhere. This option is experimental and may cause bugs!
+option.LIGHTSHAFT_GROUND=Ground fog
+option.LIGHTSHAFT_GROUND.comment=Transforms the rays to the ground volumetric fog. 
 option.LIGHTSHAFT_ALTITUDE=Altitude
 
 option.FOG_DENSITY=Fog Density
@@ -365,10 +378,6 @@ option.SKY_DENSITY_W=Weather Density
 option.SKY_EXPOSURE_W=Weather Exposure
 option.SKY_HORIZON_N=Near Horizon
 option.SKY_HORIZON_F=Far Horizon
-option.ATMOSPHERIC_DENSITY=Atmospheric Density
-option.HORIZON_OFFSET=Horizon Offset
-option.CHORIZON_BLENDINGFACTOR=Horizon Blending
-option.CHORIZON_BLENDINGFACTOR.comment=Lower values give sharper and thinner horizon. Higher values make horizon blend with the sky and may cause bugs.
 option.SKY_GROUND_BRIGHTNESS=Sky Ground Brightness
 option.SKY_GROUND=Sky Ground
 option.SKY_GROUND.comment=Darkens the bottom part of the sky. §e[*]§rThis option is affected by fog density.
@@ -379,8 +388,6 @@ value.SKY_GROUND.2=Full
 option.HORIZON_EXPONENT=Horizon Exponent
 option.HORIZON_DISTANCE=Horizon Distance
 option.HORIZON_DISTANCE.comment=Adjusts sky gradient. Nearer horizon gives slightly brighter sky, further horizon gives slightly darker sky. 
-option.HORIZON_HORIZONTAL_EXPONENT=Horizon Horizontal Exponent
-option.HORIZON_VERTICAL_EXPONENT=Horizon Vertical Exponent
 value.HORIZON_DISTANCE.1.0=Very Near
 value.HORIZON_DISTANCE.1.5=Near
 value.HORIZON_DISTANCE.2.0=Medium
@@ -395,10 +402,10 @@ option.SKYBOX_BRIGHTNESS.comment=Adjusts skybox brightness. §e[*]§rSet to 1.00
 #Cloud Config
 option.CLOUD_THICKNESS=Thickness
 option.CLOUD_THICKNESS.comment=Adjusts cloud thickness, higher thickness makes artifacts more visible.
-value.CLOUD_THICKNESS.1 =Very Low
-value.CLOUD_THICKNESS.2 =Low
-value.CLOUD_THICKNESS.4 =Medium
-value.CLOUD_THICKNESS.8 =High
+value.CLOUD_THICKNESS.1=Very Low
+value.CLOUD_THICKNESS.2=Low
+value.CLOUD_THICKNESS.4=Medium
+value.CLOUD_THICKNESS.8=High
 value.CLOUD_THICKNESS.16=Very High
 
 option.CLOUD_AMOUNT=Amount
@@ -905,6 +912,16 @@ option.AURORA_HR=Red
 option.AURORA_HG=Green
 option.AURORA_HB=Blue
 option.AURORA_HI=Intensity
+
+option.RIFT_LR=Red
+option.RIFT_LG=Green
+option.RIFT_LB=Blue
+option.RIFT_LI=Intensity
+
+option.RIFT_HR=Red
+option.RIFT_HG=Green
+option.RIFT_HB=Blue
+option.RIFT_HI=Intensity
 
 option.NETHER_NR=Red
 option.NETHER_NG=Green

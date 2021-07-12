@@ -126,6 +126,7 @@ vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol) {
 	float currentStep = dither * sampleStep;
 	
 	float brightness = CLOUD_BRIGHTNESS - rainStrength;
+	if (CLOUD_BRIGHTNESS == 1) brightness = 1;
 	float VoS = dot(normalize(viewPos), sunVec);
 	float VoU = dot(normalize(viewPos), upVec);
 	float VoL = dot(normalize(viewPos), lightVec);
@@ -200,7 +201,7 @@ void DrawStars(inout vec3 color, vec3 viewPos) {
 	coord = floor(coord * 1024.0) / 1024.0;
 	
 	float VoU = clamp(dot(normalize(viewPos), normalize(upVec)), 0.0, 1.0);
-	float multiplier = sqrt(sqrt(VoU)) * 5.0 * (1.0 - rainStrength);
+	float multiplier = sqrt(sqrt(VoU)) * 5.0 * (1.0 - rainStrength) * STARS_AMOUNT;
 	
 	float star = 1.0;
 	if (VoU > 0.0) {
@@ -209,8 +210,13 @@ void DrawStars(inout vec3 color, vec3 viewPos) {
 		star *= GetNoise(coord.xy + 0.23);
 	}
 	star = clamp(star - 0.7125, 0.0, 1.0) * multiplier;
-		
+	
+	#ifdef DAY_STARS
 	color += star * pow(lightNight, vec3(0.8));
+	#else
+	if (moonVisibility > 0.0) color += star * pow(lightNight, vec3(0.8));
+	#endif
+
 	#ifdef END
 	color += star * pow(lightNight * 16, vec3(0.8));
 	#endif
@@ -220,11 +226,11 @@ void DrawBigStars(inout vec3 color, vec3 viewPos) {
 	vec3 wpos = vec3(gbufferModelViewInverse * vec4(viewPos, 1.0));
 	vec3 planeCoord = wpos / (wpos.y + length(wpos.xz));
 	vec2 wind = vec2(frametime, 0.0);
-	vec2 coord = planeCoord.xz + cameraPosition.xz * 0.0001 + wind * 0.00125;
+	vec2 coord = planeCoord.xz * 1.2 + cameraPosition.xz * 0.0001 + wind * 0.00125;
 	coord = floor(coord * 1024.0) / 1024.0;
 	
 	float VoU = clamp(dot(normalize(viewPos), normalize(upVec)), 0.0, 1.0);
-	float multiplier = sqrt(sqrt(VoU)) * 3.0 * (1.0 - rainStrength);
+	float multiplier = sqrt(sqrt(VoU)) * 3.0 * (1.0 - rainStrength) * STARS_AMOUNT;
 	
 	float star = 1.0;
 	if (VoU > 0.0) {
@@ -234,7 +240,12 @@ void DrawBigStars(inout vec3 color, vec3 viewPos) {
 	}
 	star = clamp(star - 0.7125, 0.0, 1.0) * multiplier;
 		
+	#ifdef DAY_STARS
 	color += star * pow(lightNight, vec3(0.8));
+	#else
+	if (moonVisibility > 0.0) color += star * pow(lightNight, vec3(0.8));
+	#endif
+
 	#ifdef END
 	color += star * pow(lightNight * 16 * endCol.rgb, vec3(1.0));
 	#endif
@@ -255,7 +266,7 @@ float RiftSample(vec2 coord, vec2 wind, float VoU) {
 		  noise+= texture2D(noisetex, coord * 0.01575 + wind * 0.05).b * 3.0;
 		  noise+= texture2D(noisetex, coord * 0.00754).b * 4.0;
 
-	noise = max(1.0 - 4.0 * (0.5 * VoU + 0.5) * abs(noise - 3.0), 0.0);
+	noise = max(1.0 - 2.0 * (0.5 * VoU + 0.5) * abs(noise - 3.0), 0.0);
 
 	return noise;
 }
@@ -331,25 +342,28 @@ vec3 DrawRift(vec3 viewPos, float dither, int samples) {
 	if (VoU > 0.0) {
 		vec3 wpos = normalize((gbufferModelViewInverse * vec4(viewPos, 1.0)).xyz);
 		for(int i = 0; i < samples; i++) {
-			vec3 planeCoord = wpos * ((10.0 + currentStep * 10.0) / wpos.y) * 0.006;
-				 planeCoord.y *= 32;
+			vec3 planeCoord = wpos * ((6.0 + currentStep * 5.0) / wpos.y) * 0.008;
 
 			float iDither = i + dither;
 
-			vec2 coord = cameraPosition.xz * 0.0002 + planeCoord.xz;
+			vec2 coord = cameraPosition.xz * 0.00008 + planeCoord.xz;
 				 coord += vec2(coord.y, -coord.x) * 1.0;
-				 coord += cos(mix(vec2(cos(iDither * 1), sin(iDither * 2.00)), vec2(cos(iDither * 3.0), sin(iDither * 4.00)), iDither) * 0.0025);
-				 coord += sin(mix(vec2(cos(iDither * 2), sin(iDither * 2.50)), vec2(cos(iDither * 3.0), sin(iDither * 3.50)), iDither) * 0.0020);
-				 coord += cos(mix(vec2(cos(iDither * 3), sin(iDither * 3.75)), vec2(cos(iDither * 4.5), sin(iDither * 5.25)), iDither) * 0.0015);
+				 coord += cos(mix(vec2(cos(iDither * 1), sin(iDither * 2.00)), vec2(cos(iDither * 3.0), sin(iDither * 4.00)), iDither) * 0.0020);
+				 coord += sin(mix(vec2(cos(iDither * 2), sin(iDither * 2.50)), vec2(cos(iDither * 3.0), sin(iDither * 3.50)), iDither) * 0.0015);
+				 coord += cos(mix(vec2(cos(iDither * 3), sin(iDither * 3.75)), vec2(cos(iDither * 4.5), sin(iDither * 5.25)), iDither) * 0.0010);
 
 			float noise = RiftSample(coord, wind, VoU);
 			
 			if (noise > 0.0) {
 				noise *= texture2D(noisetex, coord * 0.25 + wind * 0.25).b;
 				noise *= 1.0 * texture2D(noisetex, coord + wind * 16.0).b + 0.75;
-				noise = noise * noise * 8 * sampleStep;
+				noise = noise * noise * 5 * sampleStep;
 				noise *= max(sqrt(1.0 - length(planeCoord.xz) * 2.5), 0.0);
-				vec3 riftColor = mix(auroraLowCol, auroraHighCol, pow(currentStep, 0.4)) * vec3(END_R * 6.0, END_G * 0.5, END_B * 2.0) / 12;
+				#ifdef END
+				vec3 riftColor = mix(riftLowCol, riftHighCol, pow(currentStep, 0.4)) * vec3(END_R * 6.0, END_G * 0.5, END_B * 2.0) / 16;
+				#else
+				vec3 riftColor = mix(riftLowCol, riftHighCol, pow(currentStep, 0.4)) * 0.5;
+				#endif
 				aurora += noise * riftColor * exp2(-4.0 * i * sampleStep);
 			}
 			currentStep += sampleStep;

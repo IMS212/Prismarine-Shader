@@ -104,7 +104,7 @@ void main() {
 	float NdotU = dot(nViewPos, upVec);
 	float dither = Bayer64(gl_FragCoord.xy);
 
-	#if NIGHT_SKY_MODE != 3
+	#if NIGHT_SKY_MODE != 3 && NIGHT_SKY_MODE != 4
 	float clampNdotU = x2(x2(clamp(NdotU * 4.0, 0.0, 1.0)));
 	vec3 wpos = normalize((gbufferModelViewInverse * viewPos).xyz);
 	vec3 planeCoord = wpos / (wpos.y + length(wpos.xz) * 0.5);
@@ -142,8 +142,16 @@ void main() {
 	#endif
 
 	#ifdef STARS
+	#ifdef SMALL_STARS
 	DrawStars(albedo.rgb, viewPos.xyz);
+	#endif
+	#ifdef BIG_STARS
 	DrawBigStars(albedo.rgb, viewPos.xyz);
+	#endif
+	#endif
+
+	#if NIGHT_SKY_MODE == 3
+	if (moonVisibility > 0.0 && rainStrength != 1.0) albedo.rgb += DrawRift(viewPos.xyz, dither, 24);
 	#endif
 
 	#ifdef AURORA
@@ -171,8 +179,13 @@ void main() {
 	#ifdef END
 	vec3 albedo = vec3(0.0);
 
-	#ifdef STARS
+	#if defined END_STARS
+	#ifdef SMALL_STARS
 	DrawStars(albedo.rgb, viewPos.xyz);
+	#endif
+	#ifdef BIG_STARS
+	DrawBigStars(albedo.rgb, viewPos.xyz);
+	#endif
 	#endif
 
 	#if END_SKY == 2 || END_SKY == 3
