@@ -24,6 +24,8 @@ uniform int frameCounter;
 uniform int isEyeInWater;
 uniform int worldTime;
 
+uniform int heldItemId;
+uniform int heldItemId2;
 uniform float frameTimeCounter;
 uniform float nightVision;
 uniform float rainStrength;

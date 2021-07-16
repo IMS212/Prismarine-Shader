@@ -32,6 +32,8 @@ uniform int frameCounter;
 uniform int isEyeInWater;
 uniform int worldTime;
 
+uniform int heldItemId;
+uniform int heldItemId2;
 uniform float blindFactor, nightVision;
 uniform float far, near;
 uniform float frameTimeCounter;
@@ -55,7 +57,6 @@ uniform sampler2D gaux2;
 uniform sampler2D depthtex1;
 uniform sampler2D depthtex2;
 uniform sampler2D noisetex;
-uniform sampler2D colortex7, colortex8;
 
 #ifdef ADVANCED_MATERIALS
 uniform ivec2 atlasSize;

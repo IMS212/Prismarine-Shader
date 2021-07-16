@@ -357,7 +357,7 @@ vec3 DrawRift(vec3 viewPos, float dither, int samples) {
 			if (noise > 0.0) {
 				noise *= texture2D(noisetex, coord * 0.25 + wind * 0.25).b;
 				noise *= 1.0 * texture2D(noisetex, coord + wind * 16.0).b + 0.75;
-				noise = noise * noise * 5 * sampleStep;
+				noise = noise * noise * 2 * sampleStep;
 				noise *= max(sqrt(1.0 - length(planeCoord.xz) * 2.5), 0.0);
 				#ifdef END
 				vec3 riftColor = mix(riftLowCol, riftHighCol, pow(currentStep, 0.4)) * vec3(END_R * 6.0, END_G * 0.5, END_B * 2.0) / 16;

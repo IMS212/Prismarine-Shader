@@ -73,8 +73,9 @@ float GetLinearDepth(float depth) {
 }
 
 //Includes//
-#include "/lib/color/dimensionColor.glsl"
-#include "/lib/color/skyColor.glsl"
+#include "/lib/color/lightColor.glsl"
+#include "/lib/color/netherColor.glsl"
+#include "/lib/color/endColor.glsl"
 #include "/lib/color/waterColor.glsl"
 #include "/lib/util/dither.glsl"
 #include "/lib/atmospherics/waterFog.glsl"

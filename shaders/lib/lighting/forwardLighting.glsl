@@ -133,7 +133,7 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
     #ifdef OVERWORLD
     #if COLORED_LIGHTING_MODE == 3
     vec2 pos = (cameraPosition.xz + worldPos.xz);
-    blocklightCol = x4(ntmix(pos, pos, pos, 0.0004)) * blocklightStrength * 4;
+    blocklightCol = x4(ntmix(pos, pos, pos, 0.0002)) * blocklightStrength * 2;
     vec3 blockLighting =  newLightmap * newLightmap * blocklightCol * BLOCKLIGHT_I;
 
     //TIME BASED
@@ -142,6 +142,21 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
 
     //NORMAL
     #elif COLORED_LIGHTING_MODE == 0
+    vec3 blockLighting =  newLightmap * newLightmap * blocklightCol;
+
+    //HANDHELD
+    #elif COLORED_LIGHTING_MODE == 4
+    if (heldItemId == 61 || heldItemId2 == 61) blocklightCol = TORCH.rgb;
+    if (heldItemId == 60 || heldItemId2 == 60) blocklightCol = SOUL_TORCH.rgb;
+    if (heldItemId == 59 || heldItemId2 == 59) blocklightCol = LAVA.rgb;
+    if (heldItemId == 58 || heldItemId2 == 58) blocklightCol = BEACON.rgb;
+    if (heldItemId == 57 || heldItemId2 == 57) blocklightCol = SEA_LANTERN.rgb;
+    if (heldItemId == 56 || heldItemId2 == 56) blocklightCol = GLOWSTONE.rgb;
+    if (heldItemId == 55 || heldItemId2 == 55) blocklightCol = SHROOMLIGHT.rgb;
+    if (heldItemId == 54 || heldItemId2 == 54) blocklightCol = END_ROD.rgb;
+    if (heldItemId == 53 || heldItemId2 == 53) blocklightCol = TORCH.rgb;
+    if (heldItemId == 52 || heldItemId2 == 52) blocklightCol = REDSTONE_TORCH.rgb;
+    if (heldItemId == 51 || heldItemId2 == 51) blocklightCol = SOUL_TORCH.rgb;
     vec3 blockLighting =  newLightmap * newLightmap * blocklightCol;
     #endif
     #endif

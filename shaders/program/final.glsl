@@ -31,13 +31,31 @@ const int gaux4Format = RGB16; //fresnel
 const bool colortex1MipmapEnabled = true;
 const bool shadowHardwareFiltering = true;
 const float shadowDistanceRenderMul = 1.0;
-
+const float aberrationStrength = float(CHROMATIC_ABERRATION_STRENGTH) / 500;
 const int noiseTextureResolution = 512;
 
 const float drynessHalflife = 50.0;
 const float wetnessHalflife = 300.0;
 
 //Common Functions//
+#ifdef CHROMATIC_ABERRATION
+vec2 scaleCoord(vec2 coord, float scale) {
+    coord = (coord * scale) - (0.5 * (scale - 1));
+    return clamp(coord, 0, 0.999999);
+}
+
+vec3 ChromaticAbberation(vec2 coord, float amount) {
+    vec3 col = vec3(0.0);
+
+    amount = distance(coord, vec2(0.5)) * amount;
+    col.r = texture2D(colortex1, scaleCoord(coord, 1.0 - amount)).r;
+    col.g = texture2D(colortex1, coord).g;
+    col.b = texture2D(colortex1, scaleCoord(coord, 1.0 + amount)).b;
+
+    return col;
+}
+#endif
+
 #ifdef TAA
 vec2 sharpenOffsets[4] = vec2[4](
 	vec2( 1.0,  0.0),
@@ -68,7 +86,20 @@ void main() {
 	newTexCoord = floor(newTexCoord * view) / view;
 	#endif
 
+	#ifdef CHROMATIC_ABERRATION
+	vec3 color = ChromaticAbberation(texCoord, aberrationStrength);
+	#else
 	vec3 color = texture2D(colortex1, texCoord).rgb;
+	#endif
+
+	#if Sharpen > 0 && !defined RETRO_FILTER && !defined DOF
+	vec2 view = 1.0 / vec2(viewWidth, viewHeight);
+	color *= Sharpen * 0.1 + 1.0;
+	color -= texture2D(colortex1,texCoord.xy+vec2(1.0,0.0)*view).rgb * Sharpen * 0.025;
+	color -= texture2D(colortex1,texCoord.xy+vec2(0.0,1.0)*view).rgb * Sharpen * 0.025;
+	color -= texture2D(colortex1,texCoord.xy+vec2(-1.0,0.0)*view).rgb * Sharpen * 0.025;
+	color -= texture2D(colortex1,texCoord.xy+vec2(0.0,-1.0)*view).rgb * Sharpen * 0.025;
+	#endif
 	
 	#ifdef TAA
 	SharpenFilter(color, newTexCoord);

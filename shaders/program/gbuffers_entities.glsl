@@ -34,6 +34,8 @@ uniform int frameCounter;
 uniform int isEyeInWater;
 uniform int worldTime;
 
+uniform int heldItemId;
+uniform int heldItemId2;
 uniform float frameTimeCounter;
 uniform float nightVision;
 uniform float rainStrength;
@@ -96,9 +98,9 @@ float InterleavedGradientNoise() {
 #include "/lib/color/dimensionColor.glsl"
 #include "/lib/color/specularColor.glsl"
 #include "/lib/util/spaceConversion.glsl"
+#include "/lib/color/waterColor.glsl"
 #include "/lib/lighting/forwardLighting.glsl"
 #include "/lib/surface/ggx.glsl"
-#include "/lib/color/waterColor.glsl"
 
 #ifdef TAA
 #include "/lib/util/jitter.glsl"
@@ -267,6 +269,16 @@ void main() {
 		#if defined ADVANCED_MATERIALS && defined REFLECTION_SPECULAR && defined REFLECTION_ROUGH
 		normalMap = mix(vec3(0.0, 0.0, 1.0), normalMap, smoothness);
 		newNormal = clamp(normalize(normalMap * tbnMatrix), vec3(-1.0), vec3(1.0));
+		#endif
+
+		#if defined OVERWORLD && defined WATER_TINT
+		if (isEyeInWater == 1){
+			float lightFactor = pow(x2(lightmap.y), 0.5) * (1.0 - pow(x2(lightmap.y), 0.5)) * (1.0 - lightmap.x) * 250;
+			vec3 pos = worldPos.xyz+cameraPosition.xyz;
+			vec3 tint = lightFactor * waterColor.rgb * lightCol.rgb * x4(WATER_I);
+			albedo.rgb += (1 - lightmap.x) * (albedo.rgb * x2(waterColor.rgb) * 250 + 250 * albedo.rgb * x2(waterColor.rgb));
+			albedo.rgb *= (1.0 + tint) * (0.2 + lightmap.x);
+		}
 		#endif
 	}
 

@@ -35,6 +35,8 @@ uniform int frameCounter;
 uniform int isEyeInWater;
 uniform int worldTime;
 
+uniform int heldItemId;
+uniform int heldItemId2;
 uniform float frameTimeCounter;
 uniform float nightVision;
 uniform float rainStrength;
@@ -328,11 +330,11 @@ void main() {
 
 		#if defined OVERWORLD && defined WATER_TINT
 		if (isEyeInWater == 1){
-			float causticsFactor = pow(x2(lightmap.y), 0.5) * (1.0 - pow(x2(lightmap.y), 0.5)) * (1.0 - rainStrength*0.5) * (1.0 - lightmap.x) * WATER_CAUSTICS_STRENGTH;
+			float lightFactor = pow(x2(lightmap.y), 0.5) * (1.0 - pow(x2(lightmap.y), 0.5)) * (1.0 - lightmap.x) * 250;
 			vec3 pos = worldPos.xyz+cameraPosition.xyz;
-			vec3 caustic = getCaustics(pos) * causticsFactor * waterColor.rgb * lightCol.rgb * x4(WATER_I) - rainStrength;
-			albedo.rgb += (1 - lightmap.x) * (albedo.rgb * x2(waterColor.rgb) * WATER_CAUSTICS_STRENGTH + WATER_CAUSTICS_STRENGTH * albedo.rgb * x2(waterColor.rgb));
-			albedo.rgb *= (1.0 + caustic) * (0.2 + lightmap.x);
+			vec3 tint = lightFactor * waterColor.rgb * lightCol.rgb * x4(WATER_I);
+			albedo.rgb += (1 - lightmap.x) * (albedo.rgb * x2(waterColor.rgb) * 250 + 250 * albedo.rgb * x2(waterColor.rgb));
+			albedo.rgb *= (1.0 + tint) * (0.2 + lightmap.x);
 		}
 		#endif
 	} else albedo.a = 0.0;

@@ -11,18 +11,43 @@ https://bitslablab.com
 
 //Varyings//
 varying float mat;
+varying vec4 texCoord, position;
 
-varying vec2 texCoord, lmCoord;
+varying vec3 sunVec, upVec, eastVec;
 
+uniform vec3 cameraPosition;
 varying vec4 color;
 
 //Uniforms//
+uniform float rainStrength;
+uniform float frameTimeCounter;
+uniform float timeAngle, timeBrightness;
 uniform int blockEntityId;
 uniform int isEyeInWater;
+uniform int worldTime;
 
+uniform sampler2D noisetex;
 uniform sampler2D tex;
 
+uniform mat4 gbufferProjectionInverse;
+uniform mat4 gbufferModelViewInverse;
+uniform mat4 shadowProjection;
+uniform mat4 shadowModelView;
+
+#ifdef WORLD_TIME_ANIMATION
+float frametime = float(worldTime) * 0.05 * ANIMATION_SPEED;
+#else
+float frametime = frameTimeCounter * ANIMATION_SPEED;
+#endif
+
+float sunVisibility  = clamp((dot( sunVec, upVec) + 0.05) * 10.0, 0.0, 1.0);
+float moonVisibility = clamp((dot(-sunVec, upVec) + 0.05) * 10.0, 0.0, 1.0);
+
 #include "/lib/color/waterColor.glsl"
+#include "/lib/color/lightColor.glsl"
+#include "/lib/prismarine/functions.glsl"
+#include "/lib/util/spaceConversion.glsl"
+#include "/lib/prismarine/caustics.glsl"
 
 //Program//
 void main() {
@@ -30,36 +55,35 @@ void main() {
 	if (blockEntityId == 10250) discard;
 	#endif
 
-	#ifdef TOON_LIGHTMAP
-	vec2 lightmap = floor(lmCoord * 14.999 * (0.75 + 0.25 * color.a)) / 14.0;
-	lightmap = clamp(lightmap, vec2(0.0), vec2(1.0));
-	#else
-	vec2 lightmap = clamp(lmCoord, vec2(0.0), vec2(1.0));
-	#endif
-
-	float newLightmap  = pow(lightmap.x, 10.0) * 1.5 + lightmap.x * 0.7;
-
     vec4 albedo = texture2D(tex, texCoord.xy);
 	albedo.rgb *= color.rgb;
 
     float premult = float(mat > 0.98 && mat < 1.02);
 	float disable = float(mat > 1.98 && mat < 2.02);
 	float water = float (mat > 2.98);
-	float lava = float(mat > 3.98);
-	#ifdef WATER_TINT
-	if (water > 0.9){
-		albedo.rgb = waterShadowColor.rgb * (WATER_I * 16 - isEyeInWater - isEyeInWater - isEyeInWater - isEyeInWater);
-	}
-	#endif
+
 	if (disable > 0.5 || albedo.a < 0.01) discard;
 
     #ifdef SHADOW_COLOR
-	albedo.rgb = mix(vec3(1.0), albedo.rgb, 1.0 - pow(1.0 - albedo.a, 3.0));
-	albedo.rgb *= 1.0 - pow(albedo.a, 64.0);
+	albedo.rgb = mix(vec3(1), albedo.rgb, pow(albedo.a, (1.0 - albedo.a) * 0.5) * COLORED_SHADOW_OPACITY * 2);
+	albedo.rgb *= 1.0 - pow(albedo.a, 128.0);
 	#else
 	if ((premult > 0.5 && albedo.a < 0.98)) albedo.a = 0.0;
 	#endif
 	
+	#ifdef WATER_TINT
+	if (water > 0.9){
+		albedo.rgb = waterShadowColor.rgb * lightCol.rgb * (WATER_I * 16 - isEyeInWater - isEyeInWater - isEyeInWater - isEyeInWater);
+	}
+	#endif
+
+	#ifdef PROJECTED_CAUSTICS
+	if (water > 0.9){
+		vec3 caustic = (getCaustics(position.xyz+cameraPosition.xyz) * WATER_CAUSTICS_STRENGTH) * waterShadowColor.rgb * lightCol.rgb * WATER_I;
+		albedo.rgb *= caustic;
+	}
+	#endif
+
 	gl_FragData[0] = albedo;
 }
 
@@ -71,13 +95,13 @@ void main() {
 //Varyings//
 varying float mat;
 
-varying vec2 texCoord, lmCoord;
-
+varying vec4 texCoord, position;
+varying vec3 sunVec, upVec, eastVec;
 varying vec4 color;
 
 //Uniforms//
 uniform int worldTime;
-
+uniform float timeAngle;
 uniform float frameTimeCounter;
 
 uniform vec3 cameraPosition;
@@ -106,10 +130,7 @@ float frametime = frameTimeCounter * ANIMATION_SPEED;
 
 //Program//
 void main() {
-	texCoord = gl_MultiTexCoord0.xy;
-
-	lmCoord = (gl_TextureMatrix[1] * gl_MultiTexCoord1).xy;
-	lmCoord = clamp((lmCoord - 0.03125) * 1.06667, vec2(0.0), vec2(0.9333, 1.0));
+	texCoord = gl_MultiTexCoord0;
 
 	color = gl_Color;
 	
@@ -119,7 +140,7 @@ void main() {
 	if (mc_Entity.x == 10300) mat = 3;
 	if (mc_Entity.x == 10203) mat = 4;
 	
-	vec4 position = shadowModelViewInverse * shadowProjectionInverse * ftransform();
+	position = shadowModelViewInverse * shadowProjectionInverse * ftransform();
 	
 	float istopv = gl_MultiTexCoord0.t < mc_midTexCoord.t ? 1.0 : 0.0;
 	position.xyz = WavingBlocks(position.xyz, istopv);
@@ -127,6 +148,14 @@ void main() {
 	#ifdef WORLD_CURVATURE
 	position.y -= WorldCurvature(position.xz);
 	#endif
+
+	const vec2 sunRotationData = vec2(cos(sunPathRotation * 0.01745329251994), -sin(sunPathRotation * 0.01745329251994));
+	float ang = fract(timeAngle - 0.25);
+	ang = (ang + (cos(ang * 3.14159265358979) * -0.5 + 0.5 - ang) / 3.0) * 6.28318530717959;
+	sunVec = normalize((gbufferModelView * vec4(vec3(-sin(ang), cos(ang) * sunRotationData) * 2000.0, 1.0)).xyz);
+
+	upVec = normalize(gbufferModelView[1].xyz);
+	eastVec = normalize(gbufferModelView[0].xyz);
 	
 	gl_Position = shadowProjection * shadowModelView * position;
 

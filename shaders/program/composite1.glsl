@@ -47,8 +47,6 @@ uniform sampler2D noisetex;
 
 //Optifine Constants//
 const bool colortex1MipmapEnabled = true;
-const bool colortex4MipmapEnabled = true;
-const bool colortex5MipmapEnabled = true;
 
 //Common Variables//
 
@@ -91,9 +89,9 @@ void main() {
 			 viewPos /= viewPos.w;
 		vec3 nViewPos = normalize(viewPos.xyz);
 		float VoU = clamp(dot(nViewPos, upVec), -1.0, 1.0);
-		VoU = 1 - VoU;
+		VoU = (2-(cameraPosition.y*LIGHTSHAFT_ALTITUDE_FACTOR)) - VoU;
 		vl *= VoU * VoU;
-		vl *= 0.5;
+		vl *= 0.25;
 	}
 	#endif
 	#endif

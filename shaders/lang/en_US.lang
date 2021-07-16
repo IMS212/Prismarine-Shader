@@ -63,6 +63,7 @@ screen.LIGHTSHAFT_M=Light Shafts (Morning)
 screen.LIGHTSHAFT_D=Light Shafts (Day)
 screen.LIGHTSHAFT_E=Light Shafts (Evening)
 screen.LIGHTSHAFT_N=Light Shafts (Night)
+screen.LIGHTSHAFT_W=Light Shafts (Underwater)
 screen.SKYLIGHT_M=Sky (Morning)
 screen.SKYLIGHT_D=Sky (Day)
 screen.SKYLIGHT_E=Sky (Evening)
@@ -135,6 +136,7 @@ value.ABOUT.0=BSL Edit
 
 #Lighting
 option.SHADING_REDUCTION_FACTOR=Shading Reduction
+option.COLORED_SHADOW_OPACITY=Colored Shadows Opacity
 option.NOISEMAP_SHADOWS=Noisemap Shadows
 value.NOISEMAP_SHADOWS.0=OFF
 value.NOISEMAP_SHADOWS.1=Cloud Shadows
@@ -357,7 +359,8 @@ option.LIGHTSHAFT_MIN_DISTANCE=Min Distance
 option.LIGHTSHAFT_MAX_DISTANCE=Max Distance
 option.LIGHTSHAFT_SAMPLES=Sample Count
 option.LIGHTSHAFT_SAMPLE_INTENSITY=Sample Intensity
-option.LIGHTSHAFT_ALTITUDE_DECREASE_FACTOR=Altitude Decrease Factor
+option.LIGHTSHAFT_ALTITUDE_FACTOR=Altitude Factor
+option.LIGHTSHAFT_ALTITUDE_FACTOR.comment=Increases volumetric fog density closer to the ground. Works only if ground fog option is enabled.
 option.LIGHTSHAFT_TIME_DECREASE_FACTOR=Time Decrease Factor
 option.LIGHTSHAFT_GROUND=Ground fog
 option.LIGHTSHAFT_GROUND.comment=Transforms the rays to the ground volumetric fog. 
@@ -481,7 +484,9 @@ value.WATER_MODE.2=Tinted Vanilla
 value.WATER_MODE.3=Flat Vanilla
 
 option.WATER_TINT=Water Tint
-option.WATER_TINT.comment=Tints underwater surface with water color and caustics.
+option.WATER_TINT.comment=Tints underwater surface with water color.
+option.PROJECTED_CAUSTICS=Projected Caustics
+option.CAUSTICS=Caustics
 
 option.WATER_FOG_DENSITY=Water Fog Density
 option.WATER_FOG_DENSITY.comment=Adjusts water fog density.
@@ -530,8 +535,12 @@ option.WATER_PIXEL.comment=Applies pixelation effect on water normals.
 value.WATER_PIXEL.0=OFF
 
 #Post Effects
+option.CHROMATIC_ABERRATION=Chromatic Aberration 
+option.CHROMATIC_ABERRATION_STRENGTH=Ch. Aberration Strength
+option.Sharpen=Image Sharpening
+
 option.DOF=Depth of Field
-options.DOF.comment=Enables camera focus effect.
+option.DOF.comment=Enables camera focus effect.
 option.DOF_STRENGTH=DoF Strength
 option.DOF_STRENGTH.comment=Adjusts the focus strength, higher value blurs quicker.
 
@@ -740,6 +749,11 @@ option.LIGHTSHAFT_NG=Green
 option.LIGHTSHAFT_NB=Blue
 option.LIGHTSHAFT_NI=Intensity
 
+option.LIGHTSHAFT_WR=Red
+option.LIGHTSHAFT_WG=Green
+option.LIGHTSHAFT_WB=Blue
+option.LIGHTSHAFT_WI=Intensity
+
 option.SKYLIGHT_MR=Red
 option.SKYLIGHT_MG=Green
 option.SKYLIGHT_MB=Blue
@@ -841,6 +855,7 @@ value.COLORED_LIGHTING_MODE.0=§cOFF
 value.COLORED_LIGHTING_MODE.1=XZ-pos (Dynamic)
 value.COLORED_LIGHTING_MODE.2=Light Color
 value.COLORED_LIGHTING_MODE.3=XZ-pos (Static)
+value.COLORED_LIGHTING_MODE.4=Handlight
 option.CLM_MAINCOL=D.W.P. Main Color
 option.CLM_MAINCOL.comment=Selects the main color for dynamic world position based colored lighting.
 value.CLM_MAINCOL.0=Green

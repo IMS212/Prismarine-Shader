@@ -13,6 +13,7 @@ uniform int isEyeInWater;
 const bool colortex0MipmapEnabled = false;
 const bool colortex1MipmapEnabled = true;
 
+
 varying vec3 lightVec, sunVec, upVec;
 
 varying vec4 texCoord;
@@ -122,12 +123,12 @@ void main() {
 	color = MotionBlur(color, z, dither);
 	#endif
 
-	float pixeldepth = texture2D(depthtex1,texCoord.xy).x;
+	float pixeldepth = texture2D(depthtex1, texCoord.xy).x;
 	float timeBrightnessLowered = timeBrightness / 1.5;
 	vec4 fragpos = getFragPos(texCoord.xy,pixeldepth);
 		
 	#if defined OVERWORLD && CLOUDS == 3
-	vec2 vc = vec2(texture2DLod(colortex5,texCoord.xy,float(2.0)).a,texture2DLod(colortex6,texCoord.xy,float(2.0)).a);
+	vec2 vc = vec2(texture2DLod(colortex5, texCoord.xy,float(2.0)).a,texture2DLod(colortex6, texCoord.xy,float(2.0)).a);
 	float vcmult = 0.5*(1.0-moonVisibility*0.7)*(1.0-rainStrength*0.5);
 	float opacity = VCLOUDS_OPACITY;
 	color = mix(color, mix(vcloudsCol.rgb * 0.25, vcloudsCol.rgb * 1.25, vc.y) * vcmult * vc.x, vc.x * vc.y * opacity);
