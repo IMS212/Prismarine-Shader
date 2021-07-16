@@ -146,6 +146,7 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
 
     //HANDHELD
     #elif COLORED_LIGHTING_MODE == 4
+    if (heldItemId == 62 || heldItemId2 == 62) blocklightCol = JACKOLANTERN.rgb;
     if (heldItemId == 61 || heldItemId2 == 61) blocklightCol = TORCH.rgb;
     if (heldItemId == 60 || heldItemId2 == 60) blocklightCol = SOUL_TORCH.rgb;
     if (heldItemId == 59 || heldItemId2 == 59) blocklightCol = LAVA.rgb;
