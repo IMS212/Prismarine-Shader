@@ -95,9 +95,7 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 		float depth0 = GetLinearDepth2(pixeldepth0);
 		float depth1 = GetLinearDepth2(pixeldepth1);
 
-		vec3 watercol = mix(vec3(1.0),
-							lightshaftWater.rgb / (waterColor.a * waterColor.a),
-							pow(waterAlpha, LIGHTSHAFT_WI)) * LIGHTSHAFT_WI;
+		vec3 watercol = lightshaftWater.rgb * LIGHTSHAFT_WI; //don't ask, just don't ask
 
 		for(int i = 0; i < LIGHTSHAFT_SAMPLES; i++) {
 			float maxDist = LIGHTSHAFT_MAX_DISTANCE;
@@ -139,12 +137,14 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 				else if (isEyeInWater == 1.0) shadow *= watercol * 128 * LIGHTSHAFT_WI * (1.0 + eBS);
 
 				#if (defined LIGHTSHAFT_CLOUDY_NOISE && defined OVERWORLD) || (defined END && defined END_VOLUMETRIC_FOG)
-				vec3 npos = worldposition.xyz + cameraPosition.xyz + vec3(frametime * 4.0, 0, 0);
-				float n3da = texture2D(noisetex, npos.xz / 512.0 + floor(npos.y / 3.0) * 0.35).r;
-				float n3db = texture2D(noisetex, npos.xz / 512.0 + floor(npos.y / 3.0 + 1.0) * 0.35).r;
-				float noise = mix(n3da, n3db, fract(npos.y / 3.0));
-				noise = sin(noise * 28.0 + frametime * 2.0) * 0.25 + 0.5;
-				shadow *= noise;
+				if (isEyeInWater != 1){
+					vec3 npos = worldposition.xyz + cameraPosition.xyz + vec3(frametime * 4.0, 0, 0);
+					float n3da = texture2D(noisetex, npos.xz / 512.0 + floor(npos.y / 3.0) * 0.35).r;
+					float n3db = texture2D(noisetex, npos.xz / 512.0 + floor(npos.y / 3.0 + 1.0) * 0.35).r;
+					float noise = mix(n3da, n3db, fract(npos.y / 3.0));
+					noise = sin(noise * 28.0 + frametime * 2.0) * 0.25 + 0.5;
+					shadow *= noise;
+				}
 				#endif
 
 				vl += shadow;
