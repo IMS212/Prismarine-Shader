@@ -78,12 +78,12 @@ float getHighQualityVCSample(vec3 pos, float height, float verticalThickness, fl
 	float rainStrengthLowered = rainStrength / 6.0;
 	
 	if (ymult < 1.0){
-		noise+= getHorizontalNoise(pos * samples * 0.5 - wind*0.5) * 2 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
-		noise+= getHorizontalNoise(pos * samples * 0.25 - wind*0.4) * 3 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
-		noise+= getHorizontalNoise(pos * samples * 0.125 - wind*0.3) * 4 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
-		noise+= getHorizontalNoise(pos * samples * 0.0625 - wind*0.2) * 5 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
-		noise+= getHorizontalNoise(pos * samples * 0.03125 - wind*0.1) * 6 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
-		noise+= getHorizontalNoise(pos * samples * 0.016125) * 7 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
+		noise+= getHorizontalNoise(pos * samples * 0.5 - wind*0.5) * 1 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
+		noise+= getHorizontalNoise(pos * samples * 0.25 - wind*0.4) * 2 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
+		noise+= getHorizontalNoise(pos * samples * 0.125 - wind*0.3) * 3 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
+		noise+= getHorizontalNoise(pos * samples * 0.0625 - wind*0.2) * 4 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
+		noise+= getHorizontalNoise(pos * samples * 0.03125 - wind*0.1) * 5 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
+		noise+= getHorizontalNoise(pos * samples * 0.016125) * 6 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
 	}
 	noise = clamp(mix(noise * 0.75 * VCLOUDS_AMOUNT, 21.0, 0.25 * rainStrengthLowered) - (10.0 + 5.0 * ymult), 0.0, 1.0);
 	return noise;
@@ -107,19 +107,20 @@ float getLowQualityVCSample(vec3 pos, float height, float verticalThickness, flo
 
 //FINAL
 float getVolumetricCloud(float pixeldepthw) {
-	float vc	    = 0.0;
+	float vc 		= 0.0;
 	vec4 wpos 		= vec4(0.0);
 
 	float quality	= VCLOUDS_QUALITY / 2;
 	float dither 	= (Bayer256(gl_FragCoord.xy) * quality);
 	float maxDist 	= VCLOUDS_RANGE;
 	float minDist 	= 0.01f + dither;
+	dither = fract(dither + frameTimeCounter / 32.0);
 
 	for (minDist; minDist < maxDist; ) {
 		if (getDepth(pixeldepthw) < minDist || vc > 0.999){
 			break;
 		}
-		wpos = getWorldPos(getFragPos(texCoord.xy,distx(minDist)));
+		wpos = getWorldPos(getFragPos(texCoord.xy, distx(minDist)));
 		if (length(wpos.xz) < maxDist && getDepth(pixeldepthw) > minDist){
 			float verticalNoise = getVerticalNoise((wpos.xz + cameraPosition.xz + (frametime * VCLOUDS_SPEED * 0.1)) * 0.002);		
 
