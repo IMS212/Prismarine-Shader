@@ -73,10 +73,8 @@ float moonVisibility = clamp((dot(-sunVec, upVec) + 0.05) * 10.0, 0.0, 1.0);
 //Program//
 void main() {
 	vec3 aux = texture2D(colortex6, texCoord.st).rgb;
-	vec3 aux2 = texture2D(colortex5, texCoord.st).rgb;
 	vec4 color = texture2D(colortex0, texCoord.st);
 	float pixeldepth0 = texture2D(depthtex0, texCoord.xy).x;
-	float pixeldepth1 = texture2D(depthtex1, texCoord.xy).x;
 	float dither = Bayer1024(gl_FragCoord.xy);
 
 	vec3 vl = texture2DLod(colortex1, texCoord.xy, 1.5).rgb;
@@ -115,14 +113,13 @@ void main() {
 	color.rgb += vl;
 
 	#if defined OVERWORLD && CLOUDS == 3
-	vec2 vc = vec2(0.0);
-	vc = getVolumetricCloud(pixeldepth1, pixeldepth0);
+	float vc = getVolumetricCloud(pixeldepth0);
 	#endif
 
 	/* DRAWBUFFERS:0145 */
 	gl_FragData[0] = color;
 	#if defined OVERWORLD && CLOUDS == 3
-	gl_FragData[3] = vec4(aux * vec3(0,1,0), vc.y);
+	gl_FragData[3] = vec4(aux, vc);
 	#endif
 }
 

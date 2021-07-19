@@ -299,7 +299,7 @@ void main() {
 		
 		if (water > 0.5) {
 			#if WATER_MODE == 0
-			albedo.rgb = waterColor.rgb * waterColor.a;
+			albedo.rgb = vec3(WATER_R * 0.5, WATER_G * 0.75, WATER_B * 1.25) / 255 * WATER_I * waterColor.a;
 			#elif WATER_MODE == 1
 			albedo.rgb *= albedo.a;
 			#elif WATER_MODE == 2

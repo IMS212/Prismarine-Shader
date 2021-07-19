@@ -97,7 +97,7 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 
 		vec3 watercol = mix(vec3(1.0),
 							lightshaftWater.rgb / (waterColor.a * waterColor.a),
-							pow(waterAlpha, LIGHTSHAFT_WI));
+							pow(waterAlpha, LIGHTSHAFT_WI)) * LIGHTSHAFT_WI;
 
 		for(int i = 0; i < LIGHTSHAFT_SAMPLES; i++) {
 			float maxDist = LIGHTSHAFT_MAX_DISTANCE;
