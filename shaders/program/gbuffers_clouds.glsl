@@ -46,7 +46,7 @@ void main() {
 	albedo.rgb = pow(albedo.rgb,vec3(2.2));
 	
 	float vanillaDiffuse = clamp(0.25 * dot(normal, upVec) + 0.75,0.5,1.0);
-	albedo.rgb *= lightCol * (vanillaDiffuse * (0.3 * sunVisibility + 0.2));
+	albedo.rgb *= cloudUpCol * (vanillaDiffuse * (0.3 * sunVisibility + 0.2));
 	
 	albedo.a *= 0.5 * color.a;
 	

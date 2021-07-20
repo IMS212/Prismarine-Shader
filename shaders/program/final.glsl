@@ -14,7 +14,7 @@ varying vec2 texCoord;
 
 //Uniforms//
 uniform sampler2D colortex1;
-
+uniform int isEyeInWater;
 uniform float viewWidth, viewHeight;
 
 //Optifine Constants//
@@ -31,7 +31,7 @@ const int gaux4Format = RGB16; //fresnel
 const bool colortex1MipmapEnabled = true;
 const bool shadowHardwareFiltering = true;
 const float shadowDistanceRenderMul = 1.0;
-const float aberrationStrength = float(CHROMATIC_ABERRATION_STRENGTH) / 500;
+const float aberrationStrength = float(CHROMATIC_ABERRATION_STRENGTH) / 512;
 const int noiseTextureResolution = 512;
 
 const float drynessHalflife = 50.0;

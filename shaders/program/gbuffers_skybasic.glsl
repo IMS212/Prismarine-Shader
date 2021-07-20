@@ -158,17 +158,10 @@ void main() {
 	albedo.rgb += DrawAurora(viewPos.xyz, dither, 24);
 	#endif
 	
-	#if CLOUDS == 1
+	#if CLOUDS == 1 || CLOUDS == 4
 	vec4 cloud = vec4(0.0);
-	#ifdef CLOUD_UPPER_LAYER
 	cloud += DrawCloud(viewPos.xyz, dither, lightCol, ambientCol);
 	albedo.rgb = mix(albedo.rgb, cloud.rgb, cloud.a);
-	#endif
-
-	#ifdef CLOUD_LOWER_LAYER
-	cloud += DrawLowerCloud(viewPos.xyz, dither, lightCol, ambientCol);
-	albedo.rgb = mix(albedo.rgb, cloud.rgb, cloud.a);
-	#endif
 	#endif
 
 	SunGlare(albedo, viewPos.xyz, lightCol);
@@ -200,7 +193,7 @@ void main() {
 	
     /* DRAWBUFFERS:0 */
 	gl_FragData[0] = vec4(albedo, 1.0 - star);
-    #if (defined OVERWORLD && CLOUDS == 1) || (defined END && END_SKY == 2) || (defined END && END_SKY == 3)
+    #if (defined OVERWORLD && CLOUDS == 1) || (defined END && END_SKY == 2) || (defined END && END_SKY == 3) || (defined OVERWORLD && CLOUDS == 4)
     /* DRAWBUFFERS:04 */
 	gl_FragData[1] = vec4(cloud.a, 0.0, 0.0, 0.0);
     #endif

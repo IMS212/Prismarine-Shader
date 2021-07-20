@@ -37,6 +37,8 @@ vec4 GetShadowSpace(vec4 wpos) {
 	return wpos;
 }
 
+
+//what are you looking at? there's nothing from complementary or any other shader :bruh:
 vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dither) {
 	vec3 vl = vec3(0.0);
 
@@ -134,7 +136,7 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 				vec3 shadow = clamp(shadowCol * (1.0 - shadow0) + shadow0, vec3(0.0), vec3(1.0));
 
 				if (depth0 < minDist) shadow *= color;
-				else if (isEyeInWater == 1.0) shadow *= watercol * 128 * LIGHTSHAFT_WI * (1.0 + eBS);
+				else if (isEyeInWater == 1.0) shadow *= watercol * 512 * LIGHTSHAFT_WI * (1.0 + eBS);
 
 				#if (defined LIGHTSHAFT_CLOUDY_NOISE && defined OVERWORLD) || (defined END && defined END_VOLUMETRIC_FOG)
 				if (isEyeInWater != 1){

@@ -22,7 +22,6 @@ uniform float timeAngle, timeBrightness;
 uniform sampler2D colortex0;
 uniform sampler2D colortex1;
 uniform sampler2D colortex5;
-uniform sampler2D colortex6;
 uniform sampler2D depthtex0;
 uniform sampler2D depthtex1;
 uniform sampler2D noisetex;
@@ -94,8 +93,11 @@ vec3 MotionBlur(vec3 color, float z, float dither) {
 	else return color;
 }
 
+#include "/lib/color/dimensionColor.glsl"
 #include "/lib/util/dither.glsl"
-#include "/lib/color/lightColor.glsl"
+#include "/lib/prismarine/functions.glsl"
+#include "/lib/prismarine/fragPos.glsl"
+#include "/lib/prismarine/volumetricClouds.glsl"
 
 #ifdef OUTLINE_OUTER
 #include "/lib/util/outlineOffset.glsl"
@@ -105,6 +107,8 @@ vec3 MotionBlur(vec3 color, float z, float dither) {
 void main() {
 	vec3 color = texture2DLod(colortex0, texCoord.st, 0.0).rgb;
 	float dither = Bayer64(gl_FragCoord.xy);
+	vec3 aux = texture2D(colortex5, texCoord.xy).rgb;
+	float pixeldepth0 = texture2D(depthtex0, texCoord.xy).x;
 
 	#ifdef MOTION_BLUR
 	float z = texture2D(depthtex1, texCoord.st).x;
@@ -116,15 +120,23 @@ void main() {
 	color = MotionBlur(color, z, dither);
 	#endif
 		
-	#if defined OVERWORLD && CLOUDS == 3
-	float color5 = texture2DLod(colortex5, texCoord.xy, 2.0).a;
+	#if defined OVERWORLD && (CLOUDS == 3 || CLOUDS == 4)
+	float vc = getVolumetricCloud2(pixeldepth0);
+	#endif
+
+	#if defined OVERWORLD && (CLOUDS == 3 || CLOUDS == 4)
+	float color5 = texture2DLod(colortex5, texCoord.xy, 8.0).a;
 	float vcmult = 0.5 * (1.0 - moonVisibility * 0.7) * (1.0 - rainStrength * 0.5);
 	float opacity = VCLOUDS_OPACITY;
-	color = mix(color, mix(vcloudsCol.rgb * 0.25, vcloudsCol.rgb * 1.25, color5) * vcmult, color5 * opacity);
+	color = mix(color, mix(vcloudsCol.rgb, vcloudsCol.rgb, color5) * vcmult, color5 * opacity);
 	#endif
 
 	/* DRAWBUFFERS:07 */
 	gl_FragData[0] = vec4(color, 1.0);
+	/* DRAWBUFFERS:0145 */
+	#if defined OVERWORLD && (CLOUDS == 3 || CLOUDS == 4)
+	gl_FragData[3] = vec4(aux, vc);
+	#endif
 }
 
 #endif

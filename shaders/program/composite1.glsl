@@ -38,11 +38,10 @@ uniform mat4 gbufferModelView;
 uniform mat4 shadowProjection;
 uniform mat4 shadowModelView;
 
-uniform sampler2D depthtex0, depthtex1;
+uniform sampler2D depthtex0;
 uniform sampler2D colortex0;
 uniform sampler2D colortex1;
 uniform sampler2D colortex5;
-uniform sampler2D colortex6;
 uniform sampler2D noisetex;
 
 //Optifine Constants//
@@ -64,16 +63,14 @@ float moonVisibility = clamp((dot(-sunVec, upVec) + 0.05) * 10.0, 0.0, 1.0);
 #include "/lib/color/dimensionColor.glsl"
 #include "/lib/color/waterColor.glsl"
 #include "/lib/util/dither.glsl"
-#include "/lib/util/jitter.glsl"
-#include "/lib/util/spaceConversion.glsl"
 #include "/lib/prismarine/functions.glsl"
 #include "/lib/prismarine/fragPos.glsl"
 #include "/lib/prismarine/volumetricClouds.glsl"
 
 //Program//
 void main() {
-	vec3 aux = texture2D(colortex6, texCoord.st).rgb;
-	vec4 color = texture2D(colortex0, texCoord.st);
+	vec3 aux = texture2D(colortex5, texCoord.xy).rgb;
+	vec4 color = texture2D(colortex0, texCoord.xy);
 	float pixeldepth0 = texture2D(depthtex0, texCoord.xy).x;
 	float dither = Bayer1024(gl_FragCoord.xy);
 
@@ -100,7 +97,7 @@ void main() {
 	#else
 	vl *= lightshaftCol * 0.25;
 	#endif
-	if (isEyeInWater == 1) vl *= waterColor.rgb * 0.25;
+	if (isEyeInWater == 1) vl *= lightshaftWater.rgb * (timeBrightness + LIGHTSHAFT_WI) * 0.25;
 	#endif
 
 	#ifdef END
@@ -112,13 +109,14 @@ void main() {
 
 	color.rgb += vl;
 
-	#if defined OVERWORLD && CLOUDS == 3
+	#if defined OVERWORLD && (CLOUDS == 3 || CLOUDS == 4)
 	float vc = getVolumetricCloud(pixeldepth0);
 	#endif
 
 	/* DRAWBUFFERS:0145 */
 	gl_FragData[0] = color;
-	#if defined OVERWORLD && CLOUDS == 3
+	/* DRAWBUFFERS:0145 */
+	#if defined OVERWORLD && (CLOUDS == 3 || CLOUDS == 4)
 	gl_FragData[3] = vec4(aux, vc);
 	#endif
 }

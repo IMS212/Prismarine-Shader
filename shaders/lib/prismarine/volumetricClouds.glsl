@@ -96,16 +96,109 @@ float getLowQualityVCSample(vec3 pos, float height, float verticalThickness, flo
 	float rainStrengthLowered = rainStrength / 4.0;
 
 	if (ymult < 1.0){
-		noise+= getHorizontalNoise(pos * samples * 0.1 - wind * 0.3) * 16 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
+		noise+= getHorizontalNoise(pos * samples * 0.1 - wind * 0.3) * 48 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
 	}
 
-	noise = clamp(mix(noise * VCLOUDS_AMOUNT * 0.75, 21.0, 0.25 * rainStrengthLowered) - (10.0 + 5.0 * ymult), 0.0, 1.0);
+	noise = clamp(mix(noise * VCLOUDS_AMOUNT * 0.25, 21.0, 0.25 * rainStrengthLowered) - (10.0 + 5.0 * ymult), 0.0, 1.0);
+	return noise;
+}
+
+float getUltraQualityVCSample2(vec3 pos, float height, float verticalThickness, float samples){
+	float noise = 0.0;
+	float ymult = pow(abs(height - pos.y) / verticalThickness, VCLOUDS_VERTICAL_THICKNESS);
+	vec3 wind = vec3(frametime * 0.001 * VCLOUDS_SPEED, 0.0, 0.0);
+	float rainStrengthLowered = rainStrength / 8.0;
+	
+	if (ymult < 1.0){
+		noise+= getHorizontalNoise(pos * samples * 0.5 - wind*1) * 0.25 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
+		noise+= getHorizontalNoise(pos * samples * 0.25 - wind*0.9) * 0.75 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
+		noise+= getHorizontalNoise(pos * samples * 0.125 - wind*0.8) * 1.0 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
+		noise+= getHorizontalNoise(pos * samples * 0.0625 - wind*0.7) * 1.75 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
+		noise+= getHorizontalNoise(pos * samples * 0.03125 - wind*0.6) * 2.0 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
+		noise+= getHorizontalNoise(pos * samples * 0.016125 - wind*0.5) * 2.75 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
+		noise+= getHorizontalNoise(pos * samples * 0.00862 - wind*0.4) * 3.0 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
+		noise+= getHorizontalNoise(pos * samples * 0.00431 - wind*0.3) * 3.25 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
+		noise+= getHorizontalNoise(pos * samples * 0.00216 - wind*0.2) * 4.0 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
+	}
+	noise = clamp(mix(noise * VCLOUDS_AMOUNT * 0.80, 21.0, 0.25 * rainStrengthLowered) - (10.0 + 5.0 * ymult), 0.0, 1.0);
+	return noise;
+}
+
+float getHighQualityVCSample2(vec3 pos, float height, float verticalThickness, float samples){
+	float noise = 0.0;
+	float ymult = pow(abs(height - pos.y) / verticalThickness, VCLOUDS_VERTICAL_THICKNESS);
+	vec3 wind = vec3(frametime * 0.001 * VCLOUDS_SPEED, 0.0, 0.0);
+	float rainStrengthLowered = rainStrength / 6.0;
+	
+	if (ymult < 1.0){
+		noise+= getHorizontalNoise(pos * samples * 0.5 - wind*0.5) * 1 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
+		noise+= getHorizontalNoise(pos * samples * 0.25 - wind*0.4) * 2 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
+		noise+= getHorizontalNoise(pos * samples * 0.125 - wind*0.3) * 3 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
+		noise+= getHorizontalNoise(pos * samples * 0.0625 - wind*0.2) * 4 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
+		noise+= getHorizontalNoise(pos * samples * 0.03125 - wind*0.1) * 5 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
+		noise+= getHorizontalNoise(pos * samples * 0.016125) * 6 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
+	}
+	noise = clamp(mix(noise * 0.7 * VCLOUDS_AMOUNT, 21.0, 0.25 * rainStrengthLowered) - (10.0 + 5.0 * ymult), 0.0, 1.0);
+	return noise;
+}
+
+float getLowQualityVCSample2(vec3 pos, float height, float verticalThickness, float samples){
+	float noise = 0.0;
+	float ymult = pow(abs(height - pos.y) / verticalThickness, VCLOUDS_VERTICAL_THICKNESS);
+	vec3 wind = vec3(frametime * 0.001 * VCLOUDS_SPEED, 0.0, 0.0);
+	float rainStrengthLowered = rainStrength / 4.0;
+
+	if (ymult < 1.0){
+		noise+= getHorizontalNoise(pos * samples * 0.1 - wind * 0.3) * 44 * (rainStrengthLowered + VCLOUDS_HORIZONTAL_THICKNESS);
+	}
+
+	noise = clamp(mix(noise * VCLOUDS_AMOUNT * 0.25, 21.0, 0.25 * rainStrengthLowered) - (10.0 + 5.0 * ymult), 0.0, 1.0);
 	return noise;
 }
 
 
 
 //FINAL
+float getVolumetricCloud2(float pixeldepthw) {
+	float vc 		= 0.0;
+	vec4 wpos 		= vec4(0.0);
+
+	float quality	= VCLOUDS_QUALITY / 2;
+	float dither 	= (Bayer256(gl_FragCoord.xy) * quality);
+	float maxDist 	= VCLOUDS_RANGE;
+	float minDist 	= 0.01f + dither;
+	dither = fract(dither + frameTimeCounter / 32.0);
+
+	for (minDist; minDist < maxDist; ) {
+		if (getDepth(pixeldepthw) < minDist || vc > 0.999){
+			break;
+		}
+		wpos = getWorldPos(getFragPos(texCoord.xy, distx(minDist)));
+		if (length(wpos.xz) < maxDist && getDepth(pixeldepthw) > minDist){
+			float verticalNoise = getVerticalNoise((wpos.xz + cameraPosition.xz + (frametime * VCLOUDS_SPEED * 0.1)) * 0.002);		
+
+			#ifdef WORLD_CURVATURE
+			if (length(wpos.xz) < WORLD_CURVATURE_SIZE) wpos.y += length(wpos.xz) * length(wpos.xyz) / WORLD_CURVATURE_SIZE;
+			else break;
+			#endif
+
+			wpos.xyz += cameraPosition.xyz + vec3(frametime * 4.0 * VCLOUDS_SPEED, -verticalNoise * 32.0, 0.0);
+ 
+			#if VCLOUDS_NOISE_QUALITY == 0
+			float noise = getLowQualityVCSample(wpos.xyz, (VCLOUDS_HEIGHT-9 + (timeBrightness * VCLOUDS_HEIGHT_ADJ_FACTOR)), VCLOUDS_VERTICAL_THICKNESS/1.5, VCLOUDS_SAMPLES);
+			#elif VCLOUDS_NOISE_QUALITY == 1
+			float noise = getHighQualityVCSample(wpos.xyz, (VCLOUDS_HEIGHT-9 + (timeBrightness * VCLOUDS_HEIGHT_ADJ_FACTOR)), VCLOUDS_VERTICAL_THICKNESS/1.5, VCLOUDS_SAMPLES);
+			#elif VCLOUDS_NOISE_QUALITY == 2
+			float noise = getUltraQualityVCSample(wpos.xyz, (VCLOUDS_HEIGHT-9 + (timeBrightness * VCLOUDS_HEIGHT_ADJ_FACTOR)), VCLOUDS_VERTICAL_THICKNESS/1.5, VCLOUDS_SAMPLES);
+			#endif
+
+			vc = max(noise, vc);
+		}
+		minDist = minDist + quality;
+	}
+	return vc;
+}
+
 float getVolumetricCloud(float pixeldepthw) {
 	float vc 		= 0.0;
 	vec4 wpos 		= vec4(0.0);
@@ -132,11 +225,11 @@ float getVolumetricCloud(float pixeldepthw) {
 			wpos.xyz += cameraPosition.xyz + vec3(frametime * 4.0 * VCLOUDS_SPEED, -verticalNoise * 32.0, 0.0);
  
 			#if VCLOUDS_NOISE_QUALITY == 0
-			float noise = getLowQualityVCSample(wpos.xyz, (VCLOUDS_HEIGHT + (timeBrightness * VCLOUDS_HEIGHT_ADJ_FACTOR)), VCLOUDS_VERTICAL_THICKNESS, VCLOUDS_SAMPLES);
+			float noise = getLowQualityVCSample2(wpos.xyz, (VCLOUDS_HEIGHT + (timeBrightness * VCLOUDS_HEIGHT_ADJ_FACTOR)), VCLOUDS_VERTICAL_THICKNESS*1.5, VCLOUDS_SAMPLES);
 			#elif VCLOUDS_NOISE_QUALITY == 1
-			float noise = getHighQualityVCSample(wpos.xyz, (VCLOUDS_HEIGHT + (timeBrightness * VCLOUDS_HEIGHT_ADJ_FACTOR)), VCLOUDS_VERTICAL_THICKNESS, VCLOUDS_SAMPLES);
+			float noise = getHighQualityVCSample2(wpos.xyz, (VCLOUDS_HEIGHT + (timeBrightness * VCLOUDS_HEIGHT_ADJ_FACTOR)), VCLOUDS_VERTICAL_THICKNESS*1.5, VCLOUDS_SAMPLES);
 			#elif VCLOUDS_NOISE_QUALITY == 2
-			float noise = getUltraQualityVCSample(wpos.xyz, (VCLOUDS_HEIGHT + (timeBrightness * VCLOUDS_HEIGHT_ADJ_FACTOR)), VCLOUDS_VERTICAL_THICKNESS, VCLOUDS_SAMPLES);
+			float noise = getUltraQualityVCSample2(wpos.xyz, (VCLOUDS_HEIGHT + (timeBrightness * VCLOUDS_HEIGHT_ADJ_FACTOR)), VCLOUDS_VERTICAL_THICKNESS*1.5, VCLOUDS_SAMPLES);
 			#endif
 
 			vc = max(noise, vc);
