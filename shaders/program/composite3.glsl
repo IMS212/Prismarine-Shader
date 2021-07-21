@@ -29,6 +29,7 @@ uniform sampler2D depthtex1;
 
 //Optifine Constants//
 const bool colortex0MipmapEnabled = true;
+const bool colortex5MipmapEnabled = true;
 
 //Common Variables//
 vec2 dofOffsets[60] = vec2[60](
@@ -125,8 +126,6 @@ vec3 DepthOfField(vec3 color, float z) {
 }
 
 //Includes//
-#include "/lib/color/lightColor.glsl"
-
 #ifdef OUTLINE_OUTER
 #include "/lib/util/outlineOffset.glsl"
 #include "/lib/util/outlineDepth.glsl"
@@ -145,16 +144,9 @@ void main() {
 
 	color = DepthOfField(color, z);
 	#endif
-	
-	#if defined OVERWORLD && (CLOUDS == 3 || CLOUDS == 4)
-	float color5 = texture2DLod(colortex5, texCoord.xy, 8.0).a;
-	float vcmult = 0.5 * (1.0 - moonVisibility * 0.7) * (1.0 - rainStrength * 0.5);
-	float opacity = VCLOUDS_OPACITY;
-	color = mix(color, mix(vcloudsDownCol.rgb, vcloudsDownCol.rgb, color5) * vcmult, color5 * opacity);
-	#endif
 
     /*DRAWBUFFERS:07*/
-	gl_FragData[0] = vec4(color, 1.0);
+	gl_FragData[0] = vec4(color, 0.0);
 }
 
 #endif

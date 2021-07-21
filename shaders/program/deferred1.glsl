@@ -213,7 +213,7 @@ void main() {
 			if (reflection.a < 1.0) {
 				#ifdef OVERWORLD
 				vec3 skyRefPos = reflect(normalize(viewPos.xyz), normal);
-                skyReflection = GetSkyColor(skyRefPos, lightCol, true);
+                skyReflection = GetSkyColor(skyRefPos, true);
 
 				#ifdef REFLECTION_ROUGH
 				float cloudMixRate = smoothness * smoothness * (3.0 - 2.0 * smoothness);

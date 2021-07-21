@@ -12,7 +12,8 @@ https://bitslablab.com
 uniform int isEyeInWater;
 const bool colortex0MipmapEnabled = false;
 const bool colortex1MipmapEnabled = true;
-
+const bool colortex8MipmapEnabled = true;
+const bool colortex9MipmapEnabled = true;
 
 varying vec3 lightVec, sunVec, upVec;
 
@@ -21,7 +22,8 @@ varying vec4 texCoord;
 uniform float timeAngle, timeBrightness;
 uniform sampler2D colortex0;
 uniform sampler2D colortex1;
-uniform sampler2D colortex5;
+uniform sampler2D colortex8;
+uniform sampler2D colortex9;
 uniform sampler2D depthtex0;
 uniform sampler2D depthtex1;
 uniform sampler2D noisetex;
@@ -107,7 +109,6 @@ vec3 MotionBlur(vec3 color, float z, float dither) {
 void main() {
 	vec3 color = texture2DLod(colortex0, texCoord.st, 0.0).rgb;
 	float dither = Bayer64(gl_FragCoord.xy);
-	vec3 aux = texture2D(colortex5, texCoord.xy).rgb;
 	float pixeldepth0 = texture2D(depthtex0, texCoord.xy).x;
 
 	#ifdef MOTION_BLUR
@@ -119,24 +120,15 @@ void main() {
 
 	color = MotionBlur(color, z, dither);
 	#endif
-		
-	#if defined OVERWORLD && (CLOUDS == 3 || CLOUDS == 4)
-	float vc = getVolumetricCloud2(pixeldepth0);
-	#endif
 
-	#if defined OVERWORLD && (CLOUDS == 3 || CLOUDS == 4)
-	float color5 = texture2DLod(colortex5, texCoord.xy, 8.0).a;
-	float vcmult = 0.5 * (1.0 - moonVisibility * 0.7) * (1.0 - rainStrength * 0.5);
-	float opacity = VCLOUDS_OPACITY;
-	color = mix(color, mix(vcloudsCol.rgb, vcloudsCol.rgb, color5) * vcmult, color5 * opacity);
+	#if CLOUDS == 3
+	vec2 vc = vec2(texture2DLod(colortex8,texCoord.xy,float(2.0)).a, texture2DLod(colortex9,texCoord.xy,float(2.0)).a);
+	float vcmult = 0.5 * (1.0 - moonVisibility * 0.7) * (1.0-rainStrength * 0.5);
+	color = mix(color, mix(vcloudsDownCol, vcloudsCol, vc.x) * vcmult, vc.y * vc.y);
 	#endif
 
 	/* DRAWBUFFERS:07 */
-	gl_FragData[0] = vec4(color, 1.0);
-	/* DRAWBUFFERS:0145 */
-	#if defined OVERWORLD && (CLOUDS == 3 || CLOUDS == 4)
-	gl_FragData[3] = vec4(aux, vc);
-	#endif
+	gl_FragData[0] = vec4(color, 0.0);
 }
 
 #endif

@@ -39,9 +39,11 @@ uniform mat4 shadowProjection;
 uniform mat4 shadowModelView;
 
 uniform sampler2D depthtex0;
+uniform sampler2D depthtex1;
 uniform sampler2D colortex0;
 uniform sampler2D colortex1;
-uniform sampler2D colortex5;
+uniform sampler2D colortex8;
+uniform sampler2D colortex9;
 uniform sampler2D noisetex;
 
 //Optifine Constants//
@@ -69,10 +71,12 @@ float moonVisibility = clamp((dot(-sunVec, upVec) + 0.05) * 10.0, 0.0, 1.0);
 
 //Program//
 void main() {
-	vec3 aux = texture2D(colortex5, texCoord.xy).rgb;
+	vec3 aux8 = texture2D(colortex8, texCoord.st).rgb;
+	vec3 aux9 = texture2D(colortex9, texCoord.st).rgb;
 	vec4 color = texture2D(colortex0, texCoord.xy);
 	float pixeldepth0 = texture2D(depthtex0, texCoord.xy).x;
 	float dither = Bayer1024(gl_FragCoord.xy);
+	vec2 vc = vec2(0.0);
 
 	vec3 vl = texture2DLod(colortex1, texCoord.xy, 1.5).rgb;
 	vl *= vl;
@@ -109,15 +113,16 @@ void main() {
 
 	color.rgb += vl;
 
-	#if defined OVERWORLD && (CLOUDS == 3 || CLOUDS == 4)
-	float vc = getVolumetricCloud(pixeldepth0);
+	#if CLOUDS == 3
+	float pixeldepth1 = texture2D(depthtex1, texCoord.xy).x;
+	vc = getVolumetricCloud(pixeldepth1, pixeldepth0, 0, 2);
 	#endif
 
-	/* DRAWBUFFERS:0145 */
+	/* DRAWBUFFERS:0189 */
 	gl_FragData[0] = color;
-	/* DRAWBUFFERS:0145 */
 	#if defined OVERWORLD && (CLOUDS == 3 || CLOUDS == 4)
-	gl_FragData[3] = vec4(aux, vc);
+	gl_FragData[2] = vec4(aux8, vc.x);
+	gl_FragData[3] = vec4(aux9, vc.y);
 	#endif
 }
 

@@ -92,7 +92,7 @@ void main() {
 	vec3 color = texture2D(colortex1, texCoord).rgb;
 	#endif
 
-	#if Sharpen > 0 && !defined RETRO_FILTER && !defined DOF
+	#if Sharpen > 0 && !defined RETRO_FILTER && !defined DOF && !defined TAA
 	vec2 view = 1.0 / vec2(viewWidth, viewHeight);
 	color *= Sharpen * 0.1 + 1.0;
 	color -= texture2D(colortex1,texCoord.xy+vec2(1.0,0.0)*view).rgb * Sharpen * 0.025;

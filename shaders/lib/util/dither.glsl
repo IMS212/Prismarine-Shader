@@ -1,4 +1,15 @@
 //Dithering from Jodie
+float BlueDithering() {
+    ivec2 coord = ivec2(fract(gl_FragCoord.xy/256.0)*256.0);
+    float noise = texture2DLod(noisetex, coord, 0).a;
+
+    #ifdef TAA
+        noise   = fract(noise+float(frameTimeCounter)/32);
+    #endif
+
+    return noise;
+}
+
 float Bayer2(vec2 a) {
     a = floor(a);
     return fract(dot(a, vec2(0.5, a.y * 0.75)));
