@@ -14,7 +14,7 @@ void WaterFog(inout vec3 color, vec3 viewPos) {
     waterFogColor *= 0.5 * (1.0 - blindFactor);
 
     #ifdef OVERWORLD
-    vec3 waterFogTint = lightCol * eBS * shadowFade + 0.05;
+    vec3 waterFogTint = lightCol * shadowFade + 0.05;
     #endif
     #ifdef NETHER
     vec3 waterFogTint = netherCol.rgb;
