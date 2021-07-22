@@ -12,8 +12,7 @@ https://bitslablab.com
 uniform int isEyeInWater;
 const bool colortex0MipmapEnabled = false;
 const bool colortex1MipmapEnabled = true;
-const bool colortex8MipmapEnabled = true;
-const bool colortex9MipmapEnabled = true;
+
 
 varying vec3 lightVec, sunVec, upVec;
 
