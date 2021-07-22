@@ -35,8 +35,6 @@ uniform mat4 gbufferProjection;
 uniform mat4 gbufferProjectionInverse;
 uniform mat4 gbufferModelViewInverse;
 uniform mat4 gbufferModelView;
-uniform mat4 shadowProjection;
-uniform mat4 shadowModelView;
 
 uniform sampler2D depthtex0;
 uniform sampler2D depthtex1;
@@ -48,6 +46,8 @@ uniform sampler2D noisetex;
 
 //Optifine Constants//
 const bool colortex1MipmapEnabled = true;
+const bool colortex8MipmapEnabled = true;
+const bool colortex9MipmapEnabled = true;
 
 //Common Variables//
 
@@ -113,9 +113,9 @@ void main() {
 
 	color.rgb += vl;
 
-	#if CLOUDS == 3
+	#if CLOUDS == 3 && defined OVERWORLD
 	float pixeldepth1 = texture2D(depthtex1, texCoord.xy).x;
-	vc = getVolumetricCloud(pixeldepth1, pixeldepth0, 0, 2);
+	vc = getVolumetricCloud(pixeldepth1, pixeldepth0, VCLOUDS_HEIGHT_ADJ_FACTOR, 2);
 	#endif
 
 	/* DRAWBUFFERS:0189 */

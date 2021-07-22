@@ -95,15 +95,6 @@ vec2 dofOffsets[60] = vec2[60](
 	vec2( 0.2588 ,  0.9659)
 );
 
-#ifdef WORLD_TIME_ANIMATION
-float frametime = float(worldTime)/20.0*ANIMATION_SPEED;
-#else
-float frametime = frameTimeCounter*ANIMATION_SPEED;
-#endif
-
-float sunVisibility = clamp(dot(sunVec, upVec) + 0.05, 0.0, 0.1) * 10.0;
-float moonVisibility = clamp((dot(-sunVec, upVec) + 0.05) * 10.0, 0.0, 1.0);
-
 //Common Functions//
 vec3 DepthOfField(vec3 color, float z) {
 	vec3 dof = vec3(0.0);

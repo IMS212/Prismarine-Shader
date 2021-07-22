@@ -9,37 +9,45 @@ https://bitslablab.com
 //Fragment Shader///////////////////////////////////////////////////////////////////////////////////
 #ifdef FSH
 
-uniform int isEyeInWater;
-const bool colortex0MipmapEnabled = false;
-const bool colortex1MipmapEnabled = true;
-
-
-varying vec3 lightVec, sunVec, upVec;
-
+//Varyings//
 varying vec4 texCoord;
 
+varying vec3 sunVec, upVec, lightVec;
+
+//Uniforms//
+uniform int isEyeInWater;
+uniform int worldTime;
+
+uniform float blindFactor;
+uniform float rainStrength;
+uniform float shadowFade;
 uniform float timeAngle, timeBrightness;
+uniform float frameTimeCounter;
+uniform float far, near;
+uniform float viewHeight, viewWidth, aspectRatio;
+uniform float eyeAltitude;
+
+uniform ivec2 eyeBrightnessSmooth;
+
+uniform vec3 cameraPosition, previousCameraPosition;
+
+uniform mat4 gbufferProjection;
+uniform mat4 gbufferProjectionInverse;
+uniform mat4 gbufferModelViewInverse;
+uniform mat4 gbufferModelView, gbufferPreviousModelView, gbufferPreviousProjection;
+
+uniform sampler2D depthtex0;
+uniform sampler2D depthtex1;
 uniform sampler2D colortex0;
 uniform sampler2D colortex1;
 uniform sampler2D colortex8;
 uniform sampler2D colortex9;
-uniform sampler2D depthtex0;
-uniform sampler2D depthtex1;
 uniform sampler2D noisetex;
 
-uniform mat4 shadowProjection;
-uniform mat4 shadowModelView;
-uniform float rainStrength;
-uniform ivec2 eyeBrightnessSmooth;
-uniform int worldTime;
-uniform float frameTimeCounter;
-uniform float viewWidth, viewHeight, aspectRatio;
-uniform vec3 cameraPosition, previousCameraPosition;
-uniform mat4 gbufferProjection, gbufferPreviousProjection, gbufferProjectionInverse;
-uniform mat4 gbufferModelView, gbufferPreviousModelView, gbufferModelViewInverse;
-uniform float far, near;
-uniform float eyeAltitude;
-uniform float shadowFade;
+//Optifine Constants//
+const bool colortex1MipmapEnabled = true;
+const bool colortex8MipmapEnabled = true;
+const bool colortex9MipmapEnabled = true;
 
 #ifdef WORLD_TIME_ANIMATION
 float frametime = float(worldTime)/20.0*ANIMATION_SPEED;
@@ -96,9 +104,6 @@ vec3 MotionBlur(vec3 color, float z, float dither) {
 
 #include "/lib/color/dimensionColor.glsl"
 #include "/lib/util/dither.glsl"
-#include "/lib/prismarine/functions.glsl"
-#include "/lib/prismarine/fragPos.glsl"
-#include "/lib/prismarine/volumetricClouds.glsl"
 
 #ifdef OUTLINE_OUTER
 #include "/lib/util/outlineOffset.glsl"
@@ -120,7 +125,7 @@ void main() {
 	color = MotionBlur(color, z, dither);
 	#endif
 
-	#if CLOUDS == 3
+	#if CLOUDS == 3 && defined OVERWORLD
 	vec2 vc = vec2(texture2DLod(colortex8,texCoord.xy,float(2.0)).a, texture2DLod(colortex9,texCoord.xy,float(2.0)).a);
 	float vcmult = 0.5 * (1.0 - moonVisibility * 0.7) * (1.0-rainStrength * 0.5);
 	color = mix(color, mix(vcloudsDownCol, vcloudsCol, vc.x) * vcmult, vc.y * vc.y);

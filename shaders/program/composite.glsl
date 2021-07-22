@@ -93,6 +93,7 @@ float GetLinearDepth(float depth) {
 #include "/lib/color/blocklightColor.glsl"
 #include "/lib/util/outlineOffset.glsl"
 #include "/lib/util/outlineMask.glsl"
+#include "/lib/color/skyColor.glsl"
 #include "/lib/atmospherics/sky.glsl"
 #include "/lib/atmospherics/fog.glsl"
 #include "/lib/post/outline.glsl"
