@@ -46,10 +46,14 @@ screen.CLOUDLIGHT_M=Clouds Upper (Morning)
 screen.CLOUDLIGHT_D=Clouds Upper (Day)
 screen.CLOUDLIGHT_E=Clouds Upper (Evening)
 screen.CLOUDLIGHT_N=Clouds Upper (Night)
-screen.VCLOUD_M=3D Clouds (Morning)
-screen.VCLOUD_D=3D Clouds (Day)
-screen.VCLOUD_E=3D Clouds (Evening)
-screen.VCLOUD_N=3D Clouds (Night)
+screen.VCLOUD_M=Lower Parts (Morning)
+screen.VCLOUD_D=Lower Parts (Day)
+screen.VCLOUD_E=Lower Parts (Evening)
+screen.VCLOUD_N=Lower Parts (Night)
+screen.VCLOUDDOWN_M=Upper Parts (Morning)
+screen.VCLOUDDOWN_D=Upper Parts (Day)
+screen.VCLOUDDOWN_E=Upper Parts (Evening)
+screen.VCLOUDDOWN_N=Upper Parts (Night)
 screen.DISTFADECOL_M=Distant Fade (Morning)
 screen.DISTFADECOL_D=Distant Fade (Day)
 screen.DISTFADECOL_E=Distant Fade (Evening)
@@ -682,6 +686,7 @@ option.CLOUDLIGHT_NG=Green
 option.CLOUDLIGHT_NB=Blue
 option.CLOUDLIGHT_NI=Intensity
 
+
 option.VCLOUD_MR=Red
 option.VCLOUD_MG=Green
 option.VCLOUD_MB=Blue
@@ -701,6 +706,26 @@ option.VCLOUD_NR=Red
 option.VCLOUD_NG=Green
 option.VCLOUD_NB=Blue
 option.VCLOUD_NI=Intensity
+
+option.VCLOUDDOWN_MR=Red
+option.VCLOUDDOWN_MG=Green
+option.VCLOUDDOWN_MB=Blue
+option.VCLOUDDOWN_MI=Intensity
+
+option.VCLOUDDOWN_DR=Red
+option.VCLOUDDOWN_DG=Green
+option.VCLOUDDOWN_DB=Blue
+option.VCLOUDDOWN_DI=Intensity
+
+option.VCLOUDDOWN_ER=Red
+option.VCLOUDDOWN_EG=Green
+option.VCLOUDDOWN_EB=Blue
+option.VCLOUDDOWN_EI=Intensity
+
+option.VCLOUDDOWN_NR=Red
+option.VCLOUDDOWN_NG=Green
+option.VCLOUDDOWN_NB=Blue
+option.VCLOUDDOWN_NI=Intensity
 
 option.DISTFADE_MR=Red
 option.DISTFADE_MG=Green
