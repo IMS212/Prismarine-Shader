@@ -93,6 +93,7 @@ void main() {
 		vec3 nViewPos = normalize(viewPos.xyz);
 		float VoU = clamp(dot(nViewPos, upVec), -1.0, 1.0);
 		VoU = (2-(cameraPosition.y*LIGHTSHAFT_ALTITUDE_FACTOR)) - VoU;
+		if (cameraPosition.y > 150) VoU = 1 - clamp(dot(nViewPos, upVec), -1.0, 1.0);
 		vl *= VoU * VoU;
 		vl *= 0.50;
 	}

@@ -20,7 +20,7 @@ vec3 CalcLightColor1(vec3 sun, vec3 night, vec3 weatherCol) {
 vec3 fogcolorSun    = CalcSunColor1(fogcolorMorning, fogcolorDay, fogcolorEvening);
 vec4 fogColorC    	= vec4(CalcLightColor1(fogcolorSun, fogcolorNight, weatherCol.rgb), 1);
 
-#ifdef FOG_PERBIOME
+#if FOG_COLOR_MODE == 2
 	vec4 fogCold     = vec4(vec3(BIOMEFOG_CR, BIOMEFOG_CG, BIOMEFOG_CB) / 255.0, 1.0) * BIOMEFOG_CI;
 	vec4 fogDesert   = vec4(vec3(BIOMEFOG_DR, BIOMEFOG_DG, BIOMEFOG_DB) / 255.0, 1.0) * BIOMEFOG_DI;
 	vec4 fogSwamp    = vec4(vec3(BIOMEFOG_SR, BIOMEFOG_SG, BIOMEFOG_SB) / 255.0, 1.0) * BIOMEFOG_SI;
@@ -36,8 +36,9 @@ vec4 fogColorC    	= vec4(CalcLightColor1(fogcolorSun, fogcolorNight, weatherCol
 	vec4 biomeFogCol = mix(
 		fogColorC,
 		(
-			fogCold  * isCold  + fogDesert   * isDesert   + fogBadlands * isMesa    +
-			fogSwamp * isSwamp + fogMushroom * isMushroom + fogSavanna  * isSavanna
+			fogCold  * isCold  + fogDesert * isDesert   + fogBadlands * isMesa    +
+			fogSwamp * isSwamp + fogMushroom * isMushroom + fogSavanna  * isSavanna +
+			fogForest * isForest + fogJungle * isJungle + fogTaiga * isTaiga + fogBadlands * isBadlands
 		) / max(fogWeight, 0.0001),
 		fogWeight
 	);

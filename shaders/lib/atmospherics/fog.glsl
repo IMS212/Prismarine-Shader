@@ -41,7 +41,7 @@ vec3 GetFogColor(vec3 viewPos) {
 	#elif FOG_COLOR_MODE == 1
 	vec3 lightFog = pow(GetSkyColor(viewPos, false) / 2 * vec3(FOG_R, FOG_G, FOG_B) * FOG_I, vec3(4.0 - sunVisibility)) * baseGradient;
 	#else
-	vec3 lightFog = pow(biomeFogCol.rgb * vec3(FOG_R, FOG_G, FOG_B) * FOG_I, vec3(4.0 - sunVisibility)) * baseGradient;
+	vec3 lightFog = pow(biomeFogCol.rgb / 2, vec3(4.0 - sunVisibility)) * baseGradient;
 	#endif
 
 	lightFog = lightFog / (1.0 + lightFog * rainStrength);
@@ -107,6 +107,8 @@ void NormalFog(inout vec3 color, vec3 viewPos) {
 				vanillaFogColor = GetSkyColor(viewPos, false);
 				#elif FOG_COLOR_MODE == 1
 				vanillaFogColor = distfadeCol * 0.2;
+				#else
+				vanillaFogColor = GetSkyColor(viewPos, false);
 				#endif
 			}
 			vanillaFogColor *= (4.0 - 3.0 * eBS) * (1.0 + nightVision);
