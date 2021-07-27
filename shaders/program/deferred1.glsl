@@ -152,6 +152,7 @@ float GetAmbientOcclusion(float z){
 
 //Includes//
 #include "/lib/color/dimensionColor.glsl"
+#include "/lib/color/fogColor.glsl"
 #include "/lib/color/skyColor.glsl"
 #include "/lib/color/blocklightColor.glsl"
 #include "/lib/color/waterColor.glsl"

@@ -47,11 +47,6 @@ uniform sampler2DShadow shadowtex1;
 uniform sampler2D shadowcolor0;
 #endif
 
-//Attributes//
-
-//Optifine Constants//
-const bool colortex5Clear = false;
-
 //Common Variables//
 float eBS = eyeBrightnessSmooth.y / 240.0;
 float sunVisibility = clamp(dot(sunVec, upVec) + 0.05, 0.0, 0.1) * 10.0;
@@ -73,9 +68,7 @@ float GetLinearDepth(float depth) {
 }
 
 //Includes//
-#include "/lib/color/lightColor.glsl"
-#include "/lib/color/netherColor.glsl"
-#include "/lib/color/endColor.glsl"
+#include "/lib/color/dimensionColor.glsl"
 #include "/lib/color/waterColor.glsl"
 #include "/lib/util/dither.glsl"
 #include "/lib/atmospherics/waterFog.glsl"
@@ -94,6 +87,7 @@ float GetLinearDepth(float depth) {
 #include "/lib/util/outlineOffset.glsl"
 #include "/lib/util/outlineMask.glsl"
 #include "/lib/color/skyColor.glsl"
+#include "/lib/color/fogColor.glsl"
 #include "/lib/atmospherics/sky.glsl"
 #include "/lib/atmospherics/fog.glsl"
 #include "/lib/post/outline.glsl"

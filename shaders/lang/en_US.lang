@@ -3,11 +3,11 @@
 #Profiles
 profile.POTATO=Potato
 profile.LOW=Low
+profile.RUSSIAN_DOOMER=Russian Doomer
 profile.MEDIUM=Medium
 profile.HIGH=High
 profile.ULTRA=Ultra
-profile.HEAVEN_LIGHTING=Heaven Lighting
-profile.comment=Potato : minimum visual effects, maximum performance. Low : low shadows, no extra effects. Medium : medium shadows, clouds. High : medium shadows, rain puddles, advanced materials, AO and light shafts. Ultra : high shadows, AO, and light shafts. Heaven Lighting : bright overall lighting, high bloom strength and Depth of Field.
+profile.comment=Potato : minimum visual effects, maximum performance. Low : low shadows, no extra effects. Russian Doomer : stylized profile with dark and depressive look. Medium : medium shadows, clouds. High : medium shadows, rain puddles, advanced materials, AO and light shafts. Ultra : high shadows, AO, and light shafts.
 
 #Screens
 screen.LIGHTING=Lighting
@@ -382,6 +382,10 @@ option.LIGHTSHAFT_TIME_DECREASE_FACTOR=Time Decrease Factor
 option.LIGHTSHAFT_GROUND=Ground fog
 option.LIGHTSHAFT_GROUND.comment=Transforms the rays to the ground volumetric fog. 
 option.LIGHTSHAFT_ALTITUDE=Altitude
+option.LIGHTSHAFT_COLOR_MODE=Color Mode 
+value.LIGHTSHAFT_COLOR_MODE.0=Automatic 
+value.LIGHTSHAFT_COLOR_MODE.1=Manual 
+value.LIGHTSHAFT_COLOR_MODE.2=Sky Color + Manual
 
 option.FOG_DENSITY=Fog Density
 option.FOG_DENSITY.comment=Adjusts fog density. §e[*]§rThis option is ignored in the nether.
@@ -438,16 +442,17 @@ value.VCLOUDS_NOISE_QUALITY.2=High
 option.VCLOUDS_AMOUNT=Amount
 option.VCLOUDS_RANGE=Range
 option.VCLOUDS_RANGE.comment=Changes the maximum render distance
-option.VCLOUDS_OPACITY=Opacity
+option.VCLOUDS_BRIGHTNESS=Brighhtness
 option.VCLOUDS_SPEED=Speed
 option.VCLOUDS_QUALITY=Quality
-value.VCLOUDS_QUALITY.16=woah...
-value.VCLOUDS_QUALITY.14=Potato
+value.VCLOUDS_QUALITY.16=bruh
+value.VCLOUDS_QUALITY.14=Irritatered
 value.VCLOUDS_QUALITY.12=Very Low
 value.VCLOUDS_QUALITY.10=Low
 value.VCLOUDS_QUALITY.8=Medium
 value.VCLOUDS_QUALITY.6=High
 value.VCLOUDS_QUALITY.4=Ultra
+value.VCLOUDS_QUALITY.2=AAA *intense GPU screaming*
 option.VCLOUDS_HEIGHT=Height
 option.VCLOUDS_VERTICAL_THICKNESS=Vertcial Thickness
 option.VCLOUDS_HORIZONTAL_THICKNESS=Horizontal Thickness
@@ -489,6 +494,7 @@ value.WATER_CAUSTICS_STRENGTH.300=Medium
 value.WATER_CAUSTICS_STRENGTH.400=High
 value.WATER_CAUSTICS_STRENGTH.500=Very High
 option.WATER_CAUSTICS_AMOUNT=Caustics Amount
+value.WATER_CAUSTICS_AMOUNT.2048=Very Low
 value.WATER_CAUSTICS_AMOUNT.1024=Low
 value.WATER_CAUSTICS_AMOUNT.512=Medium
 value.WATER_CAUSTICS_AMOUNT.256=High

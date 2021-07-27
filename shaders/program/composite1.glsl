@@ -46,11 +46,9 @@ uniform sampler2D noisetex;
 
 //Optifine Constants//
 const bool colortex1MipmapEnabled = true;
-const bool colortex8MipmapEnabled = true;
-const bool colortex9MipmapEnabled = true;
+
 
 //Common Variables//
-
 #ifdef WORLD_TIME_ANIMATION
 float frametime = float(worldTime)/20.0*ANIMATION_SPEED;
 #else
@@ -61,11 +59,17 @@ float eBS = eyeBrightnessSmooth.y / 240.0;
 float sunVisibility = clamp(dot(sunVec, upVec) + 0.05, 0.0, 0.1) * 10.0;
 float moonVisibility = clamp((dot(-sunVec, upVec) + 0.05) * 10.0, 0.0, 1.0);
 
+float GetLuminance(vec3 color) {
+	return dot(color,vec3(0.299, 0.587, 0.114));
+}
+
 //Includes//
 #include "/lib/color/dimensionColor.glsl"
 #include "/lib/color/waterColor.glsl"
 #include "/lib/util/dither.glsl"
 #include "/lib/prismarine/functions.glsl"
+#include "/lib/color/skyColor.glsl"
+#include "/lib/atmospherics/sky.glsl"
 #include "/lib/prismarine/fragPos.glsl"
 #include "/lib/prismarine/volumetricClouds.glsl"
 
@@ -75,33 +79,37 @@ void main() {
 	vec3 aux9 = texture2D(colortex9, texCoord.st).rgb;
 	vec4 color = texture2D(colortex0, texCoord.xy);
 	float pixeldepth0 = texture2D(depthtex0, texCoord.xy).x;
-	float dither = Bayer1024(gl_FragCoord.xy);
 	vec2 vc = vec2(0.0);
 
 	vec3 vl = texture2DLod(colortex1, texCoord.xy, 1.5).rgb;
 	vl *= vl;
 
+	vec4 viewPos = gbufferProjectionInverse * (vec4(texCoord.xy, pixeldepth0, 1.0) * 2.0 - 1.0);
+		 viewPos /= viewPos.w;
+
 	#ifdef LIGHTSHAFT_GROUND
 	#ifdef OVERWORLD
 	if (isEyeInWater == 0){
-		vec4 viewPos = gbufferProjectionInverse * (vec4(texCoord.xy, pixeldepth0, 1.0) * 2.0 - 1.0);
-			 viewPos /= viewPos.w;
 		vec3 nViewPos = normalize(viewPos.xyz);
 		float VoU = clamp(dot(nViewPos, upVec), -1.0, 1.0);
 		VoU = (2-(cameraPosition.y*LIGHTSHAFT_ALTITUDE_FACTOR)) - VoU;
 		vl *= VoU * VoU;
-		vl *= 0.25;
+		vl *= 0.50;
 	}
 	#endif
 	#endif
 
 	#ifdef OVERWORLD
-	#ifdef LIGHTSHAFT_AUTOCOLOR
+	#if LIGHTSHAFT_COLOR_MODE == 0
 	vl *= lightCol * 0.25;
-	#else
+	#elif LIGHTSHAFT_COLOR_MODE == 1
 	vl *= lightshaftCol * 0.25;
+	#else
+	vec3 lightshaftCol0 = CalcSunColor(GetSkyColor(viewPos.xyz, false), lightshaftDay * 0.25, GetSkyColor(viewPos.xyz, false));
+	vec3 skylightshaftCol = CalcLightColor(lightshaftCol0, lightshaftNight * 0.50, waterColor.rgb);
+	vl *= skylightshaftCol;
 	#endif
-	if (isEyeInWater == 1) vl *= lightshaftWater.rgb * (timeBrightness + LIGHTSHAFT_WI) * 0.25;
+	if (isEyeInWater == 1) vl *= waterShadowColor.rgb * lightshaftWater.rgb * lightCol.rgb * (timeBrightness + LIGHTSHAFT_WI);
 	#endif
 
 	#ifdef END

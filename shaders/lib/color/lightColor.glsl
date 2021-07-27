@@ -23,11 +23,6 @@ vec3 distfadeDay        = vec3(DISTFADE_DR,   DISTFADE_DG,   DISTFADE_DB)   * DI
 vec3 distfadeEvening    = vec3(DISTFADE_ER,   DISTFADE_EG,   DISTFADE_EB)   * DISTFADE_EI / 255.0;
 vec3 distfadeNight      = vec3(DISTFADE_NR,   DISTFADE_NG,   DISTFADE_NB)   * DISTFADE_NI * 0.3 / 255.0;
 
-vec3 fogcolorMorning    = vec3(FOGCOLOR_MR,   FOGCOLOR_MG,   FOGCOLOR_MB)   * FOGCOLOR_MI / 255.0;
-vec3 fogcolorDay        = vec3(FOGCOLOR_DR,   FOGCOLOR_DG,   FOGCOLOR_DB)   * FOGCOLOR_DI / 255.0;
-vec3 fogcolorEvening    = vec3(FOGCOLOR_ER,   FOGCOLOR_EG,   FOGCOLOR_EB)   * FOGCOLOR_EI / 255.0;
-vec3 fogcolorNight      = vec3(FOGCOLOR_NR,   FOGCOLOR_NG,   FOGCOLOR_NB)   * FOGCOLOR_NI * 0.3 / 255.0;
-
 vec3 skylightMorning    = vec3(SKYLIGHT_MR,   SKYLIGHT_MG,   SKYLIGHT_MB)   * SKYLIGHT_MI / 255.0;
 vec3 skylightDay        = vec3(SKYLIGHT_DR,   SKYLIGHT_DG,   SKYLIGHT_DB)   * SKYLIGHT_DI / 255.0;
 vec3 skylightEvening    = vec3(SKYLIGHT_ER,   SKYLIGHT_EG,   SKYLIGHT_EB)   * SKYLIGHT_EI / 255.0;
@@ -52,9 +47,9 @@ vec3 cloudambientNight    = vec3(CLOUDAMBIENT_NR, CLOUDAMBIENT_NG, CLOUDAMBIENT_
 vec3 cloudlightEnd      = vec3(CLOUDS_END_R,   CLOUDS_END_G,   CLOUDS_END_B)   * CLOUDS_END_I / 64.0;
 vec3 cloudambientEnd    = vec3(CLOUDS_END_R,   CLOUDS_END_G,   CLOUDS_END_B)   * CLOUDS_END_I * 0.2 / 64.0;
 
-#if SKY_MODE != 2 && defined WEATHER_PERBIOME
-	uniform float isDesert, isMesa, isCold, isSwamp, isMushroom, isSavanna;
+uniform float isDesert, isMesa, isBadlands, isJungle, isForest, isCold, isSwamp, isMushroom, isSavanna, isTaiga;
 
+#if defined WEATHER_PERBIOME
 	vec4 weatherRain     = vec4(vec3(WEATHER_RR, WEATHER_RG, WEATHER_RB) / 255.0, 1.0) * WEATHER_RI;
 	vec4 weatherCold     = vec4(vec3(WEATHER_CR, WEATHER_CG, WEATHER_CB) / 255.0, 1.0) * WEATHER_CI;
 	vec4 weatherDesert   = vec4(vec3(WEATHER_DR, WEATHER_DG, WEATHER_DB) / 255.0, 1.0) * WEATHER_DI;
@@ -75,20 +70,6 @@ vec3 cloudambientEnd    = vec3(CLOUDS_END_R,   CLOUDS_END_G,   CLOUDS_END_B)   *
 	);
 #endif
 
-#if SKY_MODE == 2
-	uniform float isCold;
-	vec4 weatherCold     = vec4(vec3(WEATHER_CR, WEATHER_CG, WEATHER_CB) / 255.0, 1.0) * WEATHER_CI;
-	vec4 weatherRain     = vec4(vec3(WEATHER_RR, WEATHER_RG, WEATHER_RB) / 255.0, 1.0) * WEATHER_RI;
-	float weatherWeight = isCold;
-	vec4 weatherCol = mix(weatherRain,(weatherCold  * isCold) / max(weatherWeight, 0.0001),weatherWeight);
-#endif
-
-#ifndef WEATHER_PERBIOME
-#if SKY_MODE != 2
-	vec4 weatherCol = vec4(vec3(WEATHER_RR, WEATHER_RG, WEATHER_RB) / 255.0, 1.0) * WEATHER_RI;
-#endif
-#endif
-
 float mefade = 1.0 - clamp(abs(timeAngle - 0.5) * 8.0 - 1.5, 0.0, 1.0);
 float dfade = 1.0 - timeBrightness;
 
@@ -105,7 +86,6 @@ vec3 CalcLightColor(vec3 sun, vec3 night, vec3 weatherCol) {
 
 vec3 lightSun     	   = CalcSunColor(lightMorning, lightDay, lightEvening);
 vec3 ambientSun   	   = CalcSunColor(ambientMorning, ambientDay, ambientEvening);
-vec3 fogcolorSun       = CalcSunColor(fogcolorMorning, fogcolorDay, fogcolorEvening);
 vec3 distfadeSun       = CalcSunColor(distfadeMorning, distfadeDay, distfadeEvening);
 vec3 skylightSun       = CalcSunColor(skylightMorning, skylightDay, skylightEvening);
 vec3 lightshaftSun     = CalcSunColor(lightshaftMorning, lightshaftDay, lightshaftEvening);
@@ -114,7 +94,7 @@ vec3 vcDownSun     	   = CalcSunColor(vcDownMorning, vcDownDay, vcDownEvening);
 vec3 cloudlightSun     = CalcSunColor(cloudlightMorning, cloudlightDay, cloudlightEvening);
 vec3 cloudambientSun   = CalcSunColor(cloudambientMorning, cloudambientDay, cloudambientEvening);
 
-vec3 distfadeCol    = CalcLightColor(distfadeSun, distfadeNight, weatherCol.rgb * 0.75 * WEATHER_OPACITY);
+vec3 distfadeCol    = CalcLightColor(distfadeSun, distfadeNight, weatherCol.rgb);
 vec3 lightCol       = CalcLightColor(lightSun, lightNight, weatherCol.rgb);
 vec3 ambientCol     = CalcLightColor(ambientSun, ambientNight, weatherCol.rgb);
 vec3 lightshaftCol  = CalcLightColor(lightshaftSun, lightshaftNight, weatherCol.rgb);

@@ -31,9 +31,9 @@ varying vec4 vTexCoord, vTexCoordAM;
 uniform int frameCounter;
 uniform int isEyeInWater;
 uniform int worldTime;
-
 uniform int heldItemId;
 uniform int heldItemId2;
+
 uniform float blindFactor, nightVision;
 uniform float far, near;
 uniform float frameTimeCounter;
@@ -72,10 +72,6 @@ uniform float wetness;
 //Optifine Constants//
 
 //Common Variables//
-#if defined NETHER || defined END
-vec4 weatherCol = vec4(0, 0, 0, 0);
-#endif
-
 float eBS = eyeBrightnessSmooth.y / 240.0;
 float sunVisibility  = clamp((dot( sunVec, upVec) + 0.05) * 10.0, 0.0, 1.0);
 float moonVisibility = clamp((dot(-sunVec, upVec) + 0.05) * 10.0, 0.0, 1.0);
@@ -177,6 +173,7 @@ vec3 GetWaterNormal(vec3 worldPos, vec3 viewPos, vec3 viewVector) {
 //Includes//
 #include "/lib/color/blocklightColor.glsl"
 #include "/lib/color/dimensionColor.glsl"
+#include "/lib/color/fogColor.glsl"
 #include "/lib/color/skyColor.glsl"
 #include "/lib/color/specularColor.glsl"
 #include "/lib/color/waterColor.glsl"
@@ -210,6 +207,10 @@ vec3 GetWaterNormal(vec3 worldPos, vec3 viewPos, vec3 viewVector) {
 
 //Program//
 void main() {
+	#if defined NETHER || defined END
+	weatherCol = vec4(0, 0, 0, 0);
+	#endif
+
 	vec4 screenPos = vec4(gl_FragCoord.xy / vec2(viewWidth, viewHeight), gl_FragCoord.z, 1.0);
 	vec4 viewPos = gbufferProjectionInverse * (screenPos * 2.0 - 1.0);
 	viewPos /= viewPos.w;
@@ -321,7 +322,7 @@ void main() {
 		float vanillaDiffuse = (0.25 * NoU + 0.75) + (0.667 - abs(NoE)) * (1.0 - abs(NoU)) * 0.15;
 			  vanillaDiffuse*= vanillaDiffuse;
 
-		float parallaxShadow = 1.0;
+		float parallaxShadow = 0.0;
 		#ifdef ADVANCED_MATERIALS
 		vec3 rawAlbedo = albedo.rgb * 0.999 + 0.001;
 		albedo.rgb *= ao;

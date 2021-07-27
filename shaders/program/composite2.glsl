@@ -128,7 +128,7 @@ void main() {
 	#if CLOUDS == 3 && defined OVERWORLD
 	vec2 vc = vec2(texture2DLod(colortex8,texCoord.xy,float(2.0)).a, texture2DLod(colortex9,texCoord.xy,float(2.0)).a);
 	float vcmult = 0.5 * (1.0 - moonVisibility * 0.7) * (1.0-rainStrength * 0.5);
-	color = mix(color, mix(vcloudsDownCol, vcloudsCol, vc.x) * vcmult, vc.y * vc.y);
+	color = mix(color, mix(vcloudsDownCol, vcloudsCol, vc.x * VCLOUDS_BRIGHTNESS) * vcmult, vc.y * vc.y) * VCLOUDS_BRIGHTNESS;
 	#endif
 
 	/* DRAWBUFFERS:07 */

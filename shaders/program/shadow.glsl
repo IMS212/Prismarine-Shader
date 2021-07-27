@@ -73,13 +73,13 @@ void main() {
 	
 	#ifdef WATER_TINT
 	if (water > 0.9){
-		albedo.rgb = waterShadowColor.rgb * lightCol.rgb * (WATER_I * 16 - isEyeInWater - isEyeInWater - isEyeInWater - isEyeInWater);
+		albedo.rgb = waterShadowColor.rgb * lightshaftWater.rgb * lightCol.rgb * (WATER_I * 16 - isEyeInWater - isEyeInWater - isEyeInWater - isEyeInWater);
 	}
 	#endif
 
 	#ifdef PROJECTED_CAUSTICS
 	if (water > 0.9){
-		vec3 caustic = (getCaustics(position.xyz+cameraPosition.xyz) * WATER_CAUSTICS_STRENGTH) * waterShadowColor.rgb * lightCol.rgb * WATER_I;
+		vec3 caustic = (getCaustics(position.xyz+cameraPosition.xyz) * WATER_CAUSTICS_STRENGTH) * waterShadowColor.rgb * lightshaftWater.rgb * lightCol.rgb * WATER_I * (0.5 + isEyeInWater);
 		albedo.rgb *= caustic;
 	}
 	#endif
@@ -138,7 +138,6 @@ void main() {
 	if (mc_Entity.x == 10301) mat = 1;
 	if (mc_Entity.x == 10249 || mc_Entity.x == 10252) mat = 2;
 	if (mc_Entity.x == 10300) mat = 3;
-	if (mc_Entity.x == 10203) mat = 4;
 	
 	position = shadowModelViewInverse * shadowProjectionInverse * ftransform();
 	

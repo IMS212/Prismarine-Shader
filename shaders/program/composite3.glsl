@@ -23,13 +23,11 @@ uniform float eyeAltitude;
 
 uniform mat4 gbufferProjection;
 
-uniform sampler2D colortex5;
 uniform sampler2D colortex0;
 uniform sampler2D depthtex1;
 
 //Optifine Constants//
 const bool colortex0MipmapEnabled = true;
-const bool colortex5MipmapEnabled = true;
 
 //Common Variables//
 vec2 dofOffsets[60] = vec2[60](

@@ -35,8 +35,8 @@ uniform mat4 gbufferModelViewInverse;
 uniform mat4 gbufferProjectionInverse;
 
 uniform sampler2D noisetex;
-uniform sampler2D colortex6;
-uniform sampler2D colortex7;
+uniform sampler2D colortex10;
+uniform sampler2D colortex11;
 
 //Common Variables//
 #ifdef WORLD_TIME_ANIMATION
@@ -128,14 +128,14 @@ void main() {
 
 	#if NIGHT_SKY_MODE == 0 || NIGHT_SKY_MODE == 2
 		if (moonVisibility > 0.0 && rainStrength == 0.0){
-			vec3 helios = texture2D(colortex6, scoord * 0.8 + 0.6).rgb;
+			vec3 helios = texture2D(colortex10, scoord * 0.8 + 0.6).rgb;
 			helios *= x2(length(helios) + 0.6);
 			albedo.rgb += helios * 0.05 * clampNdotU * (1.0 - sunVisibility) * (1.0 - rainStrength);
 		}
 	#endif
 	#if NIGHT_SKY_MODE == 1 || NIGHT_SKY_MODE == 2
 		if (moonVisibility > 0.0 && rainStrength == 0.0){
-			vec3 nebula = texture2D(colortex7, scoord * 0.8 + 0.6).rgb;
+			vec3 nebula = texture2D(colortex11, scoord * 0.8 + 0.6).rgb;
 			nebula *= x2(length(nebula) + 0.6);
 			albedo.rgb += nebula * 0.05 * clampNdotU * (1.0 - sunVisibility) * (1.0 - rainStrength);
 		}

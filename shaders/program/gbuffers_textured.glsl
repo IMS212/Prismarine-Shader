@@ -26,6 +26,7 @@ uniform int worldTime;
 
 uniform int heldItemId;
 uniform int heldItemId2;
+
 uniform float blindFactor, nightVision;
 uniform float far, near;
 uniform float frameTimeCounter;
@@ -84,6 +85,7 @@ float GetLinearDepth(float depth) {
 #include "/lib/color/blocklightColor.glsl"
 #include "/lib/color/waterColor.glsl"
 #include "/lib/color/dimensionColor.glsl"
+#include "/lib/color/fogColor.glsl"
 #include "/lib/color/skyColor.glsl"
 #include "/lib/util/dither.glsl"
 #include "/lib/util/spaceConversion.glsl"
