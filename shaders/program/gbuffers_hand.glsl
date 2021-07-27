@@ -9,8 +9,6 @@ https://bitslablab.com
 //Fragment Shader///////////////////////////////////////////////////////////////////////////////////
 #ifdef FSH
 
-//Extensions//
-
 //Varyings//
 varying float isMainHand;
 
@@ -63,6 +61,11 @@ uniform sampler2D specular;
 uniform sampler2D normals;
 #endif
 
+#ifdef DYNAMIC_HANDLIGHT
+uniform int heldBlockLightValue;
+uniform int heldBlockLightValue2;
+#endif
+
 //Common Variables//
 float eBS = eyeBrightnessSmooth.y / 240.0;
 float sunVisibility  = clamp((dot( sunVec, upVec) + 0.05) * 10.0, 0.0, 1.0);
@@ -96,13 +99,13 @@ float GetHandItem(int id) {
 }
 
 //Includes//
+#include "/lib/prismarine/functions.glsl"
 #include "/lib/color/blocklightColor.glsl"
 #include "/lib/color/dimensionColor.glsl"
 #include "/lib/color/specularColor.glsl"
 #include "/lib/util/spaceConversion.glsl"
 #include "/lib/lighting/forwardLighting.glsl"
 #include "/lib/surface/ggx.glsl"
-#include "/lib/color/waterColor.glsl"
 
 #ifdef TAA
 #include "/lib/util/jitter.glsl"
@@ -115,7 +118,7 @@ float GetHandItem(int id) {
 #include "/lib/surface/parallax.glsl"
 #endif
 
-#if MC_VERSION >= 11500 && defined TEMPORARY_FIX
+#ifdef NORMAL_SKIP
 #undef PARALLAX
 #undef SELF_SHADOW
 #endif
@@ -128,11 +131,12 @@ void main() {
 
 	#ifdef ADVANCED_MATERIALS
 	vec2 newCoord = vTexCoord.st * vTexCoordAM.pq + vTexCoordAM.st;
+	float surfaceDepth = 1.0;
 	float skipAdvMat = float(heldItemId  == 358 || (heldItemId2 == 358 && isMainHand  < 0.5));
 	
 	#ifdef PARALLAX
 	if (skipAdvMat < 0.5) {
-		newCoord = GetParallaxCoord(0.0);
+		newCoord = GetParallaxCoord(0.0, surfaceDepth);
 		albedo = texture2DGradARB(texture, newCoord, dcdx, dcdy) * color;
 	}
 	#endif
@@ -150,12 +154,14 @@ void main() {
 		#endif
 		lightmap.x = max(lightmap.x, GetHandItem(213));
 
-		float emissive = (GetHandItem(50) + GetHandItem(83) + GetHandItem(213));
+		float emissive = (GetHandItem(50) + GetHandItem(89) + GetHandItem(213));
 		
 		float metalness      = 0.0;
 		float emission       = emissive * 0.25;
 		float subsurface     = 0.0;
 		vec3 baseReflectance = vec3(0.04);
+		
+		emission *= length(albedo.rgb);
 
 		vec3 screenPos = vec3(gl_FragCoord.xy / vec2(viewWidth, viewHeight), gl_FragCoord.z + 0.38);
 		#ifdef TAA
@@ -172,7 +178,7 @@ void main() {
 		GetMaterials(smoothness, metalness, f0, emission, subsurface, porosity, ao, normalMap,
 					 newCoord, dcdx, dcdy);
 
-		#if MC_VERSION >= 11500 && defined TEMPORARY_FIX
+		#ifdef NORMAL_SKIP
 		normalMap = vec3(0.0, 0.0, 1.0);
 		#endif
 		
@@ -182,6 +188,17 @@ void main() {
 
 		if (normalMap.x > -0.999 && normalMap.y > -0.999)
 			newNormal = clamp(normalize(normalMap * tbnMatrix), vec3(-1.0), vec3(1.0));
+		#endif
+		
+		#ifdef DYNAMIC_HANDLIGHT
+		float heldLightValue = max(float(heldBlockLightValue), float(heldBlockLightValue2));
+		float handlight = clamp(heldLightValue / 15.0, 0.0, 0.9333);
+		lightmap.x = max(lightmap.x, handlight);
+		#endif
+
+		#ifdef TOON_LIGHTMAP
+		lightmap = floor(lmCoord * 14.999 * (0.75 + 0.25 * color.a)) / 14.0;
+		lightmap = clamp(lightmap, vec2(0.0), vec2(1.0));
 		#endif
 
     	albedo.rgb = pow(albedo.rgb, vec3(2.2));
@@ -193,10 +210,6 @@ void main() {
 		if (doRecolor > 0.5) {
 			albedo.rgb = blocklightCol * pow(ec, 1.5) / (BLOCKLIGHT_I * BLOCKLIGHT_I);
 			albedo.rgb /= 0.7 * albedo.rgb + 0.7;
-		}
-		#else
-		if (doRecolor > 0.5) {
-			albedo.rgb *= ec * 0.25 + 0.5;
 		}
 		#endif
 
@@ -214,7 +227,7 @@ void main() {
 		float parallaxShadow = 1.0;
 		#ifdef ADVANCED_MATERIALS
 		vec3 rawAlbedo = albedo.rgb * 0.999 + 0.001;
-		albedo.rgb *= ao;
+		albedo.rgb *= ao * ao;
 
 		#ifdef REFLECTION_SPECULAR
 		albedo.rgb *= 1.0 - metalness * smoothness;
@@ -230,7 +243,7 @@ void main() {
 		#endif
 		
 		if (doParallax > 0.5 && skipAdvMat < 0.5) {
-			parallaxShadow = GetParallaxShadow(0.0, newCoord, lightVec, tbnMatrix);
+			parallaxShadow = GetParallaxShadow(surfaceDepth, 0.0, newCoord, lightVec, tbnMatrix);
 		}
 		#endif
 		#endif
@@ -261,7 +274,7 @@ void main() {
 		albedo.rgb = albedo.rgb * (1.0 - fresnel3 * smoothness * smoothness * (1.0 - metalness));
 		#endif
 
-		#if defined OVERWORLD || defined END
+		#if (defined OVERWORLD || defined END) && (defined ADVANCED_MATERIALS || defined SPECULAR_HIGHLIGHT_ROUGH)
 		vec3 specularColor = GetSpecularColor(lightmap.y, metalness, baseReflectance);
 		
 		albedo.rgb += GetSpecularHighlight(newNormal, viewPos, smoothness, baseReflectance,
@@ -271,16 +284,6 @@ void main() {
 		#if defined ADVANCED_MATERIALS && defined REFLECTION_SPECULAR && defined REFLECTION_ROUGH
 		normalMap = mix(vec3(0.0, 0.0, 1.0), normalMap, smoothness);
 		newNormal = clamp(normalize(normalMap * tbnMatrix), vec3(-1.0), vec3(1.0));
-		#endif
-
-		#if defined OVERWORLD && defined WATER_TINT
-		if (isEyeInWater == 1){
-			float lightFactor = pow(x2(lightmap.y), 0.5) * (1.0 - pow(x2(lightmap.y), 0.5)) * (1.0 - lightmap.x) * 250;
-			vec3 pos = worldPos.xyz+cameraPosition.xyz;
-			vec3 tint = lightFactor * waterColor.rgb * lightCol.rgb * x4(WATER_I);
-			albedo.rgb += (1 - lightmap.x) * (albedo.rgb * x2(waterColor.rgb) * 250 + 250 * albedo.rgb * x2(waterColor.rgb));
-			albedo.rgb *= (1.0 + tint) * (0.2 + lightmap.x);
-		}
 		#endif
 	}
 
@@ -413,6 +416,10 @@ void main() {
 	
 	#ifdef TAA
 	gl_Position.xy = TAAJitter(gl_Position.xy, gl_Position.w);
+	#endif
+	
+	#if MC_VERSION >= 11500
+	isMainHand = float(gl_Position.x > 0.0);
 	#endif
 }
 

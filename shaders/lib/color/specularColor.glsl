@@ -16,8 +16,9 @@ vec3 GetSpecularColor(float skylight, float metalness, vec3 baseReflectance){
     vec3 specularColor = vec3(0.0);
     #ifdef OVERWORLD
     vec3 lightME = mix(lightMorning, lightEvening, mefade);
-    vec3 lightDaySpec = mix(sqrt(lightME), sqrt(lightDay), timeBrightness * 0.7);
-    specularColor = mix(sqrt(lightNight * 0.2), lightDaySpec * lightDaySpec, sunVisibility);
+    vec3 lightDaySpec = mix(sqrt(lightME), sqrt(lightDay), dfade * 0.7);
+    vec3 lightNightSpec = sqrt(lightNight * LIGHT_NI * 0.2);
+    specularColor = mix(lightNightSpec, lightDaySpec * lightDaySpec, sunVisibility);
     specularColor *= specularColor * skylight;
     #endif
     #ifdef END

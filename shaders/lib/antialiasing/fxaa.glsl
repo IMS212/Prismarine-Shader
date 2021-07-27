@@ -124,7 +124,7 @@ vec3 FXAA311(vec3 color) {
 
 		float edgeThickness = (distance1 + distance2);
 
-		float pixelOffset = - distanceFinal / edgeThickness + 0.5f;
+		float pixelOffset = - distanceFinal / edgeThickness + 0.5;
 		
 		bool isLumaCenterSmaller = lumaCenter < lumaLocalAverage;
 

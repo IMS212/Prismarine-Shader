@@ -9,8 +9,6 @@ https://bitslablab.com
 //Fragment Shader///////////////////////////////////////////////////////////////////////////////////
 #ifdef FSH
 
-//Extensions//
-
 //Varyings//
 varying vec2 texCoord, lmCoord;
 
@@ -33,9 +31,8 @@ uniform int entityId;
 uniform int frameCounter;
 uniform int isEyeInWater;
 uniform int worldTime;
+uniform int heldItemId, heldItemId2;
 
-uniform int heldItemId;
-uniform int heldItemId2;
 uniform float frameTimeCounter;
 uniform float nightVision;
 uniform float rainStrength;
@@ -55,14 +52,19 @@ uniform mat4 gbufferModelViewInverse;
 uniform mat4 shadowProjection;
 uniform mat4 shadowModelView;
 
-uniform sampler2D noisetex;
 uniform sampler2D texture;
+uniform sampler2D noisetex;
 
 #ifdef ADVANCED_MATERIALS
 uniform ivec2 atlasSize;
 
 uniform sampler2D specular;
 uniform sampler2D normals;
+#endif
+
+#ifdef DYNAMIC_HANDLIGHT
+uniform int heldBlockLightValue;
+uniform int heldBlockLightValue2;
 #endif
 
 //Common Variables//
@@ -94,6 +96,7 @@ float InterleavedGradientNoise() {
 }
 
 //Includes//
+#include "/lib/prismarine/functions.glsl"
 #include "/lib/color/blocklightColor.glsl"
 #include "/lib/color/dimensionColor.glsl"
 #include "/lib/color/specularColor.glsl"
@@ -112,7 +115,7 @@ float InterleavedGradientNoise() {
 #include "/lib/surface/parallax.glsl"
 #endif
 
-#if MC_VERSION >= 11500 && defined TEMPORARY_FIX
+#ifdef NORMAL_SKIP
 #undef PARALLAX
 #undef SELF_SHADOW
 #endif
@@ -125,12 +128,13 @@ void main() {
 
 	#ifdef ADVANCED_MATERIALS
 	vec2 newCoord = vTexCoord.st * vTexCoordAM.pq + vTexCoordAM.st;
+	float surfaceDepth = 1.0;
 	float parallaxFade = clamp((dist - PARALLAX_DISTANCE) / 32.0, 0.0, 1.0);
 	float skipAdvMat = float(entityId == 10100);
 	
 	#ifdef PARALLAX
 	if (skipAdvMat < 0.5) {
-		newCoord = GetParallaxCoord(parallaxFade);
+		newCoord = GetParallaxCoord(parallaxFade, surfaceDepth);
 		albedo = texture2DGradARB(texture, newCoord, dcdx, dcdy) * color;
 	}
 	#endif
@@ -156,17 +160,14 @@ void main() {
 	}
 
 	if (albedo.a > 0.001 && lightningBolt < 0.5) {
-		#ifdef TOON_LIGHTMAP
-		vec2 lightmap = floor(lmCoord * 14.999 * (0.75 + 0.25 * color.a)) / 14.0;
-		lightmap = clamp(lightmap, vec2(0.0), vec2(1.0));
-		#else
 		vec2 lightmap = clamp(lmCoord, vec2(0.0), vec2(1.0));
-		#endif
 		
 		float metalness      = 0.0;
 		float emission       = float(entityColor.a > 0.05) * 0.125;
 		float subsurface     = 0.0;
 		vec3 baseReflectance = vec3(0.04);
+		
+		emission *= length(albedo.rgb);
 
 		vec3 screenPos = vec3(gl_FragCoord.xy / vec2(viewWidth, viewHeight), gl_FragCoord.z);
 		#ifdef TAA
@@ -183,7 +184,7 @@ void main() {
 		GetMaterials(smoothness, metalness, f0, emission, subsurface, porosity, ao, normalMap,
 					 newCoord, dcdx, dcdy);
 					 
-		#if MC_VERSION >= 11500 && defined TEMPORARY_FIX
+		#ifdef NORMAL_SKIP
 		normalMap = vec3(0.0, 0.0, 1.0);
 		#endif
 		
@@ -193,6 +194,17 @@ void main() {
 
 		if (normalMap.x > -0.999 && normalMap.y > -0.999 && skipAdvMat < 0.5)
 			newNormal = clamp(normalize(normalMap * tbnMatrix), vec3(-1.0), vec3(1.0));
+		#endif
+		
+		#ifdef DYNAMIC_HANDLIGHT
+		float heldLightValue = max(float(heldBlockLightValue), float(heldBlockLightValue2));
+		float handlight = clamp((heldLightValue - 2.0 * length(viewPos)) / 15.0, 0.0, 0.9333);
+		lightmap.x = max(lightmap.x, handlight);
+		#endif
+
+		#ifdef TOON_LIGHTMAP
+		lightmap = floor(lmCoord * 14.999 * (0.75 + 0.25 * color.a)) / 14.0;
+		lightmap = clamp(lightmap, vec2(0.0), vec2(1.0));
 		#endif
 		
     	albedo.rgb = pow(albedo.rgb, vec3(2.2));
@@ -227,7 +239,8 @@ void main() {
 		#endif
 		
 		if (doParallax > 0.5) {
-			parallaxShadow = GetParallaxShadow(parallaxFade, newCoord, lightVec, tbnMatrix);
+			parallaxShadow = GetParallaxShadow(surfaceDepth, parallaxFade, newCoord, lightVec,
+											   tbnMatrix);
 		}
 		#endif
 		#endif
@@ -258,7 +271,7 @@ void main() {
 		albedo.rgb = albedo.rgb * (1.0 - fresnel3 * smoothness * smoothness * (1.0 - metalness));
 		#endif
 
-		#if defined OVERWORLD || defined END
+		#if (defined OVERWORLD || defined END) && (defined ADVANCED_MATERIALS || defined SPECULAR_HIGHLIGHT_ROUGH)
 		vec3 specularColor = GetSpecularColor(lightmap.y, metalness, baseReflectance);
 		
 		albedo.rgb += GetSpecularHighlight(newNormal, viewPos, smoothness, baseReflectance,
@@ -271,15 +284,17 @@ void main() {
 		#endif
 	}
 
-    /* DRAWBUFFERS:03 */
+    /* DRAWBUFFERS:0 */
     gl_FragData[0] = albedo;
-	gl_FragData[1] = vec4(0.0, 0.0, 1.0, 1.0);
 
 	#if defined ADVANCED_MATERIALS && defined REFLECTION_SPECULAR
 	/* DRAWBUFFERS:0367 */
 	gl_FragData[1] = vec4(smoothness, skyOcclusion, 1.0, 1.0);
 	gl_FragData[2] = vec4(EncodeNormal(newNormal), float(gl_FragCoord.z < 1.0), 1.0);
 	gl_FragData[3] = vec4(fresnel3, 1.0);
+	#elif defined GLOW_OUTLINE
+    /* DRAWBUFFERS:03 */
+	gl_FragData[1] = vec4(0.0, 0.0, 1.0, 1.0);
 	#endif
 }
 

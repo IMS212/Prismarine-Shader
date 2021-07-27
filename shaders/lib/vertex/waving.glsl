@@ -28,9 +28,10 @@ vec3 CalcMove(vec3 pos, float density, float speed, vec2 mult) {
 }
 
 float CalcLilypadMove(vec3 worldpos) {
+    worldpos.z -= 0.125;
     float wave = sin(2 * pi * (frametime * 0.7 + worldpos.x * 0.14 + worldpos.z * 0.07)) +
                  sin(2 * pi * (frametime * 0.5 + worldpos.x * 0.10 + worldpos.z * 0.20));
-    return wave * 0.025;
+    return wave * 0.0125;
 }
 
 float CalcLavaMove(vec3 worldpos) {
@@ -39,7 +40,7 @@ float CalcLavaMove(vec3 worldpos) {
     if (fy > 0.01) {
     float wave = sin(pi * (frametime * 0.7 + worldpos.x * 0.14 + worldpos.z * 0.07)) +
                  sin(pi * (frametime * 0.5 + worldpos.x * 0.10 + worldpos.z * 0.20));
-    return wave * 0.025;
+    return wave * 0.0125;
     } else return 0.0;
 }
 

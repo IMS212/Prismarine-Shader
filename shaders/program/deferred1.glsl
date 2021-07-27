@@ -33,13 +33,10 @@ uniform vec3 cameraPosition;
 
 uniform mat4 gbufferProjection, gbufferPreviousProjection, gbufferProjectionInverse;
 uniform mat4 gbufferModelView, gbufferPreviousModelView, gbufferModelViewInverse;
-uniform mat4 shadowProjection;
-uniform mat4 shadowModelView;
 
 uniform sampler2D colortex0;
 uniform sampler2D colortex3;
 uniform sampler2D depthtex0;
-uniform sampler2D noisetex;
 
 #ifdef AO
 uniform sampler2D colortex4;
@@ -51,6 +48,7 @@ uniform vec3 previousCameraPosition;
 uniform sampler2D colortex5;
 uniform sampler2D colortex6;
 uniform sampler2D colortex7;
+uniform sampler2D noisetex;
 #endif
 
 //Optifine Constants//
@@ -117,18 +115,6 @@ float InterleavedGradientNoise() {
 	return fract(n + frameCounter / 8.0);
 }
 
-void GlowOutline(inout vec3 color){
-	for(int i = 0; i < 16; i++){
-		vec2 glowOffset = glowOffsets[i] / vec2(viewWidth, viewHeight);
-		float glowSample = texture2D(colortex3, texCoord.xy + glowOffset).b;
-		if(glowSample < 0.5){
-			if(i < 4) color.rgb = vec3(0.0);
-			else color.rgb = vec3(0.5);
-			break;
-		}
-	}
-}
-
 #ifdef AO
 float GetAmbientOcclusion(float z){
 	float ao = 0.0;
@@ -150,16 +136,26 @@ float GetAmbientOcclusion(float z){
 }
 #endif
 
+void GlowOutline(inout vec3 color){
+	for(int i = 0; i < 16; i++){
+		vec2 glowOffset = glowOffsets[i] / vec2(viewWidth, viewHeight);
+		float glowSample = texture2D(colortex3, texCoord.xy + glowOffset).b;
+		if(glowSample < 0.5){
+			if(i < 4) color.rgb = vec3(0.0);
+			else color.rgb = vec3(0.5);
+			break;
+		}
+	}
+}
+
 //Includes//
 #include "/lib/color/dimensionColor.glsl"
-#include "/lib/color/fogColor.glsl"
 #include "/lib/color/skyColor.glsl"
 #include "/lib/color/blocklightColor.glsl"
 #include "/lib/color/waterColor.glsl"
 #include "/lib/util/dither.glsl"
-#include "/lib/prismarine/functions.glsl"
+#include "/lib/color/fogColor.glsl"
 #include "/lib/atmospherics/sky.glsl"
-#include "/lib/util/spaceConversion.glsl"
 #include "/lib/atmospherics/fog.glsl"
 
 #ifdef OUTLINE_ENABLED
@@ -174,14 +170,15 @@ float GetAmbientOcclusion(float z){
 #include "/lib/reflections/complexFresnel.glsl"
 #include "/lib/surface/materialDeferred.glsl"
 #include "/lib/reflections/roughReflections.glsl"
+#ifdef OVERWORLD
 #include "/lib/atmospherics/clouds.glsl"
+#endif
 #endif
 
 //Program//
 void main() {
     vec4 color      = texture2D(colortex0, texCoord);
 	float z         = texture2D(depthtex0, texCoord).r;
-	float isGlowing = texture2D(colortex3, texCoord).b;
 
 	float dither = Bayer64(gl_FragCoord.xy);
 	
@@ -214,8 +211,8 @@ void main() {
 			if (reflection.a < 1.0) {
 				#ifdef OVERWORLD
 				vec3 skyRefPos = reflect(normalize(viewPos.xyz), normal);
-                skyReflection = GetSkyColor(skyRefPos, true);
-
+				skyReflection = GetSkyColor(skyRefPos, true);
+				
 				#ifdef REFLECTION_ROUGH
 				float cloudMixRate = smoothness * smoothness * (3.0 - 2.0 * smoothness);
 				#else
@@ -224,10 +221,6 @@ void main() {
 
 				#ifdef AURORA
 				skyReflection += DrawAurora(skyRefPos * 100.0, dither, 12) * cloudMixRate;
-				#endif
-
-				#if NIGHT_SKY_MODE == 3
-				skyReflection += DrawRift(skyRefPos * 100.0, dither, 12) * cloudMixRate;
 				#endif
 
 				#if CLOUDS == 1
@@ -265,9 +258,7 @@ void main() {
 		color.rgb *= GetAmbientOcclusion(z);
 		#endif
 
-		#if FOG_MODE == 0 || FOG_MODE == 2
 		Fog(color.rgb, viewPos.xyz);
-		#endif
 	} else {
 		#ifdef NETHER
 		color.rgb = netherCol.rgb * 0.04;
@@ -275,7 +266,7 @@ void main() {
 		#if defined END && !defined LIGHT_SHAFT
 		float VoL = dot(normalize(viewPos.xyz), lightVec);
 		VoL = pow(VoL * 0.5 + 0.5, 16.0) * 0.75 + 0.25;
-		color.rgb+= endCol.rgb * 0.05 * VoL;
+		color.rgb += endCol.rgb * 0.04 * VoL;
 		#endif
 
 		if (isEyeInWater == 2) {
@@ -293,7 +284,10 @@ void main() {
 	color.rgb = mix(color.rgb, outerOutline.rgb, outerOutline.a);
 	#endif
 
+	#if MC_VERSION >= 10900
+	float isGlowing = texture2D(colortex3, texCoord).b;
 	if (isGlowing > 0.5) GlowOutline(color.rgb);
+	#endif
     
     /* DRAWBUFFERS:0 */
     gl_FragData[0] = color;

@@ -93,7 +93,7 @@ void main() {
 		vec3 nViewPos = normalize(viewPos.xyz);
 		float VoU = clamp(dot(nViewPos, upVec), -1.0, 1.0);
 		VoU = (2-(cameraPosition.y*LIGHTSHAFT_ALTITUDE_FACTOR)) - VoU;
-		if (cameraPosition.y > 150) VoU = 1 - clamp(dot(nViewPos, upVec), -1.0, 1.0);
+		if (cameraPosition.y > 175) VoU = 0.75 - clamp(dot(nViewPos, upVec), -1.0, 1.0);
 		vl *= VoU * VoU;
 		vl *= 0.50;
 	}
@@ -110,14 +110,14 @@ void main() {
 	vec3 skylightshaftCol = CalcLightColor(lightshaftCol0, lightshaftNight * 0.50, waterColor.rgb);
 	vl *= skylightshaftCol;
 	#endif
-	if (isEyeInWater == 1) vl *= waterShadowColor.rgb * lightshaftWater.rgb * lightCol.rgb * (timeBrightness + LIGHTSHAFT_WI);
+	if (isEyeInWater == 1) vl *= waterShadowColor.rgb * lightshaftWater.rgb * lightCol.rgb * (timeBrightness + LIGHTSHAFT_WI) * 4;
 	#endif
 
 	#ifdef END
-    vl *= endCol.rgb * 0.025;
+    vl *= endCol.rgb * 0.25;
 	#endif
 
-    vl *= LIGHT_SHAFT_STRENGTH * (1.0 - rainStrength * eBS * 0.875) * shadowFade *
+    vl *= LIGHT_SHAFT_STRENGTH * 0.50 * (1.0 - rainStrength * 0.875) * shadowFade *
 		  (1.0 - blindFactor);
 
 	color.rgb += vl;

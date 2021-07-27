@@ -15,12 +15,17 @@ varying vec2 texCoord;
 varying vec4 color;
 
 //Uniforms//
+uniform ivec2 eyeBrightnessSmooth;
+
 uniform sampler2D texture;
+
+//Common Variables//
+float eBS = eyeBrightnessSmooth.y / 240.0;
 
 //Program//
 void main() {
 	vec4 albedo = texture2D(texture, texCoord) * color;
-	albedo.rgb = pow(albedo.rgb,vec3(2.2));
+	albedo.rgb = pow(albedo.rgb,vec3(2.2)) / (4.0 - 3.0 * eBS);
 	
     /* DRAWBUFFERS:0 */
 	gl_FragData[0] = albedo;

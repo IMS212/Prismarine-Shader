@@ -70,6 +70,11 @@ void main() {
 		albedo.a *= 0.25 * rainStrength * length(albedo.rgb / 3.0) * float(albedo.a > 0.1);
 		albedo.rgb = sqrt(albedo.rgb);
 		albedo.rgb *= (ambientCol + lmCoord.x * lmCoord.x * blocklightCol) * WEATHER_OPACITY;
+
+		#if MC_VERSION < 10800
+		albedo.a *= 4.0;
+		albedo.rgb *= 0.525;
+		#endif
 		
 		#if defined FOG && MC_VERSION < 11500
 		if (gl_FragCoord.z > 0.991) Defog(albedo.rgb);

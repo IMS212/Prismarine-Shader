@@ -9,8 +9,6 @@ https://bitslablab.com
 //Fragment Shader///////////////////////////////////////////////////////////////////////////////////
 #ifdef FSH
 
-//Extensions//
-
 //Varyings//
 varying vec2 texCoord, lmCoord;
 
@@ -23,9 +21,7 @@ varying vec4 color;
 uniform int frameCounter;
 uniform int isEyeInWater;
 uniform int worldTime;
-
-uniform int heldItemId;
-uniform int heldItemId2;
+uniform int heldItemId, heldItemId2;
 
 uniform float blindFactor, nightVision;
 uniform float far, near;
@@ -45,11 +41,16 @@ uniform mat4 gbufferModelViewInverse;
 uniform mat4 shadowProjection;
 uniform mat4 shadowModelView;
 
-uniform sampler2D noisetex;
 uniform sampler2D texture;
+uniform sampler2D noisetex;
 
 #ifdef SOFT_PARTICLES
 uniform sampler2D depthtex0;
+#endif
+
+#ifdef DYNAMIC_HANDLIGHT
+uniform int heldBlockLightValue;
+uniform int heldBlockLightValue2;
 #endif
 
 //Common Variables//
@@ -82,16 +83,17 @@ float GetLinearDepth(float depth) {
 #endif
 
 //Includes//
+#include "/lib/prismarine/functions.glsl"
 #include "/lib/color/blocklightColor.glsl"
-#include "/lib/color/waterColor.glsl"
 #include "/lib/color/dimensionColor.glsl"
-#include "/lib/color/fogColor.glsl"
 #include "/lib/color/skyColor.glsl"
 #include "/lib/util/dither.glsl"
 #include "/lib/util/spaceConversion.glsl"
+#include "/lib/color/waterColor.glsl"
+#include "/lib/color/fogColor.glsl"
 #include "/lib/atmospherics/sky.glsl"
-#include "/lib/lighting/forwardLighting.glsl"
 #include "/lib/atmospherics/fog.glsl"
+#include "/lib/lighting/forwardLighting.glsl"
 
 #ifdef TAA
 #include "/lib/util/jitter.glsl"
@@ -111,6 +113,17 @@ void main() {
 		vec3 viewPos = ToNDC(screenPos);
 		#endif
 		vec3 worldPos = ToWorld(viewPos);
+		
+		#ifdef DYNAMIC_HANDLIGHT
+		float heldLightValue = max(float(heldBlockLightValue), float(heldBlockLightValue2));
+		float handlight = clamp((heldLightValue - 2.0 * length(viewPos)) / 15.0, 0.0, 0.9333);
+		lightmap.x = max(lightmap.x, handlight);
+		#endif
+
+		#ifdef TOON_LIGHTMAP
+		lightmap = floor(lmCoord * 14.999 * (0.75 + 0.25 * color.a)) / 14.0;
+		lightmap = clamp(lightmap, vec2(0.0), vec2(1.0));
+		#endif
 
     	albedo.rgb = pow(albedo.rgb, vec3(2.2));
 

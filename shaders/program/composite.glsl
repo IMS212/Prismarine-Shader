@@ -12,7 +12,7 @@ https://bitslablab.com
 //Varyings//
 varying vec2 texCoord;
 
-varying vec3 sunVec, upVec, lightVec;
+varying vec3 sunVec, upVec;
 
 //Uniforms//
 uniform int frameCounter;
@@ -39,23 +39,27 @@ uniform sampler2D colortex0;
 uniform sampler2D colortex1;
 uniform sampler2D depthtex0;
 uniform sampler2D depthtex1;
-uniform sampler2D noisetex;
 
-#if FOG_MODE == 1 || FOG_MODE == 2
+#ifdef LIGHT_SHAFT
 uniform sampler2DShadow shadowtex0;
 uniform sampler2DShadow shadowtex1;
 uniform sampler2D shadowcolor0;
+uniform sampler2D noisetex;
 #endif
+
+//Attributes//
+
+//Optifine Constants//
+const bool colortex5Clear = false;
 
 //Common Variables//
 float eBS = eyeBrightnessSmooth.y / 240.0;
 float sunVisibility = clamp(dot(sunVec, upVec) + 0.05, 0.0, 0.1) * 10.0;
-float moonVisibility = clamp(dot(-sunVec, upVec) + 0.05, 0.0, 0.1) * 10.0;
 
 #ifdef WORLD_TIME_ANIMATION
-float frametime = float(worldTime)/20.0*ANIMATION_SPEED;
+float frametime = float(worldTime) * 0.05 * ANIMATION_SPEED;
 #else
-float frametime = frameTimeCounter*ANIMATION_SPEED;
+float frametime = frameTimeCounter * ANIMATION_SPEED;
 #endif
 
 //Common Functions//
@@ -69,25 +73,19 @@ float GetLinearDepth(float depth) {
 
 //Includes//
 #include "/lib/color/dimensionColor.glsl"
+#include "/lib/color/skyColor.glsl"
 #include "/lib/color/waterColor.glsl"
 #include "/lib/util/dither.glsl"
 #include "/lib/atmospherics/waterFog.glsl"
 
-#if FOG_MODE == 1 || FOG_MODE == 2
-#if defined OVERWORLD || defined END
-#include "/lib/prismarine/functions.glsl"
-#include "/lib/util/spaceConversion.glsl"
-#include "/lib/prismarine/caustics.glsl"
+#ifdef LIGHT_SHAFT
 #include "/lib/atmospherics/volumetricLight.glsl"
-#endif
 #endif
 
 #ifdef OUTLINE_ENABLED
 #include "/lib/color/blocklightColor.glsl"
 #include "/lib/util/outlineOffset.glsl"
 #include "/lib/util/outlineMask.glsl"
-#include "/lib/color/skyColor.glsl"
-#include "/lib/color/fogColor.glsl"
 #include "/lib/atmospherics/sky.glsl"
 #include "/lib/atmospherics/fog.glsl"
 #include "/lib/post/outline.glsl"
@@ -118,20 +116,17 @@ void main() {
 		vec4 viewPos = gbufferProjectionInverse * (screenPos * 2.0 - 1.0);
 		viewPos /= viewPos.w;
 
-		WaterFog(color.rgb, viewPos.xyz);
+		vec4 waterFog = GetWaterFog(viewPos.xyz);
+		color.rgb = mix(color.rgb, waterFog.rgb, waterFog.a);
 	}
 
 	#ifdef OUTLINE_ENABLED
 	color.rgb = mix(color.rgb, outerOutline.rgb, outerOutline.a);
 	#endif
 	
-	#if FOG_MODE == 1 || FOG_MODE == 2
+	#ifdef LIGHT_SHAFT
 	float dither = Bayer64(gl_FragCoord.xy);
-	#if defined OVERWORLD || defined END
 	vec3 vl = GetLightShafts(z0, z1, translucent, dither);
-	#else
-	vec3 vl = vec3(0.0);
-	#endif
 	#else
 	vec3 vl = vec3(0.0);
     #endif

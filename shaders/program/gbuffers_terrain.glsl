@@ -9,8 +9,6 @@ https://bitslablab.com
 //Fragment Shader///////////////////////////////////////////////////////////////////////////////////
 #ifdef FSH
 
-//Extensions//
-
 //Varyings//
 varying float mat, recolor;
 
@@ -34,9 +32,8 @@ varying vec4 vTexCoord, vTexCoordAM;
 uniform int frameCounter;
 uniform int isEyeInWater;
 uniform int worldTime;
+uniform int heldItemId, heldItemId2;
 
-uniform int heldItemId;
-uniform int heldItemId2;
 uniform float frameTimeCounter;
 uniform float nightVision;
 uniform float rainStrength;
@@ -67,8 +64,12 @@ uniform sampler2D normals;
 uniform float wetness;
 
 uniform mat4 gbufferModelView;
-
 #endif
+#endif
+
+#ifdef DYNAMIC_HANDLIGHT
+uniform int heldBlockLightValue;
+uniform int heldBlockLightValue2;
 #endif
 
 //Common Variables//
@@ -100,13 +101,14 @@ float InterleavedGradientNoise() {
 }
 
 //Includes//
+#include "/lib/prismarine/functions.glsl"
 #include "/lib/color/blocklightColor.glsl"
+#include "/lib/color/waterColor.glsl"
 #include "/lib/color/dimensionColor.glsl"
 #include "/lib/color/specularColor.glsl"
 #include "/lib/util/spaceConversion.glsl"
 #include "/lib/lighting/forwardLighting.glsl"
 #include "/lib/surface/ggx.glsl"
-#include "/lib/color/waterColor.glsl"
 
 #ifdef TAA
 #include "/lib/util/jitter.glsl"
@@ -132,12 +134,13 @@ void main() {
 
 	#ifdef ADVANCED_MATERIALS
 	vec2 newCoord = vTexCoord.st * vTexCoordAM.pq + vTexCoordAM.st;
+	float surfaceDepth = 1.0;
 	float parallaxFade = clamp((dist - PARALLAX_DISTANCE) / 32.0, 0.0, 1.0);
 	float skipAdvMat = float(mat > 3.98 && mat < 4.02);
 	
 	#ifdef PARALLAX
 	if(skipAdvMat < 0.5) {
-		newCoord = GetParallaxCoord(parallaxFade);
+		newCoord = GetParallaxCoord(parallaxFade, surfaceDepth);
 		albedo = texture2DGradARB(texture, newCoord, dcdx, dcdy) * vec4(color.rgb, 1.0);
 	}
 	#endif
@@ -147,12 +150,7 @@ void main() {
 	#endif
 
 	if (albedo.a > 0.001) {
-		#ifdef TOON_LIGHTMAP
-		vec2 lightmap = floor(lmCoord * 14.999 * (0.75 + 0.25 * color.a)) / 14.0;
-		lightmap = clamp(lightmap, vec2(0.0), vec2(1.0));
-		#else
 		vec2 lightmap = clamp(lmCoord, vec2(0.0), vec2(1.0));
-		#endif
 		
 		float foliage  = float(mat > 0.98 && mat < 1.02);
 		float leaves   = float(mat > 1.98 && mat < 2.02);
@@ -161,10 +159,12 @@ void main() {
 		float candle   = float(mat > 4.98 && mat < 5.02);
 
 		float metalness      = 0.0;
-		float emission       = (emissive + lava + candle) * 0.25;
+		float emission       = (emissive + candle) * 0.125 + (lava * 0.25);
 		float subsurface     = (foliage + candle) * 0.5 + leaves;
 		vec3 baseReflectance = vec3(0.04);
-
+		
+		if(lava < 0.5) emission *= dot(albedo.rgb, albedo.rgb);
+		
 		vec3 screenPos = vec3(gl_FragCoord.xy / vec2(viewWidth, viewHeight), gl_FragCoord.z);
 		#ifdef TAA
 		vec3 viewPos = ToNDC(vec3(TAAJitter(screenPos.xy, -0.5), screenPos.z));
@@ -185,6 +185,17 @@ void main() {
 
 		if (normalMap.x > -0.999 && normalMap.y > -0.999)
 			newNormal = clamp(normalize(normalMap * tbnMatrix), vec3(-1.0), vec3(1.0));
+		#endif
+		
+		#ifdef DYNAMIC_HANDLIGHT
+		float heldLightValue = max(float(heldBlockLightValue), float(heldBlockLightValue2));
+		float handlight = clamp((heldLightValue - 2.0 * length(viewPos)) / 15.0, 0.0, 0.9333);
+		lightmap.x = max(lightmap.x, handlight);
+		#endif
+
+		#ifdef TOON_LIGHTMAP
+		lightmap = floor(lmCoord * 14.999 * (0.75 + 0.25 * color.a)) / 14.0;
+		lightmap = clamp(lightmap, vec2(0.0), vec2(1.0));
 		#endif
 
     	albedo.rgb = pow(albedo.rgb, vec3(2.2));
@@ -207,12 +218,15 @@ void main() {
 		#endif
 		
 		vec3 outNormal = newNormal;
+		#ifdef NORMAL_PLANTS
 		if (foliage > 0.5){
 			newNormal = upVec;
+			
 			#ifdef ADVANCED_MATERIALS
 			newNormal = normalize(mix(outNormal, newNormal, normalMap.z * normalMap.z));
 			#endif
 		}
+		#endif
 		
 		float NoL = clamp(dot(newNormal, lightVec), 0.0, 1.0);
 
@@ -220,6 +234,10 @@ void main() {
 		float NoE = clamp(dot(newNormal, eastVec), -1.0, 1.0);
 		float vanillaDiffuse = (0.25 * NoU + 0.75) + (0.667 - abs(NoE)) * (1.0 - abs(NoU)) * 0.15;
 			  vanillaDiffuse*= vanillaDiffuse;
+		
+		#ifndef NORMAL_PLANTS
+		if (foliage > 0.5) vanillaDiffuse *= 1.8;
+		#endif
 
 		float parallaxShadow = 1.0;
 		#ifdef ADVANCED_MATERIALS
@@ -241,7 +259,8 @@ void main() {
 		#endif
 		
 		if (doParallax > 0.5 && skipAdvMat < 0.5) {
-			parallaxShadow = GetParallaxShadow(parallaxFade, newCoord, lightVec, tbnMatrix);
+			parallaxShadow = GetParallaxShadow(surfaceDepth, parallaxFade, newCoord, lightVec,
+											   tbnMatrix);
 		}
 		#endif
 
@@ -255,7 +274,7 @@ void main() {
 		vec3 shadow = vec3(0.0);
 		GetLighting(albedo.rgb, shadow, viewPos, worldPos, lightmap, color.a, NoL, vanillaDiffuse,
 					parallaxShadow, emission, subsurface);
-
+					
 		#ifdef ADVANCED_MATERIALS
 		float puddles = 0.0;
 		#ifdef REFLECTION_RAIN
@@ -271,8 +290,8 @@ void main() {
 		
 		puddles *= clamp(lightmap.y * 32.0 - 31.0, 0.0, 1.0) * (1.0 - lava);
 
-		float ps = pow(mix(psl, psh, porosity), psc); //1.0, 0.25, 0.5 | sqrt(1.0 - 0.75 * porosity)
-		float pd = pow(mix(pdl, pdh, porosity), pdc); //0.05, 0.45, 1.0 | (0.4 * porosity + 0.05)
+		float ps = sqrt(1.0 - 0.75 * porosity);
+		float pd = (0.5 * porosity + 0.15);	
 		
 		smoothness = mix(smoothness, 1.0, puddles * ps);
 		f0 = max(f0, puddles * 0.02);
@@ -312,7 +331,7 @@ void main() {
 		albedo.rgb = albedo.rgb * (1.0 - fresnel3 * smoothness * smoothness * (1.0 - metalness));
 		#endif
 
-		#if defined OVERWORLD || defined END
+		#if (defined OVERWORLD || defined END) && (defined ADVANCED_MATERIALS || defined SPECULAR_HIGHLIGHT_ROUGH)
 		vec3 specularColor = GetSpecularColor(lightmap.y, metalness, baseReflectance);
 		
 		albedo.rgb += GetSpecularHighlight(newNormal, viewPos, smoothness, baseReflectance,
@@ -452,13 +471,12 @@ void main() {
 
 	if (mc_Entity.x >= 10100 && mc_Entity.x < 10200)
 		mat = 1.0;
-	if (mc_Entity.x == 10104 || mc_Entity.x == 10105){
+	if (mc_Entity.x == 10105 || mc_Entity.x == 10106){
 		mat = 2.0;
 		color.rgb *= 1.225;
 	}
 	if (mc_Entity.x >= 10200 && mc_Entity.x < 10300)
 		mat = 3.0;
-
 	if (mc_Entity.x == 10203)
 		mat = 4.0;
 	if (mc_Entity.x == 10207)

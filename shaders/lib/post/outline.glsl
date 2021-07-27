@@ -54,7 +54,10 @@ void Outline(vec3 color, bool secondPass, out vec4 outerOutline, out vec4 innerO
 
 	if (oOutlineMask > 0.001) {
 		Fog(oOutlineColor, viewPos.xyz);
-		if (isEyeInWater == 1.0 && secondPass) WaterFog(oOutlineColor, viewPos.xyz);
+		if (isEyeInWater == 1.0 && secondPass) {
+            vec4 waterFog = GetWaterFog(viewPos.xyz);
+            oOutlineColor = mix(oOutlineColor, waterFog.rgb, waterFog.a);
+        }
 	}
 
 	outerOutline = vec4(oOutlineColor, oOutlineMask);

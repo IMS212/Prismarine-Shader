@@ -202,6 +202,9 @@ value.DESATURATION_FACTOR.1.0=Medium
 value.DESATURATION_FACTOR.0.5=High
 value.DESATURATION_FACTOR.0.0=Very High
 
+option.DYNAMIC_HANDLIGHT=Dynamic Handlight
+option.DYNAMIC_HANDLIGHT.comment=Allows blocklight to be emitted from view when holding certain objects.
+
 option.TOON_LIGHTMAP=Toon Lightmap
 option.TOON_LIGHTMAP.comment=Reduces the quality of vanilla lighting for cel shading. §e[*]§rThis option is known for making your game "look bad", only enable this when you need it.
 

@@ -1,8 +1,29 @@
 #if defined OVERWORLD || defined END
 #include "/lib/lighting/shadows.glsl"
 #endif
-#include "/lib/prismarine/caustics.glsl"
-#include "/lib/prismarine/functions.glsl"
+
+float h(vec3 pos){
+	float noise  = texture2D(noisetex, (pos.xz + vec2(frametime) * 0.25 - pos.y) / WATER_CAUSTICS_AMOUNT * 1.5).r;
+		  noise += texture2D(noisetex, (pos.xz - vec2(frametime) * 0.5 - pos.y) / WATER_CAUSTICS_AMOUNT * 3.0).r*0.8;
+		  noise -= texture2D(noisetex, (pos.xz + vec2(frametime) * 0.75 + pos.y) / WATER_CAUSTICS_AMOUNT * 4.5).r*0.6;
+		  noise += texture2D(noisetex, (pos.xz - vec2(frametime) * 0.25 - pos.y) / WATER_CAUSTICS_AMOUNT * 7.0).r*0.4;
+		  noise -= texture2D(noisetex, (pos.xz + vec2(frametime) * 0.5 + pos.y) / WATER_CAUSTICS_AMOUNT * 14.0).r*0.2;
+	
+	return noise;
+}
+
+float getFlickering(vec3 pos){
+	float h0 = h(pos);
+	float h1 = h(pos + vec3(1, 0, 0));
+	float h2 = h(pos + vec3(-1, 0, 0));
+	float h3 = h(pos + vec3(0, 0, 1));
+	float h4 = h(pos + vec3(0, 0, -1));
+	
+	float caustic = max((1 - abs(0.5 - h0)) * (1 - (abs(h1 - h2) + abs(h3 - h4))), 0);
+	caustic = max(pow(caustic, 3.5), 0) * 16 * BLOCKLIGHT_FLICKERING_STRENGTH;
+	
+	return caustic;
+}
 
 void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos,
                  vec2 lightmap, float smoothLighting, float NoL, float vanillaDiffuse,
@@ -11,7 +32,7 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
     emission = 0.0;
     #endif
 
-    #if SUBSURFACE_SCATTERING == 0 || (!defined ADVANCED_MATERIALS && SUBSURFACE_SCATTERING == 1)
+    #if SSS == 0 || (!defined ADVANCED_MATERIALS && SSS == 1)
     subsurface = 0.0;
     #endif
 
@@ -22,8 +43,8 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
     
     float scattering = 0.0;
     if (subsurface > 0.0){
-        float VdotL2 = clamp(dot(normalize(viewPos.xyz), lightVec) * 0.5 + 0.5, 0.0, 1.0);
-        scattering = pow(VdotL2, 16.0) * (1.0 - rainStrength) * subsurface;
+        float VoL = clamp(dot(normalize(viewPos.xyz), lightVec) * 0.5 + 0.5, 0.0, 1.0);
+        scattering = pow(VoL, 16.0) * (1.0 - rainStrength) * subsurface;
         NoL = mix(NoL, 1.0, sqrt(subsurface) * 0.7);
         NoL = mix(NoL, 1.0, scattering);
     }
@@ -31,12 +52,7 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
     vec3 fullShadow = shadow * NoL;
     
     #ifdef OVERWORLD
-
     vec2 noisePos = (cameraPosition.xz + worldPos.xz);
-	#if WATER_PIXEL > 0
-	noisePos = floor(noisePos * WATER_PIXEL) / WATER_PIXEL;
-	#endif
-
     #if NOISEMAP_SHADOWS == 1
     float noiseMap = texture2D(noisetex, noisePos * 0.0002).r;
     #elif NOISEMAP_SHADOWS == 2
@@ -46,12 +62,12 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
     #endif
 
     float shadowMult = (1.0 - 0.95 * rainStrength) * shadowFade;
-    vec3 sceneLighting = mix(ambientCol * noiseMap, lightCol * noiseMap, fullShadow * shadowMult);
+    vec3 sceneLighting = mix(ambientCol * noiseMap, lightCol, fullShadow * shadowMult);
     sceneLighting *= (4.0 - 3.0 * eBS) * lightmap.y * lightmap.y * (1.0 + scattering * shadow);
     #endif
 
     #ifdef END
-    vec3 sceneLighting = endCol.rgb * (0.075 * fullShadow + 0.025);
+    vec3 sceneLighting = endCol.rgb * (0.06 * fullShadow + 0.02);
     #endif
 
     #else
@@ -59,11 +75,10 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
     #endif
     
     float newLightmap  = pow(lightmap.x, 10.0) * 1.5 + lightmap.x * 0.7;
-
     float blocklightStrength = BLOCKLIGHT_I;
 
     #ifdef BLOCKLIGHT_FLICKERING
-    blocklightStrength += getFlickering(vec3(0.1,0.1,0.1));
+    blocklightStrength += getFlickering(vec3(1,1,1));
     #endif
 
     #ifdef NETHER
@@ -161,14 +176,22 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
     smoothLighting = 1.0;
     #endif
     
-    vec3 emissiveLighting = albedo * vec3(emission * 4.0);
+    vec3 albedoNormalized = normalize(albedo.rgb + 0.00001);
+    vec3 emissiveLighting = mix(albedoNormalized, vec3(1.0), emission * 0.5);
+    emissiveLighting *= emission * 4.0;
 
-    float lightFlatten = pow(min(emission * 4.0, 1.0), 4.0);
+    float lightFlatten = clamp(1.0 - pow(1.0 - emission, 128.0), 0.0, 1.0);
     vanillaDiffuse = mix(vanillaDiffuse, 1.0, lightFlatten);
     smoothLighting = mix(smoothLighting, 1.0, lightFlatten);
-    
+        
     float nightVisionLighting = nightVision * 0.25;
     
+    #ifdef ALBEDO_BALANCING
+    float albedoLength = length(albedo.rgb);
+    albedoLength /= sqrt((albedoLength * albedoLength) * 0.25 * (1.0 - lightFlatten) + 1.0);
+    albedo.rgb = albedoNormalized * albedoLength;
+    #endif
+
     //albedo = vec3(0.5);
     albedo *= sceneLighting + blockLighting + emissiveLighting + nightVisionLighting + minLighting;
     albedo *= vanillaDiffuse * smoothLighting * smoothLighting;
@@ -177,7 +200,7 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
     #ifdef OVERWORLD
     float desatAmount = sqrt(max(sqrt(length(fullShadow / 3.0)) * lightmap.y, lightmap.y)) *
                         sunVisibility * (1.0 - rainStrength * 0.4) + 
-                        sqrt(lightmap.x + emission * 4.0);
+                        sqrt(lightmap.x) + lightFlatten;
 
     vec3 desatNight   = lightNight / LIGHT_NI;
     vec3 desatWeather = weatherCol.rgb / weatherCol.a * 0.5;
@@ -191,13 +214,13 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
     #endif
 
     #ifdef NETHER
-    float desatAmount = sqrt(lightmap.x + emission * 4.0);
+    float desatAmount = sqrt(lightmap.x) + lightFlatten;
 
     vec3 desatColor = netherColSqrt.rgb / netherColSqrt.a;
     #endif
 
     #ifdef END
-    float desatAmount = sqrt(lightmap.x + emission * 4.0);
+    float desatAmount = sqrt(lightmap.x) + lightFlatten;
 
     vec3 desatColor = endCol.rgb * 1.25;
     #endif

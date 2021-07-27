@@ -20,14 +20,3 @@ float getCaustics(vec3 pos){
 	
 	return caustic;
 }
-
-float getFlickering(vec3 pos){
-	float h0 = h(pos);
-	float h1 = h(pos + vec3(1, 0, 0));
-	float h2 = h(pos + vec3(-1, 0, 0));
-	
-	float flicker = max((1 - abs(0.5 - h0)) * (1 - (abs(h1 - h2))), 0);
-	flicker = max(pow(flicker, 3.5), 0) * BLOCKLIGHT_FLICKERING_STRENGTH;
-	
-	return flicker;
-}

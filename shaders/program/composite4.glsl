@@ -21,43 +21,43 @@ uniform sampler2D colortex0;
 const bool colortex0MipmapEnabled = true;
 
 //Common Variables//
-float pw = 1.0 / viewWidth;
-float ph = 1.0 / viewHeight;
+float ph = 0.8 / min(360.0, viewHeight);
+float pw = ph / aspectRatio;
 
-float weight[7] = float[7](1.0, 6.0, 15.0, 20.0, 15.0, 6.0, 1.0);
+float weight[5] = float[5](1.0, 4.0, 6.0, 4.0, 1.0);
 
 //Common Functions//
-vec3 BloomTile(float lod, vec2 offset) {
+vec3 BloomTile(float lod, vec2 coord, vec2 offset) {
 	vec3 bloom = vec3(0.0), temp = vec3(0.0);
 	float scale = exp2(lod);
-	vec2 coord = (texCoord - offset) * scale;
+	coord = (coord - offset) * scale;
 	float padding = 0.5 + 0.005 * scale;
 
 	if (abs(coord.x - 0.5) < padding && abs(coord.y - 0.5) < padding) {
-		for(int i = -3; i <= 3; i++) {
-			for(int j = -3; j <= 3; j++) {
-				float wg = weight[i + 3] * weight[j + 3];
-				vec2 pixelOffset = vec2(i * pw, j * ph);
-				vec2 bloomCoord = (texCoord - offset + pixelOffset) * scale;
-				bloom += texture2D(colortex0, bloomCoord).rgb * wg;
+		for(int i = 0; i < 5; i++) {
+			for(int j = 0; j < 5; j++) {
+				float wg = weight[i] * weight[j];
+				vec2 pixelOffset = vec2((float(i) - 2.0) * pw, (float(j) - 2.0) * ph);
+				vec2 sampleCoord = coord + pixelOffset * scale;
+				bloom += texture2D(colortex0, sampleCoord).rgb * wg;
 			}
 		}
-		bloom /= 4096.0;
+		bloom /= 256.0;
 	}
 
-	return pow(bloom / 128.0, vec3(0.25));
+	return pow(bloom / 32.0, vec3(0.25));
 }
 
 //Program//
 void main() {
-    //Bloom Tile
-	vec3 blur =  BloomTile(2.0, vec2(0.0      , 0.0   ));
-	     blur += BloomTile(3.0, vec2(0.0      , 0.26  ));
-	     blur += BloomTile(4.0, vec2(0.135    , 0.26  ));
-	     blur += BloomTile(5.0, vec2(0.2075   , 0.26  ));
-	     blur += BloomTile(6.0, vec2(0.135    , 0.3325));
-	     blur += BloomTile(7.0, vec2(0.160625 , 0.3325));
-	     blur += BloomTile(8.0, vec2(0.1784375, 0.3325));
+	vec2 bloomCoord = texCoord * viewHeight * 0.8 / min(360.0, viewHeight);
+	vec3 blur =  BloomTile(1.0, bloomCoord, vec2(0.0      , 0.0   ));
+	     blur += BloomTile(2.0, bloomCoord, vec2(0.51     , 0.0   ));
+	     blur += BloomTile(3.0, bloomCoord, vec2(0.51     , 0.26  ));
+	     blur += BloomTile(4.0, bloomCoord, vec2(0.645    , 0.26  ));
+	     blur += BloomTile(5.0, bloomCoord, vec2(0.7175   , 0.26  ));
+	     blur += BloomTile(6.0, bloomCoord, vec2(0.645    , 0.3325));
+	     blur += BloomTile(7.0, bloomCoord, vec2(0.670625 , 0.3325));
 
     /* DRAWBUFFERS:1 */
 	gl_FragData[0] = vec4(blur, 1.0);

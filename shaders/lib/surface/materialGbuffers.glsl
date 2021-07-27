@@ -23,7 +23,7 @@ void GetMaterials(out float smoothness, out float metalness, out float f0, inout
     metalness = f0 >= 0.9 ? 1.0 : 0.0;
     porosity = specularMap.b <= 0.251 ? specularMap.b * 3.984 : 0.0;
     float sssMat = specularMap.b > 0.251 ? clamp(specularMap.b * 1.335 - 0.355, 0.0, 1.0) : 0.0;
-    #if SUBSURFACE_SCATTERING == 2
+    #if SSS == 2
     subsurface = mix(sssMat, 1.0, subsurface);
     #else
     subsurface = sssMat;
@@ -49,10 +49,12 @@ void GetMaterials(out float smoothness, out float metalness, out float f0, inout
     emission = emissionMat;
     #endif
 
+    #ifdef NORMAL_DAMPENING
     vec2 mipx = dcdx * atlasSize;
     vec2 mipy = dcdy * atlasSize;
     float delta = max(dot(mipx, mipx), dot(mipy, mipy));
     float miplevel = max(0.25 * log2(delta), 0.0);
     
     normalMap = normalize(mix(vec3(0.0, 0.0, 1.0), normalMap, 1.0 / exp2(miplevel)));
+    #endif
 }

@@ -65,24 +65,30 @@ vec3 SampleBasicShadow(vec3 shadowPos) {
 vec3 SampleFilteredShadow(vec3 shadowPos, float offset, float biasStep) {
     float shadow0 = 0.0;
 
+    #if SSS_QUALITY == 1
     float sz = shadowPos.z;
     float dither = InterleavedGradientNoise();
+    #endif
     
     for (int i = 0; i < 9; i++) {
         vec2 shadowOffset = shadowOffsets[i] * offset;
         shadow0 += shadow2D(shadowtex0, vec3(shadowPos.st + shadowOffset, shadowPos.z)).x;
+        #if SSS_QUALITY == 1
         if (biasStep > 0.0) shadowPos.z = sz - biasStep * GetCurvedBias(i, dither);
+        #endif
     }
     shadow0 /= 9.0;
 
     vec3 shadowCol = vec3(0.0);
     #ifdef SHADOW_COLOR
-    if (shadow0 < 1.0) {
+    if (shadow0 < 0.999) {
         for (int i = 0; i < 9; i++) {
             vec2 shadowOffset = shadowOffsets[i] * offset;
             shadowCol += texture2D(shadowcolor0, shadowPos.st + shadowOffset).rgb *
                          shadow2D(shadowtex1, vec3(shadowPos.st + shadowOffset, shadowPos.z)).x;
+            #if SSS_QUALITY == 1
             if (biasStep > 0.0) shadowPos.z = sz - biasStep * GetCurvedBias(i, dither);
+            #endif
         }
         shadowCol /= 9.0;
     }
@@ -93,7 +99,7 @@ vec3 SampleFilteredShadow(vec3 shadowPos, float offset, float biasStep) {
 
 vec3 GetShadow(vec3 worldPos, float NoL, float subsurface, float skylight) {
     #if SHADOW_PIXEL > 0
-    worldPos = floor((worldPos + cameraPosition) * SHADOW_PIXEL + 0.01) /
+    worldPos = (floor((worldPos + cameraPosition) * SHADOW_PIXEL + 0.01) + 0.5) /
                SHADOW_PIXEL - cameraPosition;
     #endif
     
@@ -122,7 +128,7 @@ vec3 GetShadow(vec3 worldPos, float NoL, float subsurface, float skylight) {
     
     if (subsurface > 0.0) {
         bias = 0.0002;
-        #ifdef SHADOW_FILTER
+        #if defined SHADOW_FILTER && SSS_QUALITY == 1
         bias *= mix(subsurface, 1.0, NoL);
         #endif
         offset = 0.0007;

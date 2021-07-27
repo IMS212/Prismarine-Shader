@@ -66,7 +66,7 @@ void UnderwaterDistort(inout vec2 texCoord) {
 	texCoord += vec2(
 		cos(texCoord.y * 32.0 + frameTimeCounter * 3.0),
 		sin(texCoord.x * 32.0 + frameTimeCounter * 1.7)
-	) * 0.002;
+	) * 0.0005;
 
 	float mask = float(
 		texCoord.x > 0.0 && texCoord.x < 1.0 &&
@@ -88,18 +88,21 @@ void RetroDither(inout vec3 color, float dither) {
 }
 
 vec3 GetBloomTile(float lod, vec2 coord, vec2 offset) {
-	vec3 bloom = texture2D(colortex1, coord / exp2(lod) + offset).rgb;
-	return pow(bloom, vec3(4.0)) * 256.0;
+	float scale = exp2(lod);
+	float resScale = 1.25 * min(360.0, viewHeight) / viewHeight;
+	vec2 centerOffset = vec2(0.125 * pw, 0.125 * ph);
+	vec3 bloom = texture2D(colortex1, (coord / scale + offset) * resScale + centerOffset).rgb;
+	return pow(bloom, vec3(4.0)) * 32.0;
 }
 
 void Bloom(inout vec3 color, vec2 coord) {
-	vec3 blur1 = GetBloomTile(2.0, coord, vec2(0.0      , 0.0   ));
-	vec3 blur2 = GetBloomTile(3.0, coord, vec2(0.0      , 0.26  ));
-	vec3 blur3 = GetBloomTile(4.0, coord, vec2(0.135    , 0.26  ));
-	vec3 blur4 = GetBloomTile(5.0, coord, vec2(0.2075   , 0.26  ));
-	vec3 blur5 = GetBloomTile(6.0, coord, vec2(0.135    , 0.3325));
-	vec3 blur6 = GetBloomTile(7.0, coord, vec2(0.160625 , 0.3325));
-	vec3 blur7 = GetBloomTile(8.0, coord, vec2(0.1784375, 0.3325));
+	vec3 blur1 = GetBloomTile(1.0, coord, vec2(0.0      , 0.0   )) * 1.5;
+	vec3 blur2 = GetBloomTile(2.0, coord, vec2(0.51     , 0.0   )) * 1.2;
+	vec3 blur3 = GetBloomTile(3.0, coord, vec2(0.51     , 0.26  ));
+	vec3 blur4 = GetBloomTile(4.0, coord, vec2(0.645    , 0.26  ));
+	vec3 blur5 = GetBloomTile(5.0, coord, vec2(0.7175   , 0.26  ));
+	vec3 blur6 = GetBloomTile(6.0, coord, vec2(0.645    , 0.3325)) * 0.9;
+	vec3 blur7 = GetBloomTile(7.0, coord, vec2(0.670625 , 0.3325)) * 0.7;
 	
 	#ifdef DIRTY_LENS
 	float newAspectRatio = 1.777777777777778 / aspectRatio;
@@ -113,18 +116,18 @@ void Bloom(inout vec3 color, vec2 coord) {
 	blur7 *= dirt * 16.0 + 1.0;
 	#endif
 
-	vec3 blur = (blur1 + blur2 + blur3 + blur4 + blur5 + blur6 + blur7) * 0.14;
-	
-	color = mix(color, blur, 0.05 * BLOOM_STRENGTH);
+	vec3 blur = (blur1 + blur2 + blur3 + blur4 + blur5 + blur6 + blur7) * 0.137;
+
+	color = mix(color, blur, 0.18 * BLOOM_STRENGTH);
 }
 
 void AutoExposure(inout vec3 color, inout float exposure, float tempExposure) {
-	float exposureLod = log2(viewWidth * 0.4);
+	float exposureLod = log2(viewHeight * 0.7);
 	
 	exposure = length(texture2DLod(colortex0, vec2(0.5), exposureLod).rgb);
 	exposure = clamp(exposure, 0.0001, 10.0);
 	
-	color /= 2.5 * clamp(tempExposure, 0.001, 10.0) + 0.125;
+	color /= 2.0 * clamp(tempExposure, 0.001, 10.0) + 0.125;
 }
 
 void ColorGrading(inout vec3 color) {
@@ -136,6 +139,12 @@ void ColorGrading(inout vec3 color) {
 	
 	vec3 cgTint = pow(vec3(CG_TR, CG_TG, CG_TB) / 255.0, vec3(2.2)) * GetLuminance(color) * CG_TI;
 	color = mix(color, cgTint, CG_TM);
+}
+
+void BSLTonemap(inout vec3 color) {
+	color = color * exp2(2.0 + EXPOSURE);
+	color = color / pow(pow(color, vec3(TONEMAP_WHITE_CURVE)) + 1.0, vec3(1.0 / TONEMAP_WHITE_CURVE));
+	color = pow(color, mix(vec3(TONEMAP_LOWER_CURVE), vec3(TONEMAP_UPPER_CURVE), sqrt(color)));
 }
 
 void ColorSaturation(inout vec3 color) {
@@ -171,13 +180,6 @@ vec2 GetLightPos() {
 #ifdef RETRO_FILTER
 #include "/lib/util/dither.glsl"
 #endif
-
-
-void BSLTonemap(inout vec3 color) {
-	color = color * exp2(2.0 + EXPOSURE);
-	color = color / pow(pow(color, vec3(TONEMAP_WHITE_CURVE)) + 1.0, vec3(1.0 / TONEMAP_WHITE_CURVE));
-	color = pow(color, mix(vec3(TONEMAP_LOWER_CURVE), vec3(TONEMAP_UPPER_CURVE), sqrt(color)));
-}
 
 //Program//
 void main() {
@@ -235,7 +237,7 @@ void main() {
 	
 	#ifdef AUTO_EXPOSURE
 	if (texCoord.x < 2.0 * pw && texCoord.y < 2.0 * ph)
-		temporalData = mix(tempExposure, sqrt(exposure), 0.016);
+		temporalData = mix(tempExposure, sqrt(exposure), 0.033);
 	#endif
 
 	#ifdef LENS_FLARE

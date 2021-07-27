@@ -35,8 +35,6 @@ uniform mat4 gbufferModelViewInverse;
 uniform mat4 gbufferProjectionInverse;
 
 uniform sampler2D noisetex;
-uniform sampler2D colortex10;
-uniform sampler2D colortex11;
 
 //Common Variables//
 #ifdef WORLD_TIME_ANIMATION
@@ -86,8 +84,7 @@ void SunGlare(inout vec3 color, vec3 viewPos, vec3 lightCol) {
 }
 
 //Includes//
-#include "/lib/color/lightColor.glsl"
-#include "/lib/color/endColor.glsl"
+#include "/lib/color/dimensionColor.glsl"
 #include "/lib/color/skyColor.glsl"
 #include "/lib/util/dither.glsl"
 #include "/lib/prismarine/functions.glsl"
@@ -96,13 +93,16 @@ void SunGlare(inout vec3 color, vec3 viewPos, vec3 lightCol) {
 
 //Program//
 void main() {
+	float dither = Bayer64(gl_FragCoord.xy);
 	vec4 screenPos = vec4(gl_FragCoord.xy / vec2(viewWidth, viewHeight), gl_FragCoord.z, 1.0);
 	vec4 viewPos = gbufferProjectionInverse * (screenPos * 2.0 - 1.0);
 	viewPos /= viewPos.w;
 
+	#ifdef OVERWORLD
+	vec3 albedo = GetSkyColor(viewPos.xyz, false);
+	
 	vec3 nViewPos = normalize(viewPos.xyz);
 	float NdotU = dot(nViewPos, upVec);
-	float dither = Bayer64(gl_FragCoord.xy);
 
 	#if NIGHT_SKY_MODE != 3 && NIGHT_SKY_MODE != 4
 	float clampNdotU = x2(x2(clamp(NdotU * 4.0, 0.0, 1.0)));
@@ -114,9 +114,6 @@ void main() {
 	vec2 scoord = planeCoord.xz - moonCoord.xz;
 		 scoord *= 0.2;
 	#endif
-
-	#ifdef OVERWORLD
-	vec3 albedo = GetSkyColor(viewPos.xyz, false);
 	
 	#ifdef ROUND_SUN_MOON
 	vec3 lightMA = mix(lightMorning, lightEvening, mefade);

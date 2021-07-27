@@ -1,5 +1,5 @@
 uniform float eyeAltitude;
-uniform float sunAngle;
+
 #include "/lib/color/auroraColor.glsl"
 float CloudSample(vec2 coord, vec2 wind, float currentStep, float sampleStep, float sunCoverage) {
 	float noiseCoverage = abs(currentStep - 0.125) * (currentStep > 0.125 ? 1.12 : 4.0);
@@ -81,7 +81,7 @@ vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol) {
 
 		#ifdef END
 		cloudColor = mix(
-			cloudambientEnd * (0.35 * sunVisibility + 0.5),
+			cloudambientEnd * (0.35 * sunVisibility + 0.5) * 0.25,
 			cloudlightEnd * (0.75 + 1.15 * scattering),
 			cloudLighting
 		);

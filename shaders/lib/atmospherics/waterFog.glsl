@@ -1,8 +1,8 @@
-#if (WATER_MODE == 1 || WATER_MODE == 3) && !defined SKY_VANILLA && !defined NETHER
+#if (WATER_MODE == 1 || WATER_MODE == 3) && !defined SKY_VANILLA && (!defined NETHER || !defined NETHER_VANILLA)
 uniform vec3 fogColor;
 #endif
 
-void WaterFog(inout vec3 color, vec3 viewPos) {
+vec4 GetWaterFog(vec3 viewPos) {
     float fog = length(viewPos) / waterFogRange;
     fog = 1.0 - exp(-3.0 * fog);
     
@@ -14,7 +14,7 @@ void WaterFog(inout vec3 color, vec3 viewPos) {
     waterFogColor *= 0.5 * (1.0 - blindFactor);
 
     #ifdef OVERWORLD
-    vec3 waterFogTint = lightCol * shadowFade + 0.05;
+    vec3 waterFogTint = lightCol * shadowFade * 0.9 + 0.1;
     #endif
     #ifdef NETHER
     vec3 waterFogTint = netherCol.rgb;
@@ -24,5 +24,5 @@ void WaterFog(inout vec3 color, vec3 viewPos) {
     #endif
     waterFogTint = sqrt(waterFogTint * length(waterFogTint));
 
-    color = mix(color, waterFogColor * waterFogTint, fog);
+    return vec4(waterFogColor * waterFogTint, fog);
 }
