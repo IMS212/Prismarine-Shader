@@ -36,54 +36,57 @@ vec4 GetShadowSpace(vec4 wpos) {
 	return wpos;
 }
 
-
-//what are you looking at? there's nothing from complementary or any other shader :bruh:
+//Light shafts from Robobo1221 (modified)
 vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dither) {
 	vec3 vl = vec3(0.0);
 
-	#ifdef TAA
-	dither = fract(dither + frameCounter);
+	#ifdef END_VOLUMETRIC_FOG
 	#endif
+
+	dither = fract(dither + frameCounter / 4);
 	
-	//LOLOLOLOLOL
-	#ifdef LIGHTSHAFT_CLOUDY_NOISE
-	#endif
-	//
+	vec3 screenPos = vec3(texCoord, pixeldepth0);
+	vec4 viewPos = gbufferProjectionInverse * (vec4(screenPos, 1.0) * 2.0 - 1.0);
+	viewPos /= viewPos.w;
+	
+	vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.0);
+	float VoL = dot(normalize(viewPos.xyz), lightVec);
 
-	vec4 viewPos = gbufferProjectionInverse * (vec4(texCoord, pixeldepth0, 1.0) * 2.0 - 1.0);
-		 viewPos /= viewPos.w;
-	vec3 lightVec 		= sunVec * (1.0 - 2.0 * float(timeAngle > 0.5325 && timeAngle < 0.9675));
-	vec3 nViewPos 		= normalize(viewPos.xyz);
-	float VoL 			= dot(nViewPos, lightVec);
-
-	#ifdef OVERWORLD //////////// O V E R W O R L D ////////////
-	float visfactor 	= 0.05 * (-LIGHTSHAFT_TIME_DECREASE_FACTOR * timeBrightness + 1.0) * (1.0 * rainStrength + 0.1);
-	float invvisfactor	= 1.0 - visfactor;
-	float visibility 	= 0.5 - (rainStrength / 4);
+	#ifdef OVERWORLD
+	float visfactor = 0.05 * (-0.8 * timeBrightness + 1.0) * (3.0 * rainStrength + 1.0);
+	float invvisfactor = 1.0 - visfactor;
+	float visibility = clamp(VoL * 0.5 + 0.5, 0.0, 1.0);
 
 	visibility = visfactor / (1.0 - invvisfactor * visibility) - visfactor;
 	visibility = clamp(visibility * 1.015 / invvisfactor - 0.015, 0.0, 1.0);
-	visibility = mix(1.0, visibility, 0.75);
-	visibility = visibility - (rainStrength / 4.0);
-
-	#elif defined END //////////// E N D ////////////
+	visibility = mix(1.0, visibility, 0.25 * eBS + 0.75);
+	#endif
+	
+	#ifdef END
 	VoL = pow(VoL * 0.5 + 0.5, 16.0) * 0.75 + 0.25;
 	float visibility = VoL;
 	#endif
 
-	visibility *= 0.14285 * float(pixeldepth0 > 0.56);
+	#ifdef NETHER
+	float visibility = 0;
+	#endif
+
+	visibility *= 0.2 * float(pixeldepth0 > 0.75);
 
 	if (visibility > 0.0) {
-		vec4 worldposition = vec4(0.0);
-		vec4 shadowposition = vec4(0.0);	
+		float maxDist = LIGHTSHAFT_MAX_DISTANCE;
+		
 		float depth0 = GetLinearDepth2(pixeldepth0);
 		float depth1 = GetLinearDepth2(pixeldepth1);
-
+		vec4 worldposition = vec4(0.0);
+		vec4 shadowposition = vec4(0.0);
+		
 		vec3 watercol = lightshaftWater.rgb * LIGHTSHAFT_WI; //don't ask, just don't ask
-
+		
 		for(int i = 0; i < LIGHTSHAFT_SAMPLES; i++) {
+			float minDist = (exp2(i + dither) - 0.95) * LIGHTSHAFT_MIN_DISTANCE;
 			float maxDist = LIGHTSHAFT_MAX_DISTANCE;
-			float minDist = (i + dither) * LIGHTSHAFT_MIN_DISTANCE;
+
 			#ifdef END
 			maxDist = 128.0;
 			minDist = exp2(i + dither) - 0.95;
@@ -102,7 +105,7 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 			#endif
 			#endif
 
-			worldposition = GetWorldSpace(GetLogarithmicDepth(minDist), texCoord.xy);
+			worldposition = GetWorldSpace(GetLogarithmicDepth(minDist), texCoord.st);
 			shadowposition = GetShadowSpace(worldposition);
 			shadowposition.z += 0.0512 / shadowMapResolution;
 
@@ -124,7 +127,7 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 				if (depth0 < minDist) shadow *= color;
 				else if (isEyeInWater == 1.0) shadow *= watercol * 512 * LIGHTSHAFT_WI * (1.0 + eBS);
 
-				#if (defined LIGHTSHAFT_CLOUDY_NOISE && defined OVERWORLD) || (defined END && defined END_VOLUMETRIC_FOG)
+				#if defined END_VOLUMETRIC_FOG && defined END
 				if (isEyeInWater != 1){
 					vec3 npos = worldposition.xyz + cameraPosition.xyz + vec3(frametime * 4.0, 0, 0);
 					float n3da = texture2D(noisetex, npos.xz / 512.0 + floor(npos.y / 3.0) * 0.35).r;
@@ -133,20 +136,26 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 					noise = sin(noise * 16.0 + frametime) * 0.25 + 0.5;
 					shadow *= noise;
 				}
+				#elif defined LIGHTSHAFT_CLOUDY_NOISE && defined OVERWORLD
+				if (isEyeInWater != 1){
+					vec3 npos = worldposition.xyz + cameraPosition.xyz + vec3(frametime * 4.0, 0, 0);
+					float n3da = texture2D(noisetex, npos.xz / 1024.0 + floor(npos.y / 3.0) * 0.35).r;
+					float n3db = texture2D(noisetex, npos.xz / 1024.0 + floor(npos.y / 3.0 + 1.0) * 0.35).r;
+					float noise = mix(n3da, n3db, fract(npos.y / 3.0));
+					noise = sin(noise * 16.0) * 0.25 + 0.5;
+					shadow *= noise;
+				}
 				#endif
-
+				
 				vl += shadow;
-			} else {
+			}
+			else{
 				vl += 1.0;
 			}
-		}
-		if(isEyeInWater==1)	{
-			#ifdef LIGHTSHAFT_WATER
-			vl /= sqrt(vl);
-			#endif
 		}
 		vl = sqrt(vl * visibility);
 		if(dot(vl, vl) > 0.0) vl += (dither - 0.25) / 128.0;
 	}
+	
 	return vl;
 }

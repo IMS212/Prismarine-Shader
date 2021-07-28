@@ -1,7 +1,7 @@
 //Dithering from Jodie
 float Bayer2(vec2 a) {
     a = floor(a);
-    return fract(dot(a, vec2(0.5, a.y * 0.75)));
+    return fract(dot(a, vec2(0.25, a.y * 0.50)));
 }
 
 #define Bayer4(a)   (Bayer2(  0.5 * (a)) * 0.25 + Bayer2(a))

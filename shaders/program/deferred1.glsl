@@ -154,8 +154,8 @@ void GlowOutline(inout vec3 color){
 #include "/lib/color/blocklightColor.glsl"
 #include "/lib/color/waterColor.glsl"
 #include "/lib/util/dither.glsl"
-#include "/lib/color/fogColor.glsl"
 #include "/lib/atmospherics/sky.glsl"
+#include "/lib/color/fogColor.glsl"
 #include "/lib/atmospherics/fog.glsl"
 
 #ifdef OUTLINE_ENABLED
@@ -263,7 +263,7 @@ void main() {
 		#ifdef NETHER
 		color.rgb = netherCol.rgb * 0.04;
 		#endif
-		#if defined END && !defined LIGHT_SHAFT
+		#if defined END && FOG_MODE == 0
 		float VoL = dot(normalize(viewPos.xyz), lightVec);
 		VoL = pow(VoL * 0.5 + 0.5, 16.0) * 0.75 + 0.25;
 		color.rgb += endCol.rgb * 0.04 * VoL;

@@ -52,17 +52,8 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
     vec3 fullShadow = shadow * NoL;
     
     #ifdef OVERWORLD
-    vec2 noisePos = (cameraPosition.xz + worldPos.xz);
-    #if NOISEMAP_SHADOWS == 1
-    float noiseMap = texture2D(noisetex, noisePos * 0.0002).r;
-    #elif NOISEMAP_SHADOWS == 2
-    float noiseMap = texture2D(noisetex, noisePos * 0.02).r + SHADING_REDUCTION_FACTOR + SHADING_REDUCTION_FACTOR;
-    #else
-    float noiseMap = 1;
-    #endif
-
     float shadowMult = (1.0 - 0.95 * rainStrength) * shadowFade;
-    vec3 sceneLighting = mix(ambientCol * noiseMap, lightCol, fullShadow * shadowMult);
+    vec3 sceneLighting = mix(ambientCol, lightCol, fullShadow * shadowMult);
     sceneLighting *= (4.0 - 3.0 * eBS) * lightmap.y * lightmap.y * (1.0 + scattering * shadow);
     #endif
 

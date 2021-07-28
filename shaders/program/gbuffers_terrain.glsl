@@ -216,6 +216,17 @@ void main() {
 		#ifdef WHITE_WORLD
 		albedo.rgb = vec3(0.35);
 		#endif
+
+		vec2 noisePos = (cameraPosition.xz + worldPos.xz);
+		#if NOISEMAP_SHADOWS == 1
+		float noiseMap = texture2D(noisetex, noisePos * 0.0002).r;
+		#elif NOISEMAP_SHADOWS == 2
+		float noiseMap = texture2D(noisetex, noisePos * 0.02).r + SHADING_REDUCTION_FACTOR + SHADING_REDUCTION_FACTOR;
+		#else
+		float noiseMap = 1;
+		#endif
+
+		albedo.rgb *= noiseMap;
 		
 		vec3 outNormal = newNormal;
 		#ifdef NORMAL_PLANTS

@@ -158,15 +158,6 @@ void DrawBigStars(inout vec3 color, vec3 viewPos) {
 	#endif
 }
 
-float AuroraSample(vec2 coord, vec2 wind, float VoU) {
-	float noise = texture2D(noisetex, coord * 0.0625  + wind * 0.25).b * 3.0;
-		  noise+= texture2D(noisetex, coord * 0.03125 + wind * 0.15).b * 4.0;	
-
-	noise = max(1.0 - 4.0 * (0.5 * VoU + 0.5) * abs(noise - 3.0), 0.0);
-
-	return noise;
-}
-
 float RiftSample(vec2 coord, vec2 wind, float VoU) {
 	float noise = texture2D(noisetex, coord * 0.0625  + wind * 0.25).b * 1.0;
 		  noise+= texture2D(noisetex, coord * 0.03125 + wind * 0.15).b * 2.0;	
@@ -175,12 +166,22 @@ float RiftSample(vec2 coord, vec2 wind, float VoU) {
 
 	noise = max(1.0 - 2.0 * (0.5 * VoU + 0.5) * abs(noise - 3.0), 0.0);
 
+	return noise * 2;
+}
+
+#ifdef AURORA
+float AuroraSample(vec2 coord, vec2 wind, float VoU) {
+	float noise = texture2D(noisetex, coord * 0.0625  + wind * 0.25).b * 3.0;
+		  noise+= texture2D(noisetex, coord * 0.03125 + wind * 0.15).b * 3.0;
+
+	noise = max(1.0 - 4.0 * (0.5 * VoU + 0.5) * abs(noise - 3.0), 0.0);
+
 	return noise;
 }
 
 vec3 DrawAurora(vec3 viewPos, float dither, int samples) {
 	#ifdef TAA
-		dither = fract(16.0 * frameTimeCounter + dither);
+	dither = fract(16.0 * frameTimeCounter + dither);
 	#endif
 	
 	float sampleStep = 1.0 / samples;
@@ -190,15 +191,13 @@ vec3 DrawAurora(vec3 viewPos, float dither, int samples) {
 
 	float visibility = moonVisibility * (1.0 - rainStrength) * (1.0 - rainStrength);
 
-	#if	defined WEATHER_PERBIOME
+	#ifdef WEATHER_PERBIOME
 	visibility *= isCold * isCold;
-	#else
-	visibility = 0.0;
 	#endif
 
 	vec2 wind = vec2(
-		frametime * CLOUD_SPEED * 0.000525,
-		sin(frametime * CLOUD_SPEED * 0.05) * 0.00125
+		frametime * CLOUD_SPEED * 0.000125,
+		sin(frametime * CLOUD_SPEED * 0.05) * 0.00025
 	);
 
 	vec3 aurora = vec3(0.0);
@@ -206,18 +205,18 @@ vec3 DrawAurora(vec3 viewPos, float dither, int samples) {
 	if (VoU > 0.0 && visibility > 0.0) {
 		vec3 wpos = normalize((gbufferModelViewInverse * vec4(viewPos, 1.0)).xyz);
 		for(int i = 0; i < samples; i++) {
-			vec3 planeCoord = wpos * ((11.0 + currentStep * 9.0) / wpos.y) * 0.008;
+			vec3 planeCoord = wpos * ((8.0 + currentStep * 7.0) / wpos.y) * 0.003;
 
-			vec2 coord = cameraPosition.xz * 0.00008 + planeCoord.xz;
-			coord += vec2(coord.y, -coord.x) * 1.0;
+			vec2 coord = cameraPosition.xz * 0.00004 + planeCoord.xz;
+			coord += vec2(coord.y, -coord.x) * 0.3;
 
 			float noise = AuroraSample(coord, wind, VoU);
 			
-			if(noise > 0.0) {
+			if (noise > 0.0) {
 				noise *= texture2D(noisetex, coord * 0.125 + wind * 0.25).b;
-				noise *= 1.0 * texture2D(noisetex, coord + wind * 16.0).b + 0.75;
-				noise = noise * noise * 5 * sampleStep;
-				noise *= max(sqrt(1.0 - length(planeCoord.xz) * 2.75), 0.0);
+				noise *= 0.5 * texture2D(noisetex, coord + wind * 16.0).b + 0.75;
+				noise = noise * noise * 3.0 * sampleStep;
+				noise *= max(sqrt(1.0 - length(planeCoord.xz) * 3.75), 0.0);
 
 				vec3 auroraColor = mix(auroraLowCol, auroraHighCol, pow(currentStep, 0.4));
 				aurora += noise * auroraColor * exp2(-6.0 * i * sampleStep);
@@ -228,6 +227,7 @@ vec3 DrawAurora(vec3 viewPos, float dither, int samples) {
 
 	return aurora * visibility;
 }
+#endif
 
 vec3 DrawRift(vec3 viewPos, float dither, int samples) {
 	#ifdef TAA

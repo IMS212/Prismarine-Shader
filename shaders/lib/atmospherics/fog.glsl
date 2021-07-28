@@ -12,10 +12,10 @@ vec3 GetFogColor(vec3 viewPos) {
     float VoL = clamp(dot(nViewPos, sunVec), -1.0, 1.0);
 	float VoS = dot(nViewPos, sunVec);
 
-	float density = 1.5;
+	float density = 2;
 
     float nightDensity = 0.75;
-    float weatherDensity = 1.5;
+    float weatherDensity = 1.25;
     float exposure = exp2(timeBrightness * 0.75 - 1.00);
     float nightExposure = exp2(-3.5);
 
@@ -26,7 +26,7 @@ vec3 GetFogColor(vec3 viewPos) {
 	#elif FOG_COLOR_MODE == 1
 	vec3 fog = GetSkyColor(viewPos, false) * baseGradient / (SKY_I * SKY_I);
 	#else
-	vec3 fog = biomeFogCol.rgb * baseGradient / (SKY_I * SKY_I);
+	vec3 fog = getBiomeFogColor(viewPos) * baseGradient / (SKY_I * SKY_I);
 	#endif
 	
     fog = fog / sqrt(fog * fog + 1.0) * exposure * sunVisibility * (SKY_I * SKY_I);
@@ -39,9 +39,9 @@ vec3 GetFogColor(vec3 viewPos) {
 	#if FOG_COLOR_MODE == 0
 	vec3 lightFog = pow(fogcolorSun / 2 * vec3(FOG_R, FOG_G, FOG_B) * FOG_I, vec3(4.0 - sunVisibility)) * baseGradient;
 	#elif FOG_COLOR_MODE == 1
-	vec3 lightFog = pow(GetSkyColor(viewPos, false) / 2 * vec3(FOG_R, FOG_G, FOG_B) * FOG_I, vec3(4.0 - sunVisibility)) * baseGradient;
+	vec3 lightFog = pow(GetSkyColor(viewPos, false), vec3(4.0 - sunVisibility)) * baseGradient;
 	#else
-	vec3 lightFog = pow(biomeFogCol.rgb / 2, vec3(4.0 - sunVisibility)) * baseGradient;
+	vec3 lightFog = pow(getBiomeFogColor(viewPos) / 2, vec3(4.0 - sunVisibility)) * baseGradient;
 	#endif
 
 	lightFog = lightFog / (1.0 + lightFog * rainStrength);
@@ -94,7 +94,7 @@ void NormalFog(inout vec3 color, vec3 viewPos) {
 
 	#if DISTANT_FADE == 1 || DISTANT_FADE == 3
 	if(isEyeInWater != 2.0){
-		float vanillaFog = 1.0 - (far - (fogFactor + 20.0)) * 5.0 / (FOG_DENSITY * far);
+		float vanillaFog = 1.0 - (far - (fogFactor + 20.0)) * 5.0 / (FOG_DENSITY / 1.5 * far);
 		#ifdef COLORED_FOG
 		vanillaFog *= 2;
 		#endif
