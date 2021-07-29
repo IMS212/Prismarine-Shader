@@ -42,8 +42,9 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 
 	#ifdef END_VOLUMETRIC_FOG
 	#endif
-
-	dither = fract(dither + frameCounter / 4);
+	
+	#ifdef LIGHTSHAFT_CLOUDY_NOISE
+	#endif
 	
 	vec3 screenPos = vec3(texCoord, pixeldepth0);
 	vec4 viewPos = gbufferProjectionInverse * (vec4(screenPos, 1.0) * 2.0 - 1.0);
@@ -55,11 +56,22 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 	#ifdef OVERWORLD
 	float visfactor = 0.05 * (-0.8 * timeBrightness + 1.0) * (3.0 * rainStrength + 1.0);
 	float invvisfactor = 1.0 - visfactor;
-	float visibility = clamp(VoL * 0.5 + 0.5, 0.0, 1.0);
+	float visibility = 0.95;
+	float persistence = (LIGHTSHAFT_PERSISTENCE_FACTOR * 2) - (cameraPosition.y * LIGHTSHAFT_ALTITUDE_FACTOR);
+
+	#ifdef LIGHTSHAFT_PERSISTENCE
+	if (isEyeInWater == 0){
+		persistence *= min(2.0 + rainStrength*rainStrength - sunVisibility*sunVisibility, 8.0) - (timeBrightness * LIGHTSHAFT_TIME_DECREASE_FACTOR);
+		if (persistence <= 32.00) {
+			if (persistence >= 1.0) visibility *= max((VoL + persistence) / (persistence + 1.0), 0.0);
+			else visibility *= pow(max((VoL + 1.0) / 2.0, 0.0), (32.0 - persistence * 16.0));
+		}
+	}
+	#endif
 
 	visibility = visfactor / (1.0 - invvisfactor * visibility) - visfactor;
 	visibility = clamp(visibility * 1.015 / invvisfactor - 0.015, 0.0, 1.0);
-	visibility = mix(1.0, visibility, 0.25 * eBS + 0.75);
+	visibility = mix(1.0, visibility, 0.25 * eBS + 0.75 * eBS);
 	#endif
 	
 	#ifdef END
@@ -84,7 +96,12 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 		vec3 watercol = lightshaftWater.rgb * LIGHTSHAFT_WI; //don't ask, just don't ask
 		
 		for(int i = 0; i < LIGHTSHAFT_SAMPLES; i++) {
+			#ifdef END
 			float minDist = (exp2(i + dither) - 0.95) * LIGHTSHAFT_MIN_DISTANCE;
+			#else
+			float minDist = (i + dither) * LIGHTSHAFT_MIN_DISTANCE;
+			if (isEyeInWater == 1) minDist = (pow(i + dither + 0.5, 2.0)) * LIGHTSHAFT_MIN_DISTANCE * 0.055;
+			#endif
 			float maxDist = LIGHTSHAFT_MAX_DISTANCE;
 
 			#ifdef END
@@ -144,6 +161,7 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 					float noise = mix(n3da, n3db, fract(npos.y / 3.0));
 					noise = sin(noise * 16.0) * 0.25 + 0.5;
 					shadow *= noise;
+					shadowposition *= noise;
 				}
 				#endif
 				

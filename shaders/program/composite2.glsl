@@ -23,7 +23,6 @@ uniform float rainStrength;
 uniform float shadowFade;
 uniform float timeAngle, timeBrightness;
 uniform float frameTimeCounter;
-uniform float far, near;
 uniform float viewHeight, viewWidth, aspectRatio;
 uniform float eyeAltitude;
 
@@ -113,7 +112,6 @@ vec3 MotionBlur(vec3 color, float z, float dither) {
 void main() {
 	vec3 color = texture2DLod(colortex0, texCoord.st, 0.0).rgb;
 	float dither = Bayer64(gl_FragCoord.xy);
-	float pixeldepth0 = texture2D(depthtex0, texCoord.xy).x;
 
 	#ifdef MOTION_BLUR
 	float z = texture2D(depthtex1, texCoord.st).x;
@@ -127,11 +125,10 @@ void main() {
 
 	#if CLOUDS == 3 && defined OVERWORLD
 	vec2 vc = vec2(texture2DLod(colortex8,texCoord.xy,float(2.0)).a, texture2DLod(colortex9,texCoord.xy,float(2.0)).a);
-	float vcmult = 0.5 * (1.0 - moonVisibility * 0.7) * (1.0-rainStrength * 0.5);
-	color = mix(color, mix(vcloudsDownCol, vcloudsCol, vc.x * VCLOUDS_BRIGHTNESS) * vcmult, vc.y * vc.y) * VCLOUDS_BRIGHTNESS;
+	color = mix(color, mix(vcloudsDownCol, vcloudsCol, vc.x) * (1.0 - rainStrength * 0.25), vc.y * vc.y * VCLOUDS_OPACITY);
 	#endif
 
-	/* DRAWBUFFERS:07 */
+	/* DRAWBUFFERS:0 */
 	gl_FragData[0] = vec4(color, 0.0);
 }
 

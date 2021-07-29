@@ -99,12 +99,25 @@ screen.WEATHER_B=Mesa Sandstorm
 screen.WEATHER_S=Swamp Rain
 screen.WEATHER_M=Mushroom Island Rain
 screen.WEATHER_V=Savanna Cloudy
+screen.BIOMEFOG_COLOR=Per-Biome Fog Color
+screen.BIOMEFOG_C=Cold Biomes
+screen.BIOMEFOG_D=Desert
+screen.BIOMEFOG_B=Mesa
+screen.BIOMEFOG_S=Swamp
+screen.BIOMEFOG_M=Mushroom Island
+screen.BIOMEFOG_V=Savanna
+screen.BIOMEFOG_T=Taiga
+screen.BIOMEFOG_J=Jungle
+screen.BIOMEFOG_BL=Badlands
+screen.BIOMEFOG_F=Forest
 screen.AURORA_COLOR=Aurora Color
 screen.AURORA_L=Low Section Color
 screen.AURORA_H=High Section Color
 screen.RIFT_COLOR=Rifts Color
-screen.RIFT_L=Low Section Color
-screen.RIFT_H=High Section Color
+screen.RIFT_L=Low Section (First Layer)
+screen.RIFT_H=High Section (First Layer)
+screen.SECONDRIFT_L=Low Section (Second Layer)
+screen.SECONDRIFT_H=High Section (Second Layer)
 screen.DIMENSION_COLOR=Dimension Color
 screen.NETHER_COLOR=Nether Color
 screen.NETHER_N=Nether Wastes
@@ -306,12 +319,8 @@ option.ROUND_SUN_MOON_SIZE=Sun/Moon Size
 option.SUN_GLARE=Sun Glare 
 option.SUN_GLARE.comment=Adds a bright circle of light around sun/moon.
 option.NIGHT_SKY_MODE=Night Sky
-option.HELIOS.comment=Helios & Nebula appear on sky at night and early morning/evening.
-value.NIGHT_SKY_MODE.0=Helios
+value.NIGHT_SKY_MODE.0=OFF
 value.NIGHT_SKY_MODE.1=Nebula
-value.NIGHT_SKY_MODE.2=Helios + Nebula
-value.NIGHT_SKY_MODE.3=Rifts
-value.NIGHT_SKY_MODE.4=OFF
 option.FOG_COLOR_MODE=Overworld Fog
 option.FOG_COLOR_MODE.comment=Changes the overworld fog. Dynamic fog has automatic coloring and has many different colors. Single Color fog has only one color which can be set manually.
 value.FOG_COLOR_MODE.2=Per-Biome
@@ -320,9 +329,7 @@ value.FOG_COLOR_MODE.0=Dynamic
 option.CLOUDS=Clouds
 option.END_SKY=End Sky
 value.END_SKY.0=Vanilla
-value.END_SKY.1=Rifts
-value.END_SKY.2=Clouds
-value.END_SKY.3=Rifts + Clouds
+value.END_SKY.1=Clouds
 option.CLOUDS.comment=Enables clouds. §a[+]§rPlanar clouds benefit from TAA and affect performance. §e[+]§rVanilla clouds require vanilla cloud setting set to default or on. 
 option.END_VOLUMETRIC_FOG=End Volumetric Fog
 option.END_VOLUMETRIC_FOG.comment=Enables cloudy fog in End.
@@ -365,6 +372,9 @@ value.FOG_MODE.0=Linear
 value.FOG_MODE.1=Volumetric
 value.FOG_MODE.2=Mixed
 
+option.LIGHTSHAFT_PERSISTENCE=Persistence
+option.LIGHTSHAFT_PERSISTENCE.comment=Changes the maximum length of volumetric rays.
+option.LIGHTSHAFT_PERSISTENCE_FACTOR=Persistence Factor
 option.LIGHTSHAFT_CLOUDY_NOISE=Cloudy Noise
 option.LIGHTSHAFT_CLOUDY_NOISE.comment=Makes light rays look like volumetric cloudy fog.
 option.LIGHTSHAFT_AUTOCOLOR=Automatic coloring 
@@ -442,10 +452,10 @@ value.VCLOUDS_NOISE_QUALITY.2=High
 option.VCLOUDS_AMOUNT=Amount
 option.VCLOUDS_RANGE=Range
 option.VCLOUDS_RANGE.comment=Changes the maximum render distance
-option.VCLOUDS_BRIGHTNESS=Brighhtness
+option.VCLOUDS_OPACITY=Opacity
 option.VCLOUDS_SPEED=Speed
 option.VCLOUDS_QUALITY=Quality
-value.VCLOUDS_QUALITY.16=bruh
+value.VCLOUDS_QUALITY.16=BRUH
 value.VCLOUDS_QUALITY.14=Irritatered
 value.VCLOUDS_QUALITY.12=Very Low
 value.VCLOUDS_QUALITY.10=Low
@@ -459,6 +469,10 @@ option.VCLOUDS_HORIZONTAL_THICKNESS=Horizontal Thickness
 option.VCLOUDS_SAMPLES=Samples
 option.VCLOUDS_HEIGHT_ADJ_FACTOR=Height Adj. Factor
 option.VCLOUDS_HEIGHT_ADJ_FACTOR.comment=Adjusts cloud height at noon, then lowers it.
+option.VCLOUDS_THICKNESS_FACTOR=Thickness Adj. Factor
+option.VCLOUDS_THICKNESS_FACTOR.comment=Adjusts horizontal cloud thickness at noon, then lowers it
+option.VCLOUDS_AMOUNT_FACTOR=Amount Adj. Factor
+option.VCLOUDS_AMOUNT_FACTOR.comment=Adjusts cloud amount at noon, then lowers it
 
 option.CLOUD_HEIGHT=Height
 option.CLOUD_HEIGHT.comment=Adjusts cloud height.
@@ -932,6 +946,66 @@ option.WATER_B=Blue
 option.WATER_I=Intensity
 option.WATER_A=Alpha
 
+option.BIOMEFOG_BLR=Red
+option.BIOMEFOG_BLG=Green
+option.BIOMEFOG_BLB=Blue
+option.BIOMEFOG_BLI=Intensity
+
+option.BIOMEFOG_CR=Red
+option.BIOMEFOG_CG=Green
+option.BIOMEFOG_CB=Blue
+option.BIOMEFOG_CI=Intensity
+
+option.BIOMEFOG_DR=Red
+option.BIOMEFOG_DG=Green
+option.BIOMEFOG_DB=Blue
+option.BIOMEFOG_DI=Intensity
+
+option.BIOMEFOG_BR=Red
+option.BIOMEFOG_BG=Green
+option.BIOMEFOG_BB=Blue
+option.BIOMEFOG_BI=Intensity
+
+option.BIOMEFOG_SR=Red
+option.BIOMEFOG_SG=Green
+option.BIOMEFOG_SB=Blue
+option.BIOMEFOG_SI=Intensity
+
+option.BIOMEFOG_MR=Red
+option.BIOMEFOG_MG=Green
+option.BIOMEFOG_MB=Blue
+option.BIOMEFOG_MI=Intensity
+
+option.BIOMEFOG_VR=Red
+option.BIOMEFOG_VG=Green
+option.BIOMEFOG_VB=Blue
+option.BIOMEFOG_VI=Intensity
+
+option.BIOMEFOG_TR=Red
+option.BIOMEFOG_TG=Green
+option.BIOMEFOG_TB=Blue
+option.BIOMEFOG_TI=Intensity
+
+option.BIOMEFOG_FR=Red
+option.BIOMEFOG_FG=Green
+option.BIOMEFOG_FB=Blue
+option.BIOMEFOG_FI=Intensity
+
+option.BIOMEFOG_JR=Red
+option.BIOMEFOG_JG=Green
+option.BIOMEFOG_JB=Blue
+option.BIOMEFOG_JI=Intensity
+
+option.BIOMEFOG_SR=Red
+option.BIOMEFOG_SG=Green
+option.BIOMEFOG_SB=Blue
+option.BIOMEFOG_SI=Intensity
+
+option.WEATHER_VR=Red
+option.WEATHER_VG=Green
+option.WEATHER_VB=Blue
+option.WEATHER_VI=Intensity
+
 option.WEATHER_RR=Red
 option.WEATHER_RG=Green
 option.WEATHER_RB=Blue
@@ -971,6 +1045,16 @@ option.AURORA_HR=Red
 option.AURORA_HG=Green
 option.AURORA_HB=Blue
 option.AURORA_HI=Intensity
+
+option.RIFTSECOND_LR=Red
+option.RIFTSECOND_LG=Green
+option.RIFTSECOND_LB=Blue
+option.RIFTSECOND_LI=Intensity
+
+option.RIFTSECOND_HR=Red
+option.RIFTSECOND_HG=Green
+option.RIFTSECOND_HB=Blue
+option.RIFTSECOND_HI=Intensity
 
 option.RIFT_LR=Red
 option.RIFT_LG=Green

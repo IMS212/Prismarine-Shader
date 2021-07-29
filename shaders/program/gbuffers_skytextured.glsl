@@ -105,13 +105,9 @@ void main() {
 	#endif
 	#endif
 
-	#if END_SKY == 2 || END_SKY == 3
+	#if END_SKY == 1
 	vec4 cloud = DrawCloud(viewPos.xyz, dither, lightCol, ambientCol);
 	albedo.rgb += mix(albedo.rgb, cloud.rgb, cloud.a);
-	#endif
-
-	#if END_SKY == 1 || END_SKY == 3
-	albedo.rgb += DrawRift(viewPos.xyz, dither, 32);
 	#endif
 
 	#ifdef SKY_DESATURATION

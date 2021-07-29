@@ -406,6 +406,11 @@ void main() {
 				skyReflection += DrawAurora(skyRefPos * 100.0, dither, 12);
 				#endif
 
+				#if NIGHT_SKY_MODE == 3
+				skyReflection += DrawRift(skyRefPos * 100.0, dither, 12, 1);
+				skyReflection += DrawRift(skyRefPos * 100.0, dither, 12, 0);
+				#endif
+
 				#if CLOUDS == 1
 				vec4 cloud = DrawCloud(skyRefPos * 100.0, dither, lightCol, ambientCol);
 				skyReflection = mix(skyReflection, cloud.rgb, cloud.a);
@@ -473,6 +478,11 @@ void main() {
 					skyReflection += DrawAurora(skyRefPos * 100.0, dither, 12);
 					#endif
 					
+					#if NIGHT_SKY_MODE == 3
+					skyReflection += DrawRift(skyRefPos * 100.0, dither, 12, 1);
+					skyReflection += DrawRift(skyRefPos * 100.0, dither, 12, 0);
+					#endif
+
 					#if CLOUDS == 1
 					vec4 cloud = DrawCloud(skyRefPos * 100.0, dither, lightCol, ambientCol);
 					skyReflection = mix(skyReflection, cloud.rgb, cloud.a);

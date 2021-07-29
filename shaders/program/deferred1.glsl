@@ -34,6 +34,7 @@ uniform vec3 cameraPosition;
 uniform mat4 gbufferProjection, gbufferPreviousProjection, gbufferProjectionInverse;
 uniform mat4 gbufferModelView, gbufferPreviousModelView, gbufferModelViewInverse;
 
+uniform sampler2D noisetex;
 uniform sampler2D colortex0;
 uniform sampler2D colortex3;
 uniform sampler2D depthtex0;
@@ -154,6 +155,7 @@ void GlowOutline(inout vec3 color){
 #include "/lib/color/blocklightColor.glsl"
 #include "/lib/color/waterColor.glsl"
 #include "/lib/util/dither.glsl"
+#include "/lib/prismarine/functions.glsl"
 #include "/lib/atmospherics/sky.glsl"
 #include "/lib/color/fogColor.glsl"
 #include "/lib/atmospherics/fog.glsl"
@@ -221,6 +223,11 @@ void main() {
 
 				#ifdef AURORA
 				skyReflection += DrawAurora(skyRefPos * 100.0, dither, 12) * cloudMixRate;
+				#endif
+
+				#if NIGHT_SKY_MODE == 3
+				skyReflection += DrawRift(skyRefPos * 100.0, dither, 12, 1) * cloudMixRate;
+				skyReflection += DrawRift(skyRefPos * 100.0, dither, 12, 0) * cloudMixRate;
 				#endif
 
 				#if CLOUDS == 1

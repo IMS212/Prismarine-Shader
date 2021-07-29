@@ -93,6 +93,9 @@ void SunGlare(inout vec3 color, vec3 viewPos, vec3 lightCol) {
 
 //Program//
 void main() {
+	#ifdef END_STARS
+	#endif
+
 	float dither = Bayer64(gl_FragCoord.xy);
 	vec4 screenPos = vec4(gl_FragCoord.xy / vec2(viewWidth, viewHeight), gl_FragCoord.z, 1.0);
 	vec4 viewPos = gbufferProjectionInverse * (screenPos * 2.0 - 1.0);
@@ -103,17 +106,6 @@ void main() {
 	
 	vec3 nViewPos = normalize(viewPos.xyz);
 	float NdotU = dot(nViewPos, upVec);
-
-	#if NIGHT_SKY_MODE != 3 && NIGHT_SKY_MODE != 4
-	float clampNdotU = x2(x2(clamp(NdotU * 4.0, 0.0, 1.0)));
-	vec3 wpos = normalize((gbufferModelViewInverse * viewPos).xyz);
-	vec3 planeCoord = wpos / (wpos.y + length(wpos.xz) * 0.5);
-	vec3 moonPos = vec3(gbufferModelViewInverse * vec4(-sunVec, 1.0));
-	vec3 moonCoord = moonPos / (moonPos.y + length(moonPos.xz));
-
-	vec2 scoord = planeCoord.xz - moonCoord.xz;
-		 scoord *= 0.2;
-	#endif
 	
 	#ifdef ROUND_SUN_MOON
 	vec3 lightMA = mix(lightMorning, lightEvening, mefade);
@@ -121,21 +113,6 @@ void main() {
     vec3 moonColor = sqrt(lightNight);
 
 	RoundSunMoon(albedo, viewPos.xyz, sunColor, moonColor);
-	#endif
-
-	#if NIGHT_SKY_MODE == 0 || NIGHT_SKY_MODE == 2
-		if (moonVisibility > 0.0 && rainStrength == 0.0){
-			vec3 helios = texture2D(colortex10, scoord * 0.8 + 0.6).rgb;
-			helios *= x2(length(helios) + 0.6);
-			albedo.rgb += helios * 0.05 * clampNdotU * (1.0 - sunVisibility) * (1.0 - rainStrength);
-		}
-	#endif
-	#if NIGHT_SKY_MODE == 1 || NIGHT_SKY_MODE == 2
-		if (moonVisibility > 0.0 && rainStrength == 0.0){
-			vec3 nebula = texture2D(colortex11, scoord * 0.8 + 0.6).rgb;
-			nebula *= x2(length(nebula) + 0.6);
-			albedo.rgb += nebula * 0.05 * clampNdotU * (1.0 - sunVisibility) * (1.0 - rainStrength);
-		}
 	#endif
 
 	#ifdef STARS
@@ -147,8 +124,11 @@ void main() {
 	#endif
 	#endif
 
-	#if NIGHT_SKY_MODE == 3
-	if (moonVisibility > 0.0 && rainStrength != 1.0) albedo.rgb += DrawRift(viewPos.xyz, dither, 24);
+	#if NIGHT_SKY_MODE == 1
+	if (moonVisibility > 0.0 && rainStrength != 1.0){
+		albedo.rgb += DrawRift(viewPos.xyz, dither, 24, 1);
+		albedo.rgb += DrawRift(viewPos.xyz, dither, 24, 0);
+	}
 	#endif
 
 	#ifdef AURORA
@@ -178,19 +158,15 @@ void main() {
 	#endif
 	#endif
 
-	#if END_SKY == 2 || END_SKY == 3
+	#if END_SKY == 1
 	vec4 cloud = DrawCloud(viewPos.xyz, dither, lightCol, ambientCol);
 	albedo.rgb += mix(albedo.rgb, cloud.rgb, cloud.a);
-	#endif
-
-	#if END_SKY == 1 || END_SKY == 3
-	albedo.rgb += DrawRift(viewPos.xyz, dither, 32);
 	#endif
 	#endif
 	
     /* DRAWBUFFERS:0 */
 	gl_FragData[0] = vec4(albedo, 1.0 - star);
-    #if (defined OVERWORLD && CLOUDS == 1) || (defined END && END_SKY == 2) || (defined END && END_SKY == 3) || (defined OVERWORLD && CLOUDS == 4)
+    #if (defined OVERWORLD && CLOUDS == 1) || (defined END && END_SKY == 1)
     /* DRAWBUFFERS:04 */
 	gl_FragData[1] = vec4(cloud.a, 0.0, 0.0, 0.0);
     #endif

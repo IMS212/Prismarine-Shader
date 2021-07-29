@@ -87,6 +87,7 @@ float GetLinearDepth(float depth) {
 #include "/lib/util/outlineOffset.glsl"
 #include "/lib/util/outlineMask.glsl"
 #include "/lib/atmospherics/sky.glsl"
+#include "/lib/color/fogColor.glsl"
 #include "/lib/atmospherics/fog.glsl"
 #include "/lib/post/outline.glsl"
 #endif
@@ -125,7 +126,7 @@ void main() {
 	#endif
 	
 	#if FOG_MODE == 1 || FOG_MODE == 2
-	float dither = Bayer2(gl_FragCoord.xy);
+	float dither = Bayer256(gl_FragCoord.xy);
 	vec3 vl = GetLightShafts(z0, z1, translucent, dither);
 	#else
 	vec3 vl = vec3(0.0);

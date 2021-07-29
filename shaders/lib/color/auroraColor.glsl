@@ -1,3 +1,8 @@
+vec3 secondRiftLowColSqrt = vec3(RIFTSECOND_LR, RIFTSECOND_LG, RIFTSECOND_LB) * RIFTSECOND_LI / 255.0;
+vec3 secondRiftLowCol = secondRiftLowColSqrt * secondRiftLowColSqrt;
+vec3 secondRiftHighColSqrt = vec3(RIFTSECOND_HR, RIFTSECOND_HG, RIFTSECOND_HB) * RIFTSECOND_HI / 255.0;
+vec3 secondRiftHighCol = secondRiftHighColSqrt * secondRiftHighColSqrt;
+
 vec3 RiftLowColSqrt = vec3(RIFT_LR, RIFT_LG, RIFT_LB) * RIFT_LI / 255.0;
 vec3 riftLowCol = RiftLowColSqrt * RiftLowColSqrt;
 vec3 RiftHighColSqrt = vec3(RIFT_HR, RIFT_HG, RIFT_HB) * RIFT_HI / 255.0;
