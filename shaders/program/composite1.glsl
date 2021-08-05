@@ -47,7 +47,6 @@ uniform sampler2D noisetex;
 //Optifine Constants//
 const bool colortex1MipmapEnabled = true;
 
-
 //Common Variables//
 #ifdef WORLD_TIME_ANIMATION
 float frametime = float(worldTime)/20.0*ANIMATION_SPEED;
@@ -62,6 +61,7 @@ float moonVisibility = clamp((dot(-sunVec, upVec) + 0.05) * 10.0, 0.0, 1.0);
 float GetLuminance(vec3 color) {
 	return dot(color,vec3(0.299, 0.587, 0.114));
 }
+
 
 //Includes//
 #include "/lib/color/dimensionColor.glsl"
@@ -87,30 +87,19 @@ void main() {
 	vec4 viewPos = gbufferProjectionInverse * (vec4(texCoord.xy, pixeldepth0, 1.0) * 2.0 - 1.0);
 		 viewPos /= viewPos.w;
 
-	#ifdef LIGHTSHAFT_GROUND
 	#ifdef OVERWORLD
 	if (isEyeInWater == 0){
-		vec3 nViewPos = normalize(viewPos.xyz);
-		float VoU = clamp(dot(nViewPos, upVec), -1.0, 1.0);
-		VoU = (2-(cameraPosition.y*LIGHTSHAFT_ALTITUDE_FACTOR)) - VoU;
-		if (cameraPosition.y > 150) VoU = 1 - clamp(dot(nViewPos, upVec), -1.0, 1.0);
-		vl *= VoU * VoU;
-		vl *= 0.50;
+		#if LIGHTSHAFT_COLOR_MODE == 0
+		vl *= lightCol * 0.25;
+		#elif LIGHTSHAFT_COLOR_MODE == 1
+		vl *= lightshaftCol * 0.25;
+		#else
+		vec3 lightshaftCol0 = CalcSunColor(GetSkyColor(viewPos.xyz, false), lightshaftDay * 0.25, GetSkyColor(viewPos.xyz, false));
+		vec3 skylightshaftCol = CalcLightColor(lightshaftCol0, lightshaftNight * 0.50, waterColor.rgb);
+		vl *= skylightshaftCol;
+		#endif
 	}
-	#endif
-	#endif
-
-	#ifdef OVERWORLD
-	#if LIGHTSHAFT_COLOR_MODE == 0
-	vl *= lightCol * 0.25;
-	#elif LIGHTSHAFT_COLOR_MODE == 1
-	vl *= lightshaftCol * 0.25;
-	#else
-	vec3 lightshaftCol0 = CalcSunColor(GetSkyColor(viewPos.xyz, false), lightshaftDay * 0.25, GetSkyColor(viewPos.xyz, false));
-	vec3 skylightshaftCol = CalcLightColor(lightshaftCol0, lightshaftNight * 0.50, waterColor.rgb);
-	vl *= skylightshaftCol;
-	#endif
-	if (isEyeInWater == 1) vl *= waterShadowColor.rgb * lightshaftWater.rgb * lightCol.rgb * (timeBrightness + LIGHTSHAFT_WI);
+	if (isEyeInWater == 1) vl *= lightshaftWater.rgb * (timeBrightness + LIGHTSHAFT_WI) * 0.25 * WATER_I;
 	#endif
 
 	#ifdef END

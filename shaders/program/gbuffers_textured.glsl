@@ -91,6 +91,7 @@ float GetLinearDepth(float depth) {
 #include "/lib/util/spaceConversion.glsl"
 #include "/lib/color/waterColor.glsl"
 #include "/lib/atmospherics/sky.glsl"
+#include "/lib/atmospherics/clouds.glsl"
 #include "/lib/color/fogColor.glsl"
 #include "/lib/atmospherics/fog.glsl"
 #include "/lib/lighting/forwardLighting.glsl"

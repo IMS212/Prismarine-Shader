@@ -157,6 +157,7 @@ void GlowOutline(inout vec3 color){
 #include "/lib/util/dither.glsl"
 #include "/lib/prismarine/functions.glsl"
 #include "/lib/atmospherics/sky.glsl"
+#include "/lib/atmospherics/clouds.glsl"
 #include "/lib/color/fogColor.glsl"
 #include "/lib/atmospherics/fog.glsl"
 
@@ -172,9 +173,6 @@ void GlowOutline(inout vec3 color){
 #include "/lib/reflections/complexFresnel.glsl"
 #include "/lib/surface/materialDeferred.glsl"
 #include "/lib/reflections/roughReflections.glsl"
-#ifdef OVERWORLD
-#include "/lib/atmospherics/clouds.glsl"
-#endif
 #endif
 
 //Program//
@@ -225,9 +223,9 @@ void main() {
 				skyReflection += DrawAurora(skyRefPos * 100.0, dither, 12) * cloudMixRate;
 				#endif
 
-				#if NIGHT_SKY_MODE == 3
-				skyReflection += DrawRift(skyRefPos * 100.0, dither, 12, 1) * cloudMixRate;
-				skyReflection += DrawRift(skyRefPos * 100.0, dither, 12, 0) * cloudMixRate;
+				#if NIGHT_SKY_MODE == 1
+				skyReflection += DrawRift(skyRefPos * 100.0, dither, 6, 1) * cloudMixRate;
+				skyReflection += DrawRift(skyRefPos * 100.0, dither, 6, 0) * cloudMixRate;
 				#endif
 
 				#if CLOUDS == 1
@@ -265,7 +263,9 @@ void main() {
 		color.rgb *= GetAmbientOcclusion(z);
 		#endif
 
+		#if FOG_MODE == 0 || FOG_MODE == 2
 		Fog(color.rgb, viewPos.xyz);
+		#endif
 	} else {
 		#ifdef NETHER
 		color.rgb = netherCol.rgb * 0.04;

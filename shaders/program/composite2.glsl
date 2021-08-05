@@ -124,7 +124,7 @@ void main() {
 	#endif
 
 	#if CLOUDS == 3 && defined OVERWORLD
-	vec2 vc = vec2(texture2DLod(colortex8,texCoord.xy,float(2.0)).a, texture2DLod(colortex9,texCoord.xy,float(2.0)).a);
+	vec2 vc = vec2(texture2DLod(colortex8, texCoord.xy, float(2.0)).a, texture2DLod(colortex9, texCoord.xy, float(2.0)).a);
 	color = mix(color, mix(vcloudsDownCol, vcloudsCol, vc.x) * (1.0 - rainStrength * 0.25), vc.y * vc.y * VCLOUDS_OPACITY);
 	#endif
 

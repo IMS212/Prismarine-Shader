@@ -175,16 +175,13 @@ vec3 GetWaterNormal(vec3 worldPos, vec3 viewPos, vec3 viewVector) {
 #include "/lib/util/spaceConversion.glsl"
 #include "/lib/atmospherics/sky.glsl"
 #include "/lib/color/fogColor.glsl"
+#include "/lib/atmospherics/clouds.glsl"
 #include "/lib/atmospherics/fog.glsl"
 #include "/lib/atmospherics/waterFog.glsl"
 #include "/lib/lighting/forwardLighting.glsl"
 #include "/lib/reflections/raytrace.glsl"
 #include "/lib/reflections/simpleReflections.glsl"
 #include "/lib/surface/ggx.glsl"
-
-#ifdef OVERWORLD
-#include "/lib/atmospherics/clouds.glsl"
-#endif
 
 #ifdef TAA
 #include "/lib/util/jitter.glsl"
@@ -406,9 +403,9 @@ void main() {
 				skyReflection += DrawAurora(skyRefPos * 100.0, dither, 12);
 				#endif
 
-				#if NIGHT_SKY_MODE == 3
-				skyReflection += DrawRift(skyRefPos * 100.0, dither, 12, 1);
-				skyReflection += DrawRift(skyRefPos * 100.0, dither, 12, 0);
+				#if NIGHT_SKY_MODE == 1
+				skyReflection += DrawRift(skyRefPos * 100.0, dither, 6, 1);
+				skyReflection += DrawRift(skyRefPos * 100.0, dither, 6, 0);
 				#endif
 
 				#if CLOUDS == 1
@@ -478,9 +475,9 @@ void main() {
 					skyReflection += DrawAurora(skyRefPos * 100.0, dither, 12);
 					#endif
 					
-					#if NIGHT_SKY_MODE == 3
-					skyReflection += DrawRift(skyRefPos * 100.0, dither, 12, 1);
-					skyReflection += DrawRift(skyRefPos * 100.0, dither, 12, 0);
+					#if NIGHT_SKY_MODE == 1
+					skyReflection += DrawRift(skyRefPos * 100.0, dither, 6, 1);
+					skyReflection += DrawRift(skyRefPos * 100.0, dither, 6, 0);
 					#endif
 
 					#if CLOUDS == 1
@@ -523,18 +520,18 @@ void main() {
 
 		Fog(albedo.rgb, viewPos);
 
-		// if((isEyeInWater == 0 && water > 0.5) || (isEyeInWater == 1 && water < 0.5)) {
-		// 	float oDepth = texture2D(depthtex1, screenPos.xy).r;
-		// 	vec3 oScreenPos = vec3(gl_FragCoord.xy / vec2(viewWidth, viewHeight), oDepth);
-		// 	#ifdef TAA
-		// 	vec3 oViewPos = ToNDC(vec3(TAAJitter(oScreenPos.xy, -0.5), oScreenPos.z));
-		// 	#else
-		// 	vec3 oViewPos = ToNDC(oScreenPos);
-		// 	#endif
+		if((isEyeInWater == 0 && water > 0.5) || (isEyeInWater == 1 && water < 0.5)) {
+			float oDepth = texture2D(depthtex1, screenPos.xy).r;
+			vec3 oScreenPos = vec3(gl_FragCoord.xy / vec2(viewWidth, viewHeight), oDepth);
+			#ifdef TAA
+			vec3 oViewPos = ToNDC(vec3(TAAJitter(oScreenPos.xy, -0.5), oScreenPos.z));
+			#else
+			vec3 oViewPos = ToNDC(oScreenPos);
+			#endif
 
-		// 	vec4 waterFog = GetWaterFog(viewPos.xyz - oViewPos);
-		// 	albedo = mix(waterFog, vec4(albedo.rgb, 1.0), albedo.a);
-		// }
+			vec4 waterFog = GetWaterFog(viewPos.xyz - oViewPos);
+			albedo = mix(waterFog, vec4(albedo.rgb, 1.0), albedo.a);
+		}
 	}
 
     /* DRAWBUFFERS:01 */

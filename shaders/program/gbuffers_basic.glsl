@@ -35,12 +35,12 @@ uniform ivec2 eyeBrightnessSmooth;
 
 uniform vec3 cameraPosition;
 
+uniform sampler2D noisetex;
+
 uniform mat4 gbufferProjectionInverse;
 uniform mat4 gbufferModelViewInverse;
 uniform mat4 shadowProjection;
 uniform mat4 shadowModelView;
-
-uniform sampler2D noisetex;
 
 #ifdef DYNAMIC_HANDLIGHT
 uniform int heldBlockLightValue;

@@ -45,7 +45,7 @@ float getVolumetricNoise(vec3 pos){
 float getHQSample(vec3 pos, float height, float verticalThickness, float samples){
 	float noise = 0.0;
 	float ymult = pow(abs(height - pos.y) / verticalThickness, VCLOUDS_VERTICAL_THICKNESS);
-	vec3 wind = vec3(frametime * 0.001 * VCLOUDS_SPEED, 0.0, 0.0);
+	vec3 wind = vec3(frametime * VCLOUDS_SPEED, 0.0, 0.0);
 	float rainStrengthLowered = rainStrength / 8.0;
 	
 	if (ymult < 2.0){
@@ -66,7 +66,7 @@ float getHQSample(vec3 pos, float height, float verticalThickness, float samples
 float getMQSample(vec3 pos, float height, float verticalThickness, float samples){
 	float noise = 0.0;
 	float ymult = pow(abs(height - pos.y) / verticalThickness, VCLOUDS_VERTICAL_THICKNESS);
-	vec3 wind = vec3(frametime * 0.001 * VCLOUDS_SPEED, 0.0, 0.0);
+	vec3 wind = vec3(frametime * VCLOUDS_SPEED, 0.0, 0.0);
 	float rainStrengthLowered = rainStrength / 8.0;
 
 	if (ymult < 2.0){
@@ -84,7 +84,7 @@ float getMQSample(vec3 pos, float height, float verticalThickness, float samples
 float getLQSample(vec3 pos, float height, float verticalThickness, float samples){
 	float noise = 0.0;
 	float ymult = pow(abs(height - pos.y) / verticalThickness, VCLOUDS_VERTICAL_THICKNESS);
-	vec3 wind = vec3(frametime * 0.001 * VCLOUDS_SPEED, 0.0, 0.0);
+	vec3 wind = vec3(frametime * VCLOUDS_SPEED, 0.0, 0.0);
 	float rainStrengthLowered = rainStrength / 8.0;
 	
 	if (ymult < 4.0){
@@ -98,7 +98,7 @@ float getLQSample(vec3 pos, float height, float verticalThickness, float samples
 vec2 getVolumetricCloud(float pixeldepth, float pixeldepthw, float heightAdjFactor, float vertThicknessFactor) {
 	vec2 vc = vec2(0.0);
 	float quality = VCLOUDS_QUALITY / 2;
-	float dither = Bayer64(gl_FragCoord.xy) * quality; //useless
+	float dither = Bayer64(gl_FragCoord.xy) * quality;
 
 	float maxDist = 2.0 * VCLOUDS_RANGE * far;
 	float minDist = 0.01f + dither;
@@ -117,7 +117,7 @@ vec2 getVolumetricCloud(float pixeldepth, float pixeldepthw, float heightAdjFact
 			else break;
 			#endif
 
-			wpos.xyz += cameraPosition.xyz + vec3(frametime * 4.0 * VCLOUDS_SPEED, -vh * 32.0, 0.0);
+			wpos.xyz += cameraPosition.xyz + vec3(frametime * VCLOUDS_SPEED, -vh * 32, 0.0);
 
 			float height = VCLOUDS_HEIGHT + (heightAdjFactor * timeBrightness);
 			float vertThickness = VCLOUDS_VERTICAL_THICKNESS * vertThicknessFactor + timeBrightness;

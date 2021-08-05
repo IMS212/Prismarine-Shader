@@ -1,5 +1,3 @@
-uniform float eyeAltitude;
-
 #include "/lib/color/auroraColor.glsl"
 float CloudSample(vec2 coord, vec2 wind, float currentStep, float sampleStep, float sunCoverage) {
 	float noiseCoverage = abs(currentStep - 0.125) * (currentStep > 0.125 ? 1.12 : 4.0);
@@ -37,7 +35,7 @@ vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol) {
 	float VoS = dot(normalize(viewPos), sunVec);
 	float VoU = dot(normalize(viewPos), upVec);
 	float VoL = dot(normalize(viewPos), lightVec);
-	float cloudHeightFactor = x2(max(1.2 - 0.002 * CLOUDS_HEIGHT_FACTOR * eyeAltitude, 0.0));
+	float cloudHeightFactor = x2(max(1.2 - 0.002 * CLOUDS_HEIGHT_FACTOR * cameraPosition.y, 0.0));
 	float cloudHeight = CLOUD_HEIGHT * cloudHeightFactor * CLOUD_HEIGHT_MULTIPLIER * 0.05;
 	float sunCoverage = pow(clamp(abs(VoL) * 2.0 - 1.0, 0.0, 1.0), 12.0) * (1.0 - rainStrength);
 
@@ -224,24 +222,20 @@ float RiftSample(vec2 coord, vec2 wind, float VoU) {
 		  noise+= texture2D(noisetex, coord * 0.03125 + wind * 0.10).b;
 		  noise+= texture2D(noisetex, coord * 0.01575 + wind * 0.05).b;
 		  noise+= texture2D(noisetex, coord * 0.007150).b;
-
 	noise = max(1.0 - 2.0 * (0.5 * VoU + 0.5) * abs(noise - 3.25), 0.0);
 
 	return noise;
 }
 
 vec3 DrawRift(vec3 viewPos, float dither, int samples, float riftType) {
-	#ifdef TAA
-		dither = fract(16.0 * frameTimeCounter + dither);
-	#endif
-	
+	dither *= 0.25;
+	float VoU = dot(normalize(viewPos.xyz), upVec);
+	VoU = abs(VoU);
 	float sampleStep = 1.0 / samples;
 	float currentStep = dither * sampleStep;
 
-	float VoU = dot(normalize(viewPos), upVec);
-
 	vec2 wind = vec2(
-		frametime * CLOUD_SPEED * 0.000525,
+		frametime * CLOUD_SPEED * 0.000125,
 		sin(frametime * CLOUD_SPEED * 0.05) * 0.00125
 	);
 
@@ -251,7 +245,7 @@ vec3 DrawRift(vec3 viewPos, float dither, int samples, float riftType) {
 	if (VoU > 0.0) {
 		vec3 wpos = normalize((gbufferModelViewInverse * vec4(viewPos, 1.0)).xyz);
 		for(int i = 0; i < samples; i++) {
-			vec3 planeCoord = wpos * ((6.0 + currentStep * 5.0) / wpos.y) * 0.008;
+			vec3 planeCoord = wpos * ((0.0 + currentStep * 16.0)) * 0.002;
 
 			float iDither = i + dither;
 			vec2 coord = cameraPosition.xz * 0.00008 + planeCoord.xz;
@@ -259,12 +253,12 @@ vec3 DrawRift(vec3 viewPos, float dither, int samples, float riftType) {
 			if (riftType == 0){
 				coord += vec2(coord.y, -coord.x) * 0.75;
 				coord += cos(mix(vec2(cos(iDither * 1), sin(iDither * 2.00)), vec2(cos(iDither * 3.0), sin(iDither * 4.00)), iDither) * 0.0020);
-				coord += sin(mix(vec2(cos(iDither * 2), sin(iDither * 2.50)), vec2(cos(iDither * 3.0), sin(iDither * 3.50)), iDither) * 0.0015);
-				coord += cos(mix(vec2(cos(iDither * 3), sin(iDither * 3.75)), vec2(cos(iDither * 4.5), sin(iDither * 5.25)), iDither) * 0.0010);
+				coord += sin(mix(vec2(cos(iDither * 2), sin(iDither * 2.50)), vec2(cos(iDither * 3.0), sin(iDither * 3.50)), iDither) * 0.0005);
+				coord += cos(mix(vec2(cos(iDither * 3), sin(iDither * 3.75)), vec2(cos(iDither * 4.5), sin(iDither * 5.25)), iDither) * 0.0015);
 			}else{
 				coord += vec2(coord.y, -coord.x) * 1.25;
 				coord += cos(mix(vec2(cos(iDither * 0.50), sin(iDither * 1.00)), vec2(cos(iDither * 1.50), sin(iDither * 2.00)), iDither) * 0.0010);
-				coord += sin(mix(vec2(cos(iDither * 1.00), sin(iDither * 2.00)), vec2(cos(iDither * 3.00), sin(iDither * 4.00)), iDither) * 0.0025);
+				coord += sin(mix(vec2(cos(iDither * 1.00), sin(iDither * 2.00)), vec2(cos(iDither * 3.00), sin(iDither * 4.00)), iDither) * 0.0015);
 				coord += cos(mix(vec2(cos(iDither * 1.50), sin(iDither * 3.00)), vec2(cos(iDither * 4.50), sin(iDither * 6.00)), iDither) * 0.0005);
 			}
 
@@ -273,7 +267,7 @@ vec3 DrawRift(vec3 viewPos, float dither, int samples, float riftType) {
 			if (noise > 0.0) {
 				noise *= texture2D(noisetex, coord * 0.25 + wind * 0.25).b;
 				noise *= 1.0 * texture2D(noisetex, coord + wind * 16.0).b + 0.75;
-				noise = noise * noise * 2 * sampleStep;
+				noise = noise * noise * 4 * sampleStep;
 				noise *= max(sqrt(1.0 - length(planeCoord.xz) * 2.5), 0.0);
 				if (riftType == 0){
 					#ifdef END

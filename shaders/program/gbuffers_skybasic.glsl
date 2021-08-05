@@ -73,7 +73,7 @@ void SunGlare(inout vec3 color, vec3 viewPos, vec3 lightCol) {
 	visibility = clamp(visibility * 1.015 / invvisfactor - 0.015, 0.0, 1.0);
 	visibility = mix(1.0, visibility, 0.25 * eBS + 0.75) * (1.0 - rainStrength * eBS * 0.875);
 	visibility *= shadowFade * LIGHT_SHAFT_STRENGTH;
-	if (cameraPosition.y < 1.0) visibility *= exp(2.0 * cameraPosition.y - 2.0);
+	visibility *= 1 - timeBrightness;
 
 	#if FOG_MODE == 2 || FOG_MODE == 1
 	if (isEyeInWater == 1) color += 0.25 * lightCol * visibility;
@@ -126,13 +126,13 @@ void main() {
 
 	#if NIGHT_SKY_MODE == 1
 	if (moonVisibility > 0.0 && rainStrength != 1.0){
-		albedo.rgb += DrawRift(viewPos.xyz, dither, 24, 1);
-		albedo.rgb += DrawRift(viewPos.xyz, dither, 24, 0);
+		albedo.rgb += DrawRift(viewPos.xyz, dither, 4, 1);
+		albedo.rgb += DrawRift(viewPos.xyz, dither, 4, 0);
 	}
 	#endif
 
 	#ifdef AURORA
-	albedo.rgb += DrawAurora(viewPos.xyz, dither, 24);
+	if (moonVisibility != 0) albedo.rgb += DrawAurora(viewPos.xyz, dither, 8);
 	#endif
 	
 	#if CLOUDS == 1 || CLOUDS == 4
@@ -162,6 +162,7 @@ void main() {
 	vec4 cloud = DrawCloud(viewPos.xyz, dither, lightCol, ambientCol);
 	albedo.rgb += mix(albedo.rgb, cloud.rgb, cloud.a);
 	#endif
+
 	#endif
 	
     /* DRAWBUFFERS:0 */

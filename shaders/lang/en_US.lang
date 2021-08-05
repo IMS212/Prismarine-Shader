@@ -19,8 +19,6 @@ screen.PARALLAX=Parallax
 
 screen.ATMOSPHERICS=Atmospherics
 screen.SKY=Sky Config
-screen.DEFAULT_SKY_OPTIONS=Default Sky Config
-screen.SIMPLE_SKY_OPTIONS=Simple Sky Config
 screen.CLOUDS=Cloud Config
 screen.FOGWEATHER=Fog & Weather Config
 
@@ -87,7 +85,7 @@ screen.AMBIENT_N=Ambient (Night)
 screen.MINLIGHT=Minimum Light
 screen.BLOCKLIGHT_COLOR=Blocklight Color
 screen.SKY_COLOR_SIMPLE=Simple Sky Color
-screen.SKY_COLOR_DEFAULT=Default Sky Color
+screen.SKY_COLOR_DEFAULT=Base Sky Color
 screen.SKY_COLOR=Sky Color
 screen.FOG_TINT=Tint
 screen.WATER_COLOR=Water Color
@@ -385,13 +383,11 @@ option.LIGHT_SHAFT_STRENGTH.comment=Adjusts light shaft strength.
 option.LIGHTSHAFT_MIN_DISTANCE=Min Distance
 option.LIGHTSHAFT_MAX_DISTANCE=Max Distance
 option.LIGHTSHAFT_SAMPLES=Sample Count
-option.LIGHTSHAFT_SAMPLE_INTENSITY=Sample Intensity
-option.LIGHTSHAFT_ALTITUDE_FACTOR=Altitude Factor
-option.LIGHTSHAFT_ALTITUDE_FACTOR.comment=Increases volumetric fog density closer to the ground. Works only if ground fog option is enabled.
+option.LIGHTSHAFT_HEIGHT=Fog Height
+option.LIGHTSHAFT_HORIZONTAL_THICKNESS=Fog Horizontal Thickness
+option.LIGHTSHAFT_VERTICAL_THICKNESS=Fog Vertical Thickness
+option.LIGHTSHAFT_AMOUNT=Fog Amount
 option.LIGHTSHAFT_TIME_DECREASE_FACTOR=Time Decrease Factor
-option.LIGHTSHAFT_GROUND=Ground fog
-option.LIGHTSHAFT_GROUND.comment=Transforms the rays to the ground volumetric fog. 
-option.LIGHTSHAFT_ALTITUDE=Altitude
 option.LIGHTSHAFT_COLOR_MODE=Color Mode 
 value.LIGHTSHAFT_COLOR_MODE.0=Automatic 
 value.LIGHTSHAFT_COLOR_MODE.1=Manual 
@@ -399,6 +395,11 @@ value.LIGHTSHAFT_COLOR_MODE.2=Sky Color + Manual
 
 option.FOG_DENSITY=Fog Density
 option.FOG_DENSITY.comment=Adjusts fog density. §e[*]§rThis option is ignored in the nether.
+option.NIGHT_FOG_DENSITY=Night Fog Density
+option.DAY_FOG_DENSITY=Day Fog Density
+option.MORNING_FOG_DENSITY=Morning Fog Density
+option.EVENING_FOG_DENSITY=Evening Fog Density
+option.WEATHER_FOG_DENSITY=Weather Fog Density
 
 option.WEATHER_OPACITY=Weather Opacity
 option.WEATHER_OPACITY.comment=Adjusts weather opacity.
@@ -572,6 +573,7 @@ option.WATER_PIXEL.comment=Applies pixelation effect on water normals.
 value.WATER_PIXEL.0=OFF
 
 #Post Effects
+option.NETHER_HEAT_WAVE=Nether Heat Wave
 option.CHROMATIC_ABERRATION=Chromatic Aberration 
 option.CHROMATIC_ABERRATION_STRENGTH=Ch. Aberration Strength
 option.Sharpen=Image Sharpening

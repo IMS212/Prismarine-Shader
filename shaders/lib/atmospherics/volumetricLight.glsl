@@ -1,3 +1,46 @@
+float getNoise(vec2 pos){
+	return fract(sin(dot(pos, vec2(12.9898, 4.1414))) * 43758.5453);
+}
+
+float getVolumetricNoise(vec3 pos){
+	vec3 flr = floor(pos);
+	vec3 frc = fract(pos);
+	float yadd = 32.0;
+	frc = frc * frc * (3.0-2.0 * frc);
+	
+	float noisebdl = getNoise(flr.xz + flr.y * yadd);
+	float noisebdr = getNoise(flr.xz + flr.y * yadd + vec2(1.0,0.0));
+	float noisebul = getNoise(flr.xz + flr.y * yadd + vec2(0.0,1.0));
+	float noisebur = getNoise(flr.xz + flr.y * yadd + vec2(1.0,1.0));
+	float noisetdl = getNoise(flr.xz + flr.y * yadd + yadd);
+	float noisetdr = getNoise(flr.xz + flr.y * yadd + yadd + vec2(1.0,0.0));
+	float noisetul = getNoise(flr.xz + flr.y * yadd + yadd + vec2(0.0,1.0));
+	float noisetur = getNoise(flr.xz + flr.y * yadd + yadd + vec2(1.0,1.0));
+	float noise= mix(mix(mix(noisebdl,noisebdr,frc.x),mix(noisebul,noisebur,frc.x),frc.z),mix(mix(noisetdl,noisetdr,frc.x),mix(noisetul,noisetur,frc.x),frc.z),frc.y);
+	return noise;
+}
+
+float getFogSample(vec3 pos, float height, float verticalThickness, float samples){
+	float noise = 0.0;
+	float ymult = pow(abs(height - pos.y) / verticalThickness, LIGHTSHAFT_VERTICAL_THICKNESS);
+	vec3 wind = vec3(frametime * 0.25, 0.0, 0.0);
+	float rainStrengthLowered = rainStrength / 8.0;
+	
+	if (ymult < 2.0){
+		noise += getVolumetricNoise(pos * samples * 0.5 - wind * 1) * 0.25 * LIGHTSHAFT_HORIZONTAL_THICKNESS;
+		noise += getVolumetricNoise(pos * samples * 0.25 - wind * 0.9) * 0.75 * LIGHTSHAFT_HORIZONTAL_THICKNESS;
+		noise += getVolumetricNoise(pos * samples * 0.125 - wind * 0.8) * 1.0 * LIGHTSHAFT_HORIZONTAL_THICKNESS;
+		noise += getVolumetricNoise(pos * samples * 0.0625 - wind * 0.7) * 1.75 * LIGHTSHAFT_HORIZONTAL_THICKNESS;
+		noise += getVolumetricNoise(pos * samples * 0.03125 - wind * 0.6) * 2.0 * LIGHTSHAFT_HORIZONTAL_THICKNESS;
+		noise += getVolumetricNoise(pos * samples * 0.016125 - wind * 0.5) * 2.75 * LIGHTSHAFT_HORIZONTAL_THICKNESS;
+		noise += getVolumetricNoise(pos * samples * 0.00862 - wind * 0.4) * 3.0 * LIGHTSHAFT_HORIZONTAL_THICKNESS;
+		noise += getVolumetricNoise(pos * samples * 0.00431 - wind * 0.3) * 3.25 * LIGHTSHAFT_HORIZONTAL_THICKNESS;
+		noise += getVolumetricNoise(pos * samples * 0.00216 - wind * 0.2) * 4.0 * LIGHTSHAFT_HORIZONTAL_THICKNESS;
+	}
+	noise = clamp(mix(noise * LIGHTSHAFT_AMOUNT * 0.85, 21.0, 0.25 * rainStrengthLowered) - (10.0 + 5.0 * ymult), 0.0, 1.0);
+	return noise;
+}
+
 float GetLogarithmicDepth(float dist) {
 	return (far * (dist - near)) / (dist * (far - near));
 }
@@ -40,6 +83,9 @@ vec4 GetShadowSpace(vec4 wpos) {
 vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dither) {
 	vec3 vl = vec3(0.0);
 
+	dither *= 2;
+	dither = fract(dither + frameTimeCounter);
+
 	#ifdef END_VOLUMETRIC_FOG
 	#endif
 	
@@ -56,8 +102,8 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 	#ifdef OVERWORLD
 	float visfactor = 0.05 * (-0.8 * timeBrightness + 1.0) * (3.0 * rainStrength + 1.0);
 	float invvisfactor = 1.0 - visfactor;
-	float visibility = 0.95;
-	float persistence = (LIGHTSHAFT_PERSISTENCE_FACTOR * 2) - (cameraPosition.y * LIGHTSHAFT_ALTITUDE_FACTOR);
+	float visibility = 1 - rainStrength;
+	float persistence = (LIGHTSHAFT_PERSISTENCE_FACTOR * 2);
 
 	#ifdef LIGHTSHAFT_PERSISTENCE
 	if (isEyeInWater == 0){
@@ -71,38 +117,37 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 
 	visibility = visfactor / (1.0 - invvisfactor * visibility) - visfactor;
 	visibility = clamp(visibility * 1.015 / invvisfactor - 0.015, 0.0, 1.0);
-	visibility = mix(1.0, visibility, 0.25 * eBS + 0.75 * eBS);
+	visibility = mix(1.0, visibility, 1);
 	#endif
 	
 	#ifdef END
 	VoL = pow(VoL * 0.5 + 0.5, 16.0) * 0.75 + 0.25;
 	float visibility = VoL;
+	visibility *= 0.50;
 	#endif
 
 	#ifdef NETHER
 	float visibility = 0;
 	#endif
 
-	visibility *= 0.2 * float(pixeldepth0 > 0.75);
+	visibility *= 0.25 * float(pixeldepth0 > 0.75);
 
 	if (visibility > 0.0) {
-		float maxDist = LIGHTSHAFT_MAX_DISTANCE;
-		
 		float depth0 = GetLinearDepth2(pixeldepth0);
 		float depth1 = GetLinearDepth2(pixeldepth1);
 		vec4 worldposition = vec4(0.0);
 		vec4 shadowposition = vec4(0.0);
 		
-		vec3 watercol = lightshaftWater.rgb * LIGHTSHAFT_WI; //don't ask, just don't ask
+		vec3 watercol = lightshaftWater.rgb * LIGHTSHAFT_WI * 0.25 * WATER_I; //don't ask, just don't ask
 		
 		for(int i = 0; i < LIGHTSHAFT_SAMPLES; i++) {
+			float maxDist = LIGHTSHAFT_MAX_DISTANCE * far;
 			#ifdef END
 			float minDist = (exp2(i + dither) - 0.95) * LIGHTSHAFT_MIN_DISTANCE;
 			#else
 			float minDist = (i + dither) * LIGHTSHAFT_MIN_DISTANCE;
-			if (isEyeInWater == 1) minDist = (pow(i + dither + 0.5, 2.0)) * LIGHTSHAFT_MIN_DISTANCE * 0.055;
+			if (isEyeInWater == 1) minDist = (exp2(i + dither) - 0.95) * 5;
 			#endif
-			float maxDist = LIGHTSHAFT_MAX_DISTANCE;
 
 			#ifdef END
 			maxDist = 128.0;
@@ -111,6 +156,7 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 
 			if (minDist >= maxDist) break;
 			if (depth1 < minDist || (depth0 < minDist && color == vec3(0.0))) break;
+			if (rainStrength == 1) break;
 
 			#ifndef LIGHTSHAFT_WATER
 			if (isEyeInWater == 1.0) break;
@@ -128,7 +174,7 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 
 			if (length(shadowposition.xy * 2.0 - 1.0) < 1.0) {
 				float shadow0 = shadow2D(shadowtex0, shadowposition.xyz).z;
-				
+					
 				vec3 shadowCol = vec3(0.0);
 				#ifdef SHADOW_COLOR
 				if (shadow0 < 1.0) {
@@ -155,20 +201,19 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 				}
 				#elif defined LIGHTSHAFT_CLOUDY_NOISE && defined OVERWORLD
 				if (isEyeInWater != 1){
-					vec3 npos = worldposition.xyz + cameraPosition.xyz + vec3(frametime * 4.0, 0, 0);
-					float n3da = texture2D(noisetex, npos.xz / 1024.0 + floor(npos.y / 3.0) * 0.35).r;
-					float n3db = texture2D(noisetex, npos.xz / 1024.0 + floor(npos.y / 3.0 + 1.0) * 0.35).r;
-					float noise = mix(n3da, n3db, fract(npos.y / 3.0));
-					noise = sin(noise * 16.0) * 0.25 + 0.5;
+					vec3 npos = worldposition.xyz + cameraPosition.xyz;
+
+					#ifdef WORLD_CURVATURE
+					if (length(npos.xz) < WORLD_CURVATURE_SIZE) npos.y += length(npos.xz) * length(npos.xyz) / WORLD_CURVATURE_SIZE;
+					else break;
+					#endif
+
+					float noise = getFogSample(npos.xyz, LIGHTSHAFT_HEIGHT, LIGHTSHAFT_VERTICAL_THICKNESS, 4);
 					shadow *= noise;
-					shadowposition *= noise;
 				}
 				#endif
-				
+					
 				vl += shadow;
-			}
-			else{
-				vl += 1.0;
 			}
 		}
 		vl = sqrt(vl * visibility);

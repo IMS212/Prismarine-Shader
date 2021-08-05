@@ -66,7 +66,7 @@ void UnderwaterDistort(inout vec2 texCoord) {
 	texCoord += vec2(
 		cos(texCoord.y * 32.0 + frameTimeCounter * 3.0),
 		sin(texCoord.x * 32.0 + frameTimeCounter * 1.7)
-	) * 0.0005;
+	) * 0.00075;
 
 	float mask = float(
 		texCoord.x > 0.0 && texCoord.x < 1.0 &&
@@ -185,6 +185,11 @@ vec2 GetLightPos() {
 void main() {
     vec2 newTexCoord = texCoord;
 	if (isEyeInWater == 1.0) UnderwaterDistort(newTexCoord);
+	#ifdef NETHER_HEAT_WAVE
+	#ifdef NETHER
+	UnderwaterDistort(newTexCoord);
+	#endif
+	#endif
 	
 	vec3 color = texture2D(colortex0, newTexCoord).rgb;
 	

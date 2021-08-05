@@ -73,7 +73,7 @@ void main() {
 	
 	#ifdef WATER_TINT
 	if (water > 0.9){
-		albedo.rgb = waterShadowColor.rgb * lightshaftWater.rgb * lightCol.rgb * (WATER_I * 16 - isEyeInWater - isEyeInWater - isEyeInWater - isEyeInWater);
+		albedo.rgb = waterShadowColor.rgb * lightshaftWater.rgb * lightCol.rgb * (WATER_I * 16 * WATER_CAUSTICS_STRENGTH);
 	}
 	#endif
 
