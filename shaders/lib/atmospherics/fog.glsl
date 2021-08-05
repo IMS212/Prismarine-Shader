@@ -137,8 +137,8 @@ void NormalFog(inout vec3 color, vec3 viewPos) {
 				#endif
 				#if NIGHT_SKY_MODE == 1
 				if (moonVisibility > 0.0 && rainStrength != 1.0){
-					vanillaFogColor += DrawRift(viewPos.xyz, dither, 2, 1);
-					vanillaFogColor += DrawRift(viewPos.xyz, dither, 2, 0);
+					vanillaFogColor += DrawRift(viewPos.xyz, dither, 4, 1);
+					vanillaFogColor += DrawRift(viewPos.xyz, dither, 4, 0);
 				}
 				#endif
 			}
