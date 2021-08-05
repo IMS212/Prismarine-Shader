@@ -77,7 +77,6 @@ float GetLinearDepth(float depth) {
 #include "/lib/color/skyColor.glsl"
 #include "/lib/color/waterColor.glsl"
 #include "/lib/util/dither.glsl"
-#include "/lib/util/spaceConversion.glsl"
 #include "/lib/atmospherics/waterFog.glsl"
 
 #if FOG_MODE == 1 || FOG_MODE == 2
@@ -101,58 +100,10 @@ void main() {
     vec3 translucent = texture2D(colortex1, texCoord).rgb;
 	float z0 = texture2D(depthtex0, texCoord).r;
 	float z1 = texture2D(depthtex1, texCoord).r;
-	float isWater = 0.0;
-
-	if (translucent.b > 0.999 && z1 > z0) {
-		isWater = 1.0;
-		translucent = vec3(1.0);
-	}
 	
 	vec4 screenPos = vec4(texCoord.x, texCoord.y, z0, 1.0);
 	vec4 viewPos = gbufferProjectionInverse * (screenPos * 2.0 - 1.0);
 	viewPos /= viewPos.w;
-
-	#ifdef OVERWORLD
-		if (isWater > 0.5) {
-			vec3 worldPos = ToWorld(viewPos.xyz);
-			vec3 refractPos = worldPos.xyz + cameraPosition.xyz;
-			refractPos *= 0.005;
-			float refractSpeed = 0.0035 * WATER_SPEED;
-			vec2 refractPos2 = refractPos.xz + refractPos.y * 0.5 + refractSpeed * frametime;
-
-			vec2 refractNoise = texture2D(noisetex, refractPos2).rg - vec2(0.5);
-
-			float hand = 1.0 - float(z0 < 0.56);
-			float d0 = GetLinearDepth(z0);
-			//float d1 = GetLinearDepth(z1);
-			float distScale0 = max((far - near) * d0 + near, 6.0);
-			float fovScale = gbufferProjection[1][1] / 1.37;
-			float refractScale = fovScale / distScale0;
-			vec2 refractMult = vec2(0.07 * refractScale);
-			refractMult *= hand * 2;
-			refractNoise *= refractMult;
-			
-			vec2 refractCoord = texCoord.xy + refractNoise;
-
-			float waterCheck = float(texture2D(colortex1, refractCoord).b > 0.999);
-			float depthCheck0 = texture2D(depthtex0, refractCoord).r;
-			float depthCheck1 = texture2D(depthtex1, refractCoord).r;
-			float depthDif = GetLinearDepth(depthCheck1) - GetLinearDepth(depthCheck0);
-			refractNoise *= clamp(depthDif * 150.0, 0.0, 1.0);
-			refractCoord = texCoord.xy + refractNoise;
-			if (depthCheck0 >= 0.56) {
-				if (waterCheck > 0.95) {
-					color.rgb = texture2D(colortex0, refractCoord).rgb;
-					if (isEyeInWater == 1) {
-						translucent = texture2D(colortex1, refractCoord).rgb;
-						if (translucent.b > 0.999) translucent = vec3(1.0);
-						z0 = texture2D(depthtex0, refractCoord).r;
-						z1 = texture2D(depthtex1, refractCoord).r;
-					}
-				}
-			}
-		}
-	#endif
 	
 	#ifdef OUTLINE_ENABLED
 	vec4 outerOutline = vec4(0.0), innerOutline = vec4(0.0);
