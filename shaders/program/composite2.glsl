@@ -25,6 +25,7 @@ uniform float timeAngle, timeBrightness;
 uniform float frameTimeCounter;
 uniform float viewHeight, viewWidth, aspectRatio;
 uniform float eyeAltitude;
+uniform float isTaiga, isJungle, isBadlands, isForest;
 
 uniform ivec2 eyeBrightnessSmooth;
 
@@ -101,7 +102,6 @@ vec3 MotionBlur(vec3 color, float z, float dither) {
 	else return color;
 }
 
-#include "/lib/color/dimensionColor.glsl"
 #include "/lib/util/dither.glsl"
 
 #ifdef OUTLINE_OUTER
@@ -109,12 +109,19 @@ vec3 MotionBlur(vec3 color, float z, float dither) {
 #include "/lib/util/outlineDepth.glsl"
 #endif
 
+#if defined VOLUMETRIC_CLOUDS && defined OVERWORLD
+#include "/lib/color/dimensionColor.glsl"
+#include "/lib/color/skyColor.glsl"
+#include "/lib/atmospherics/sky.glsl"
+#include "/lib/color/fogColor.glsl"
+#endif
+
 void main() {
 	vec3 color = texture2DLod(colortex0, texCoord.st, 0.0).rgb;
 	float dither = Bayer64(gl_FragCoord.xy);
+	float z = texture2D(depthtex1, texCoord.st).x;
 
 	#ifdef MOTION_BLUR
-	float z = texture2D(depthtex1, texCoord.st).x;
 
 	#ifdef OUTLINE_OUTER
 	DepthOutline(z);
@@ -123,7 +130,17 @@ void main() {
 	color = MotionBlur(color, z, dither);
 	#endif
 
-	#if CLOUDS == 3 && defined OVERWORLD
+	#if defined VOLUMETRIC_CLOUDS && defined OVERWORLD && SKY_COLOR_MODE == 1
+	vec4 currentPosition = vec4(texCoord.xy, z, 1.0) * 2.0 - 1.0;
+	vec4 viewPos = gbufferProjectionInverse * currentPosition;
+	viewPos = gbufferModelViewInverse * viewPos;
+	viewPos /= viewPos.w;
+
+	vec2 vc = vec2(texture2DLod(colortex8, texCoord.xy, float(2.0)).a, texture2DLod(colortex9, texCoord.xy, float(2.0)).a);
+	color = mix(color, mix(vcloudsDownCol * getBiomeCloudsColor(viewPos.xyz), vcloudsCol * getBiomeCloudsColor(viewPos.xyz), vc.x) * (1.0 - rainStrength * 0.25), vc.y * vc.y * VCLOUDS_OPACITY);
+	#endif
+
+	#if defined VOLUMETRIC_CLOUDS && defined OVERWORLD && SKY_COLOR_MODE != 1
 	vec2 vc = vec2(texture2DLod(colortex8, texCoord.xy, float(2.0)).a, texture2DLod(colortex9, texCoord.xy, float(2.0)).a);
 	color = mix(color, mix(vcloudsDownCol, vcloudsCol, vc.x) * (1.0 - rainStrength * 0.25), vc.y * vc.y * VCLOUDS_OPACITY);
 	#endif

@@ -40,10 +40,6 @@ screen.LIGHTSHAFT_OPTIONS=Volumetric Rays Config
 screen.COLOR=Color
 screen.LIGHT_COLOR=Lighting Color
 screen.CLOUDS_COLOR=Clouds Color
-screen.CLOUDLIGHT_M=Clouds Upper (Morning)
-screen.CLOUDLIGHT_D=Clouds Upper (Day)
-screen.CLOUDLIGHT_E=Clouds Upper (Evening)
-screen.CLOUDLIGHT_N=Clouds Upper (Night)
 screen.VCLOUD_M=Upper Parts (Morning)
 screen.VCLOUD_D=Upper Parts (Day)
 screen.VCLOUD_E=Upper Parts (Evening)
@@ -52,11 +48,6 @@ screen.VCLOUDDOWN_M=Lower Parts (Morning)
 screen.VCLOUDDOWN_D=Lower Parts (Day)
 screen.VCLOUDDOWN_E=Lower Parts (Evening)
 screen.VCLOUDDOWN_N=Lower Parts (Night)
-screen.DISTFADECOL_M=Distant Fade (Morning)
-screen.DISTFADECOL_D=Distant Fade (Day)
-screen.DISTFADECOL_E=Distant Fade (Evening)
-screen.DISTFADECOL_N=Distant Fade (Night)
-screen.DISTFADE_COLOR=Distant Fade Color
 screen.FOGCOLOR_M=Fog (Morning)
 screen.FOGCOLOR_D=Fog (Day)
 screen.FOGCOLOR_E=Fog (Evening)
@@ -70,10 +61,6 @@ screen.SKYLIGHT_M=Sky (Morning)
 screen.SKYLIGHT_D=Sky (Day)
 screen.SKYLIGHT_E=Sky (Evening)
 screen.SKYLIGHT_N=Sky (Night)
-screen.CLOUDAMBIENT_M=Clouds Lower (Morning)
-screen.CLOUDAMBIENT_D=Clouds Lower (Day)
-screen.CLOUDAMBIENT_E=Clouds Lower (Evening)
-screen.CLOUDAMBIENT_N=Clouds Lower (Night)
 screen.LIGHT_M=Light (Morning)
 screen.AMBIENT_M=Ambient (Morning)
 screen.LIGHT_D=Light (Day)
@@ -97,6 +84,17 @@ screen.WEATHER_B=Mesa Sandstorm
 screen.WEATHER_S=Swamp Rain
 screen.WEATHER_M=Mushroom Island Rain
 screen.WEATHER_V=Savanna Cloudy
+screen.BIOMESKY_COLOR=Per-Biome Sky Color
+screen.BIOMESKY_C=Cold Biomes
+screen.BIOMESKY_D=Desert
+screen.BIOMESKY_B=Mesa
+screen.BIOMESKY_S=Swamp
+screen.BIOMESKY_M=Mushroom Island
+screen.BIOMESKY_V=Savanna
+screen.BIOMESKY_T=Taiga
+screen.BIOMESKY_J=Jungle
+screen.BIOMESKY_BL=Badlands
+screen.BIOMESKY_F=Forest
 screen.BIOMEFOG_COLOR=Per-Biome Fog Color
 screen.BIOMEFOG_C=Cold Biomes
 screen.BIOMEFOG_D=Desert
@@ -129,7 +127,7 @@ screen.VOLUMETRIC_FOG=Volumetric Fog Config
 screen.PLANAR_CLOUDS=Planar Clouds Config
 screen.VOLUMETRIC_CLOUDS_CONFIG=Volumetric Clouds Config
 screen.CLOUDS_CONFIG=Planar Clouds Config
-screen.FOG_COLOR=Fog Color
+screen.FOG_COLOR=Low-Altitude Fog Color
 screen.LIGHTSHAFT_COLOR=Light Shafts Color
 screen.LENSFLARE_CONFIG=Lens Flare Config
 screen.OTHERLENS=Other
@@ -152,6 +150,7 @@ screen.JACKOLANTERN=Jack O Lantern
 screen.BLOCKLIGHT_NETHER=Nether Blocklight Col 
 screen.BLOCKLIGHT_END=End Blocklight Col 
 screen.ADDITIONAL_BLOCKLIGHT_COLORS=Additional Colors
+screen.CA_CONFIG=Ch. Aberration Config
 
 screen.WORLD=World
 screen.WAVING=Waving Blocks
@@ -319,11 +318,11 @@ option.SUN_GLARE.comment=Adds a bright circle of light around sun/moon.
 option.NIGHT_SKY_MODE=Night Sky
 value.NIGHT_SKY_MODE.0=OFF
 value.NIGHT_SKY_MODE.1=Nebula
-option.FOG_COLOR_MODE=Overworld Fog
-option.FOG_COLOR_MODE.comment=Changes the overworld fog. Dynamic fog has automatic coloring and has many different colors. Single Color fog has only one color which can be set manually.
+option.FOG_COLOR_MODE=Low-Altitude Fog Col.
+option.FOG_COLOR_MODE.comment=Changes the overworld fog. Sky colored fog picks the color from the sky. Single colored fog has only one color which can be set manually. Per-biome fog picks the color depending on the biome.
 value.FOG_COLOR_MODE.2=Per-Biome
 value.FOG_COLOR_MODE.1=Single Color
-value.FOG_COLOR_MODE.0=Dynamic
+value.FOG_COLOR_MODE.0=Sky Colored
 option.CLOUDS=Clouds
 option.END_SKY=End Sky
 value.END_SKY.0=Vanilla
@@ -400,6 +399,8 @@ option.DAY_FOG_DENSITY=Day Fog Density
 option.MORNING_FOG_DENSITY=Morning Fog Density
 option.EVENING_FOG_DENSITY=Evening Fog Density
 option.WEATHER_FOG_DENSITY=Weather Fog Density
+option.NETHER_FOG_DENSITY=Nether Fog Density
+option.END_FOG_DENSITY=End Fog Density
 
 option.WEATHER_OPACITY=Weather Opacity
 option.WEATHER_OPACITY.comment=Adjusts weather opacity.
@@ -576,6 +577,11 @@ value.WATER_PIXEL.0=OFF
 option.NETHER_HEAT_WAVE=Nether Heat Wave
 option.CHROMATIC_ABERRATION=Chromatic Aberration 
 option.CHROMATIC_ABERRATION_STRENGTH=Ch. Aberration Strength
+option.CA_COLOR=Ch. Aberration Color
+value.CA_COLOR.0=Red - Blue
+value.CA_COLOR.1=Pink - Green
+value.CA_COLOR.2=Green - Red
+value.CA_COLOR.3=RGB
 option.Sharpen=Image Sharpening
 
 option.DOF=Depth of Field
@@ -687,27 +693,6 @@ option.LIGHTSHAFT_R=Red
 option.LIGHTSHAFT_G=Green
 option.LIGHTSHAFT_B=Blue
 option.LIGHTSHAFT_I=Intensity
-
-option.CLOUDLIGHT_MR=Red
-option.CLOUDLIGHT_MG=Green
-option.CLOUDLIGHT_MB=Blue
-option.CLOUDLIGHT_MI=Intensity
-
-option.CLOUDLIGHT_DR=Red
-option.CLOUDLIGHT_DG=Green
-option.CLOUDLIGHT_DB=Blue
-option.CLOUDLIGHT_DI=Intensity
-
-option.CLOUDLIGHT_ER=Red
-option.CLOUDLIGHT_EG=Green
-option.CLOUDLIGHT_EB=Blue
-option.CLOUDLIGHT_EI=Intensity
-
-option.CLOUDLIGHT_NR=Red
-option.CLOUDLIGHT_NG=Green
-option.CLOUDLIGHT_NB=Blue
-option.CLOUDLIGHT_NI=Intensity
-
 
 option.VCLOUD_MR=Red
 option.VCLOUD_MG=Green
@@ -834,26 +819,6 @@ option.SKYLIGHT_NG=Green
 option.SKYLIGHT_NB=Blue
 option.SKYLIGHT_NI=Intensity
 
-option.CLOUDAMBIENT_MR=Red
-option.CLOUDAMBIENT_MG=Green
-option.CLOUDAMBIENT_MB=Blue
-option.CLOUDAMBIENT_MI=Intensity
-
-option.CLOUDAMBIENT_DR=Red
-option.CLOUDAMBIENT_DG=Green
-option.CLOUDAMBIENT_DB=Blue
-option.CLOUDAMBIENT_DI=Intensity
-
-option.CLOUDAMBIENT_ER=Red
-option.CLOUDAMBIENT_EG=Green
-option.CLOUDAMBIENT_EB=Blue
-option.CLOUDAMBIENT_EI=Intensity
-
-option.CLOUDAMBIENT_NR=Red
-option.CLOUDAMBIENT_NG=Green
-option.CLOUDAMBIENT_NB=Blue
-option.CLOUDAMBIENT_NI=Intensity
-
 option.LIGHT_MR=Red
 option.LIGHT_MG=Green
 option.LIGHT_MB=Blue
@@ -947,6 +912,61 @@ option.WATER_G=Green
 option.WATER_B=Blue
 option.WATER_I=Intensity
 option.WATER_A=Alpha
+
+option.BIOMESKY_BLR=Red
+option.BIOMESKY_BLG=Green
+option.BIOMESKY_BLB=Blue
+option.BIOMESKY_BLI=Intensity
+
+option.BIOMESKY_CR=Red
+option.BIOMESKY_CG=Green
+option.BIOMESKY_CB=Blue
+option.BIOMESKY_CI=Intensity
+
+option.BIOMESKY_DR=Red
+option.BIOMESKY_DG=Green
+option.BIOMESKY_DB=Blue
+option.BIOMESKY_DI=Intensity
+
+option.BIOMESKY_BR=Red
+option.BIOMESKY_BG=Green
+option.BIOMESKY_BB=Blue
+option.BIOMESKY_BI=Intensity
+
+option.BIOMESKY_SR=Red
+option.BIOMESKY_SG=Green
+option.BIOMESKY_SB=Blue
+option.BIOMESKY_SI=Intensity
+
+option.BIOMESKY_MR=Red
+option.BIOMESKY_MG=Green
+option.BIOMESKY_MB=Blue
+option.BIOMESKY_MI=Intensity
+
+option.BIOMESKY_VR=Red
+option.BIOMESKY_VG=Green
+option.BIOMESKY_VB=Blue
+option.BIOMESKY_VI=Intensity
+
+option.BIOMESKY_TR=Red
+option.BIOMESKY_TG=Green
+option.BIOMESKY_TB=Blue
+option.BIOMESKY_TI=Intensity
+
+option.BIOMESKY_FR=Red
+option.BIOMESKY_FG=Green
+option.BIOMESKY_FB=Blue
+option.BIOMESKY_FI=Intensity
+
+option.BIOMESKY_JR=Red
+option.BIOMESKY_JG=Green
+option.BIOMESKY_JB=Blue
+option.BIOMESKY_JI=Intensity
+
+option.BIOMESKY_SR=Red
+option.BIOMESKY_SG=Green
+option.BIOMESKY_SB=Blue
+option.BIOMESKY_SI=Intensity
 
 option.BIOMEFOG_BLR=Red
 option.BIOMEFOG_BLG=Green

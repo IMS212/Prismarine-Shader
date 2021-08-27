@@ -16,7 +16,7 @@ float CalcDensity(float sun, float night) {
 }
 
 #ifdef OVERWORLD
-vec3 GetFogColor(vec3 viewPos) {
+vec3 GetFogColor(vec3 viewPos, float fogType) {
 	vec3 nViewPos = normalize(viewPos);
 	float lViewPos = length(viewPos) / 64.0;
 	lViewPos = 1.0 - exp(-lViewPos * lViewPos);
@@ -30,6 +30,7 @@ vec3 GetFogColor(vec3 viewPos) {
 
 	float densitySun = CalcFogDensity(MORNING_FOG_DENSITY, DAY_FOG_DENSITY, EVENING_FOG_DENSITY);
 	float density = CalcDensity(densitySun, NIGHT_FOG_DENSITY) * FOG_DENSITY;
+	if (fogType == 0) density *= 4;
     float nightDensity = NIGHT_FOG_DENSITY;
     float weatherDensity = WEATHER_FOG_DENSITY;
     float exposure = exp2(timeBrightness * 0.75 - 1.00);
@@ -39,13 +40,16 @@ vec3 GetFogColor(vec3 viewPos) {
 
 	vec3 fog = vec3(0);
 
-	#if FOG_COLOR_MODE == 1
-    fog = fogCol * baseGradient / (SKY_I * SKY_I);
-	#elif FOG_COLOR_MODE == 0
-	fog = GetSkyColor(viewPos, false) * 1.5 * baseGradient / (SKY_I * SKY_I);
-	#elif FOG_COLOR_MODE == 2
-	fog = getBiomeFogColor(viewPos) * baseGradient / (SKY_I * SKY_I);
-	#endif
+	if (fogType == 1) fog = GetSkyColor(viewPos, false) * baseGradient / (SKY_I * SKY_I);
+	if (fogType == 0){
+        #if FOG_COLOR_MODE == 1
+        fog = fogCol * baseGradient / (SKY_I * SKY_I);
+        #elif FOG_COLOR_MODE == 0
+        fog = GetSkyColor(viewPos, false) * baseGradient / (SKY_I * SKY_I);
+        #elif FOG_COLOR_MODE == 2
+        fog = getBiomeFogColor(viewPos) * baseGradient / (SKY_I * SKY_I);
+        #endif
+    }
 
 	#ifdef COLORED_FOG
 		fog = x4(ntmix(pos, pos, pos, 0.00001));
@@ -62,13 +66,16 @@ vec3 GetFogColor(vec3 viewPos) {
 
 	vec3 lightFog = vec3(0);
 
-	#if FOG_COLOR_MODE == 1
-	lightFog = pow(fogcolorSun / 2 * vec3(FOG_R, FOG_G, FOG_B) * FOG_I, vec3(4.0 - sunVisibility)) * baseGradient;
-	#elif FOG_COLOR_MODE == 0
-	lightFog = pow(GetSkyColor(viewPos, false) * 1.5, vec3(4.0 - sunVisibility)) * baseGradient;
-	#elif FOG_COLOR_MODE == 2
-	lightFog = pow(getBiomeFogColor(viewPos) / 2, vec3(4.0 - sunVisibility)) * baseGradient;
-	#endif
+	if (fogType == 1) lightFog = GetSkyColor(viewPos, false) * 2 * baseGradient / (SKY_I * SKY_I);
+	if (fogType == 0){
+        #if FOG_COLOR_MODE == 1
+        lightFog = pow(fogcolorSun / 2 * vec3(FOG_R, FOG_G, FOG_B) * FOG_I, vec3(4.0 - sunVisibility)) * baseGradient;
+        #elif FOG_COLOR_MODE == 0
+        lightFog = pow(GetSkyColor(viewPos, false) / 2, vec3(4.0 - sunVisibility)) * baseGradient;
+        #elif FOG_COLOR_MODE == 2
+        lightFog = pow(getBiomeFogColor(viewPos) / 2, vec3(4.0 - sunVisibility)) * baseGradient;
+        #endif
+    }
 
 	#ifdef COLORED_FOG
 		lightFog = x4(ntmix(pos, pos, pos, 0.00001));
@@ -98,45 +105,76 @@ vec3 GetFogColor(vec3 viewPos) {
 }
 #endif
 
-void NormalFog(inout vec3 color, vec3 viewPos) {
+void NormalFog(inout vec3 color, vec3 viewPos, float fogType) {
+	vec4 worldPos = gbufferModelViewInverse * vec4(viewPos, 1.0);
+	worldPos.xyz /= worldPos.w;
+	float dither = Bayer64(gl_FragCoord.xy);
+
 	#if DISTANT_FADE > 0
 	#if DISTANT_FADE_STYLE == 0
 	float fogFactor = length(viewPos);
 	#else
-	vec4 worldPos = gbufferModelViewInverse * vec4(viewPos, 1.0);
-	worldPos.xyz /= worldPos.w;
 	float fogFactor = length(worldPos.xz);
 	#endif
 	#endif
-	
+
 	#ifdef OVERWORLD
-	float dither = Bayer64(gl_FragCoord.xy);
 	float densitySun = CalcFogDensity(MORNING_FOG_DENSITY, DAY_FOG_DENSITY, EVENING_FOG_DENSITY);
 	float density = CalcDensity(densitySun, NIGHT_FOG_DENSITY) * FOG_DENSITY;
+	density *= 0 + eBS;
+	if (fogType == 0) density *= 2;
+
 	float fog = length(viewPos) * density / 256.0;
 	float clearDay = sunVisibility * (1.0 - rainStrength);
 	fog *= (0.5 * rainStrength + 1.0) / (4.0 * clearDay + 1.0);
 	fog = 1.0 - exp(-2.0 * pow(fog, 0.15 * clearDay + 1.25));
-	vec3 fogColor = vec3(0.0);
-	fogColor = GetFogColor(viewPos);
 
-	if (isEyeInWater == 1) fogColor = waterColor.rgb;
+	if (isEyeInWater == 0){
+		vec3 pos = worldPos.xyz + cameraPosition.xyz + vec3(frametime * 4.0, 0, 0) + 100;
+		float height;
+		if (fogType == 0){
+			height = (pos.y - 90) * 0.01;
+		}else{
+			height = (pos.y - 160) * 0.01;
+		}
+			height = pow(height, 8);
+			height = clamp(height, 0, 1);
+		fog *= 1 - height;
+	}
+
+	vec3 fogColor = vec3(0);
+	fogColor = GetFogColor(viewPos, fogType);
+
+	#if NIGHT_SKY_MODE == 1
+	if (moonVisibility > 0.0 && rainStrength != 1.0 && isEyeInWater == 0){
+		fogColor += DrawRift(viewPos.xyz, dither, 4, 1);
+		fogColor += DrawRift(viewPos.xyz, dither, 4, 0);
+	}
+	#endif
+
+	#ifdef STARS
+	#ifdef SMALL_STARS
+	DrawStars(fogColor, viewPos.xyz);
+	#endif
+	#ifdef BIG_STARS
+	DrawBigStars(fogColor, viewPos.xyz);
+	#endif
+	#endif
+
+	if (isEyeInWater == 1) density *= 0.0;
 
 	#if DISTANT_FADE == 1 || DISTANT_FADE == 3
 	if(isEyeInWater != 2.0){
-		float vanillaFog = 1.0 - (far - (fogFactor + 20.0)) * 5.0 / (FOG_DENSITY * 1.5 * far);
+		float vanillaFog = 1.0 - (far - (fogFactor + 20.0)) * 5.0 / (FOG_DENSITY * far);
 		vanillaFog = clamp(vanillaFog, 0.0, 1.0);
+		if (isEyeInWater == 1) vanillaFog *= 0.0;
 	
 		if(vanillaFog > 0.0){
 			vec3 vanillaFogColor = vec3(0.0);
 			if (isEyeInWater == 0.0){
-				#if FOG_COLOR_MODE == 0 || FOG_COLOR_MODE == 2
 				vanillaFogColor = GetSkyColor(viewPos, false);
-				#elif FOG_COLOR_MODE == 1
-				vanillaFogColor = distfadeCol * 0.2;
-				#endif
 				#if NIGHT_SKY_MODE == 1
-				if (moonVisibility > 0.0 && rainStrength != 1.0){
+				if (moonVisibility > 0.0 && rainStrength != 1.0 && isEyeInWater == 0){
 					vanillaFogColor += DrawRift(viewPos.xyz, dither, 4, 1);
 					vanillaFogColor += DrawRift(viewPos.xyz, dither, 4, 0);
 				}
@@ -155,21 +193,29 @@ void NormalFog(inout vec3 color, vec3 viewPos) {
 
 	#ifdef NETHER
 	float viewLength = length(viewPos);
-	float fog = 2.0 * pow(viewLength * FOG_DENSITY / 256.0, 1.5);
+	float fog = 2.0 * pow(viewLength * NETHER_FOG_DENSITY / 256.0, 1.5);
 	#if DISTANT_FADE == 2 || DISTANT_FADE == 3
 	fog += 6.0 * pow(fogFactor * 1.5 / far, 4.0);
 	#endif
 	fog = 1.0 - exp(-fog);
 	vec3 fogColor = netherCol.rgb * 0.04;
+	#ifdef NETHER_SMOKE
+	fogColor += DrawRift(viewPos.xyz, dither, 4, 1);
+	fogColor += DrawRift(viewPos.xyz, dither, 4, 0);
+	#endif
 	#endif
 
 	#ifdef END
 	#if DISTANT_FADE == 2 || DISTANT_FADE == 3
-	float fog = length(viewPos) * FOG_DENSITY / 128.0;
+	float fog = length(viewPos) * END_FOG_DENSITY / 128.0;
 	fog += 6.0 * pow(fogFactor * 1 / far, 6.0);
 	fog = 1.0 - exp(-0.8 * fog * fog);
 	vec3 fogColor = endCol.rgb * 0.01;
-	#if FOG_MODE != 2 || FOG_MODE != 1
+	#if END_SKY == 2
+	fogColor.rgb += DrawRift(viewPos.xyz, dither, 4, 1);
+	fogColor.rgb += DrawRift(viewPos.xyz, dither, 4, 0);
+	#endif
+	#if FOG_MODE == 0
 	fogColor *= 1.5;
 	#endif
 	#endif
@@ -198,7 +244,8 @@ void DenseFog(inout vec3 color, vec3 viewPos) {
 }
 
 void Fog(inout vec3 color, vec3 viewPos) {
-	NormalFog(color, viewPos);
+	NormalFog(color, viewPos, 0);
+	NormalFog(color, viewPos, 1);
 	if (isEyeInWater > 1) DenseFog(color, viewPos);
 	if (blindFactor > 0.0) BlindFog(color, viewPos);
 }

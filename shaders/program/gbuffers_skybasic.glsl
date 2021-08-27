@@ -26,6 +26,7 @@ uniform float rainStrength;
 uniform float shadowFade;
 uniform float timeAngle, timeBrightness;
 uniform float viewWidth, viewHeight;
+uniform float isTaiga, isJungle, isBadlands, isForest;
 
 uniform ivec2 eyeBrightnessSmooth;
 
@@ -71,7 +72,7 @@ void SunGlare(inout vec3 color, vec3 viewPos, vec3 lightCol) {
 	float visibility = clamp(VoL * 0.5 + 0.5, 0.0, 1.0);
     visibility = visfactor / (1.0 - invvisfactor * visibility) - visfactor;
 	visibility = clamp(visibility * 1.015 / invvisfactor - 0.015, 0.0, 1.0);
-	visibility = mix(1.0, visibility, 0.25 * eBS + 0.75) * (1.0 - rainStrength * eBS * 0.875);
+	visibility = mix(1.0, visibility, 0.25 + 0.75) * (1.0 - rainStrength * 0.875);
 	visibility *= shadowFade * LIGHT_SHAFT_STRENGTH;
 	visibility *= 1 - timeBrightness;
 
@@ -85,6 +86,7 @@ void SunGlare(inout vec3 color, vec3 viewPos, vec3 lightCol) {
 
 //Includes//
 #include "/lib/color/dimensionColor.glsl"
+#include "/lib/color/waterColor.glsl"
 #include "/lib/color/skyColor.glsl"
 #include "/lib/util/dither.glsl"
 #include "/lib/prismarine/functions.glsl"
@@ -110,6 +112,7 @@ void main() {
 	#ifdef ROUND_SUN_MOON
 	vec3 lightMA = mix(lightMorning, lightEvening, mefade);
     vec3 sunColor = mix(lightMA, sqrt(lightDay * lightMA * LIGHT_DI), timeBrightness);
+	if (isEyeInWater == 1) sunColor = waterColor.rgb;
     vec3 moonColor = sqrt(lightNight);
 
 	RoundSunMoon(albedo, viewPos.xyz, sunColor, moonColor);
@@ -134,43 +137,14 @@ void main() {
 	#ifdef AURORA
 	if (moonVisibility != 0) albedo.rgb += DrawAurora(viewPos.xyz, dither, 8);
 	#endif
-	
-	#if CLOUDS == 1 || CLOUDS == 4
-	vec4 cloud = vec4(0.0);
-	cloud += DrawCloud(viewPos.xyz, dither, lightCol, ambientCol);
-	albedo.rgb = mix(albedo.rgb, cloud.rgb, cloud.a);
-	#endif
 
 	SunGlare(albedo, viewPos.xyz, lightCol);
 
-	albedo.rgb *= (4.0 - 3.0 * eBS) * (1.0 + nightVision);
-	#endif
-	
-	#ifdef END
-	vec3 albedo = vec3(0.0);
-
-	#if defined END_STARS
-	#ifdef SMALL_STARS
-	DrawStars(albedo.rgb, viewPos.xyz);
-	#endif
-	#ifdef BIG_STARS
-	DrawBigStars(albedo.rgb, viewPos.xyz);
-	#endif
-	#endif
-
-	#if END_SKY == 1
-	vec4 cloud = DrawCloud(viewPos.xyz, dither, lightCol, ambientCol);
-	albedo.rgb += mix(albedo.rgb, cloud.rgb, cloud.a);
-	#endif
-
+	albedo.rgb *= 1 * (1.0 + nightVision);
 	#endif
 	
     /* DRAWBUFFERS:0 */
 	gl_FragData[0] = vec4(albedo, 1.0 - star);
-    #if (defined OVERWORLD && CLOUDS == 1) || (defined END && END_SKY == 1)
-    /* DRAWBUFFERS:04 */
-	gl_FragData[1] = vec4(cloud.a, 0.0, 0.0, 0.0);
-    #endif
 }
 
 #endif

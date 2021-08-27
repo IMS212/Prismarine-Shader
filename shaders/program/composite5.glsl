@@ -66,7 +66,7 @@ void UnderwaterDistort(inout vec2 texCoord) {
 	texCoord += vec2(
 		cos(texCoord.y * 32.0 + frameTimeCounter * 3.0),
 		sin(texCoord.x * 32.0 + frameTimeCounter * 1.7)
-	) * 0.00075;
+	) * 0.0005;
 
 	float mask = float(
 		texCoord.x > 0.0 && texCoord.x < 1.0 &&
@@ -118,7 +118,7 @@ void Bloom(inout vec3 color, vec2 coord) {
 
 	vec3 blur = (blur1 + blur2 + blur3 + blur4 + blur5 + blur6 + blur7) * 0.137;
 
-	color = mix(color, blur, 0.18 * BLOOM_STRENGTH);
+	color = mix(color, blur, 0.15 * BLOOM_STRENGTH);
 }
 
 void AutoExposure(inout vec3 color, inout float exposure, float tempExposure) {

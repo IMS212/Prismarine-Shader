@@ -11,10 +11,10 @@ vec4 GetWaterFog(vec3 viewPos) {
     #elif  WATER_MODE == 1 || WATER_MODE == 3
     vec3 waterFogColor = fogColor * fogColor * 0.5;
     #endif
-    waterFogColor *= 0.5 * (1.0 - blindFactor);
+    waterFogColor *= 1.0 - blindFactor;
 
     #ifdef OVERWORLD
-    vec3 waterFogTint = lightCol * shadowFade * 0.9 + 0.1;
+    vec3 waterFogTint = lightCol * shadowFade * (1 + timeBrightness);
     #endif
     #ifdef NETHER
     vec3 waterFogTint = netherCol.rgb;

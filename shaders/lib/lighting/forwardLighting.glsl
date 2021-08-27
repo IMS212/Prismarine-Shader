@@ -2,29 +2,6 @@
 #include "/lib/lighting/shadows.glsl"
 #endif
 
-float h(vec3 pos){
-	float noise  = texture2D(noisetex, (pos.xz + vec2(frametime) * 0.25 - pos.y) / WATER_CAUSTICS_AMOUNT * 1.5).r;
-		  noise += texture2D(noisetex, (pos.xz - vec2(frametime) * 0.5 - pos.y) / WATER_CAUSTICS_AMOUNT * 3.0).r*0.8;
-		  noise -= texture2D(noisetex, (pos.xz + vec2(frametime) * 0.75 + pos.y) / WATER_CAUSTICS_AMOUNT * 4.5).r*0.6;
-		  noise += texture2D(noisetex, (pos.xz - vec2(frametime) * 0.25 - pos.y) / WATER_CAUSTICS_AMOUNT * 7.0).r*0.4;
-		  noise -= texture2D(noisetex, (pos.xz + vec2(frametime) * 0.5 + pos.y) / WATER_CAUSTICS_AMOUNT * 14.0).r*0.2;
-	
-	return noise;
-}
-
-float getFlickering(vec3 pos){
-	float h0 = h(pos);
-	float h1 = h(pos + vec3(1, 0, 0));
-	float h2 = h(pos + vec3(-1, 0, 0));
-	float h3 = h(pos + vec3(0, 0, 1));
-	float h4 = h(pos + vec3(0, 0, -1));
-	
-	float caustic = max((1 - abs(0.5 - h0)) * (1 - (abs(h1 - h2) + abs(h3 - h4))), 0);
-	caustic = max(pow(caustic, 3.5), 0) * 16 * BLOCKLIGHT_FLICKERING_STRENGTH;
-	
-	return caustic;
-}
-
 void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos,
                  vec2 lightmap, float smoothLighting, float NoL, float vanillaDiffuse,
                  float parallaxShadow, float emission, float subsurface) {
@@ -67,10 +44,6 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
     
     float newLightmap  = pow(lightmap.x, 10.0) * 1.5 + lightmap.x * 0.7;
     float blocklightStrength = BLOCKLIGHT_I;
-
-    #ifdef BLOCKLIGHT_FLICKERING
-    blocklightStrength += getFlickering(vec3(1,1,1));
-    #endif
 
     #ifdef NETHER
     vec3 blocklightColSqrtNether = vec3(BLOCKLIGHT_R_NETHER, BLOCKLIGHT_G_NETHER, BLOCKLIGHT_B_NETHER) * blocklightStrength / 300.0;
@@ -172,6 +145,11 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
     if (heldItemId == 51 || heldItemId2 == 51) blocklightCol = SOUL_TORCH.rgb;
     vec3 blockLighting =  newLightmap * newLightmap * blocklightCol;
     #endif
+    #endif
+
+    #ifdef BLOCKLIGHT_FLICKERING
+    float jitter = 1.0 - sin(frameTimeCounter + cos(frameTimeCounter)) * BLOCKLIGHT_FLICKERING_STRENGTH;
+    blockLighting *= jitter;
     #endif
 
     vec3 minLighting = minLightCol * (1.0 - eBS);

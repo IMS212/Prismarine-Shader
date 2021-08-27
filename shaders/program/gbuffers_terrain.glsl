@@ -10,7 +10,7 @@ https://bitslablab.com
 #ifdef FSH
 
 //Varyings//
-varying float mat, recolor;
+varying float mat, recolor, isEmissive;
 
 varying vec2 texCoord, lmCoord;
 
@@ -100,6 +100,11 @@ float InterleavedGradientNoise() {
 	return fract(n + frameCounter / 8.0);
 }
 
+vec3 GetGlow(vec3 color){
+    vec3 x = max(vec3(0), color);
+    return x * x;
+}
+
 //Includes//
 #include "/lib/prismarine/functions.glsl"
 #include "/lib/color/blocklightColor.glsl"
@@ -163,7 +168,7 @@ void main() {
 		float subsurface     = (foliage + candle) * 0.5 + leaves;
 		vec3 baseReflectance = vec3(0.04);
 		
-		if(lava < 0.5) emission *= dot(albedo.rgb, albedo.rgb);
+		if (lava < 0.5) emission *= dot(albedo.rgb, albedo.rgb);
 		
 		vec3 screenPos = vec3(gl_FragCoord.xy / vec2(viewWidth, viewHeight), gl_FragCoord.z);
 		#ifdef TAA
@@ -363,10 +368,15 @@ void main() {
 			float lightFactor = pow(x2(lightmap.y), 0.5) * (1.0 - pow(x2(lightmap.y), 0.5)) * (1.0 - lightmap.x) * 250;
 			vec3 pos = worldPos.xyz+cameraPosition.xyz;
 			vec3 tint = lightFactor * waterColor.rgb * lightCol.rgb * x4(WATER_I);
-			albedo.rgb += (1 - lightmap.x) * (albedo.rgb * x2(waterColor.rgb) * 250 + 250 * albedo.rgb * x2(waterColor.rgb));
+			albedo.rgb += (1 - lightmap.x) * (albedo.rgb * x2(waterColor.rgb * lightCol.rgb) * 250 + 250 * albedo.rgb * x2(waterColor.rgb * lightCol.rgb));
 			albedo.rgb *= (1.0 + tint) * (0.2 + lightmap.x);
 		}
 		#endif
+
+		vec3 tex = texture2D(texture, texCoord).rgb;
+		if (isEmissive == 1){
+			if (tex.r != tex.b && tex.r != tex.g && tex.g != tex.b) albedo.rgb = GetGlow(tex);
+		}
 	} else albedo.a = 0.0;
 
     /* DRAWBUFFERS:0 */
@@ -386,7 +396,7 @@ void main() {
 #ifdef VSH
 
 //Varyings//
-varying float mat, recolor;
+varying float mat, recolor, isEmissive;
 
 varying vec2 texCoord, lmCoord;
 
@@ -478,7 +488,7 @@ void main() {
     
 	color = gl_Color;
 	
-	mat = 0.0; recolor = 0.0;
+	mat = 0.0; recolor = 0.0; isEmissive = 0.0;
 
 	if (mc_Entity.x >= 10100 && mc_Entity.x < 10200)
 		mat = 1.0;
@@ -504,6 +514,9 @@ void main() {
 
 	if (mc_Entity.x == 10400)
 		color.a = 1.0;
+
+	if (mc_Entity.x == 10510)
+		isEmissive = 1.0;
 
 	const vec2 sunRotationData = vec2(cos(sunPathRotation * 0.01745329251994), -sin(sunPathRotation * 0.01745329251994));
 	float ang = fract(timeAngle - 0.25);

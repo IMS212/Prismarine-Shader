@@ -39,6 +39,7 @@ uniform float screenBrightness;
 uniform float shadowFade;
 uniform float timeAngle, timeBrightness;
 uniform float viewWidth, viewHeight;
+uniform float isTaiga, isJungle, isBadlands, isForest;
 
 uniform ivec2 eyeBrightnessSmooth;
 
@@ -162,6 +163,15 @@ vec3 GetWaterNormal(vec3 worldPos, vec3 viewPos, vec3 viewVector) {
 
 	vec3 normalMap = vec3(xDelta, yDelta, 1.0 - (xDelta * xDelta + yDelta * yDelta));
 	return normalMap * normalStrength + vec3(0.0, 0.0, 1.0 - normalStrength);
+}
+
+void RoundSunMoon(inout vec3 color, vec3 viewPos, vec3 sunColor, vec3 moonColor) {
+	float VoL = dot(normalize(viewPos),sunVec);
+	float isMoon = float(VoL < 0.0);
+	float sun = pow(abs(VoL), 800.0 * isMoon + 800.0) * (1.0 - sqrt(rainStrength));
+
+	vec3 sunMoonCol = mix(moonColor * moonVisibility, sunColor * sunVisibility, float(VoL > 0.0));
+	color += sun * sunMoonCol * ROUND_SUN_MOON_SIZE;
 }
 
 //Includes//
@@ -393,6 +403,15 @@ void main() {
 
 				#ifdef OVERWORLD
 				skyReflection = GetSkyColor(skyRefPos, true);
+
+				#ifdef ROUND_SUN_MOON
+				vec3 lightMA = mix(lightMorning, lightEvening, mefade);
+				vec3 sunColor = mix(lightMA, sqrt(lightDay * lightMA * LIGHT_DI), timeBrightness);
+				if (isEyeInWater == 1) sunColor = waterColor.rgb;
+				vec3 moonColor = sqrt(lightNight);
+
+				RoundSunMoon(skyReflection, skyRefPos.xyz, sunColor * 4, moonColor * 2);
+				#endif
 				
 				vec3 specular = GetSpecularHighlight(newNormal, viewPos,  0.9, vec3(0.02),
 													 specularColor, shadow, color.a);
@@ -400,7 +419,7 @@ void main() {
 				skyReflection += specular / ((4.0 - 3.0 * eBS) * fresnel * albedo.a);
 
 				#ifdef AURORA
-				skyReflection += DrawAurora(skyRefPos * 100.0, dither, 12);
+				skyReflection += DrawAurora(skyRefPos * 100.0, dither, 8);
 				#endif
 
 				#if NIGHT_SKY_MODE == 1
@@ -470,9 +489,18 @@ void main() {
 					#ifdef OVERWORLD
 					vec3 skyRefPos = reflect(normalize(viewPos.xyz), newNormal);
 					skyReflection = GetSkyColor(skyRefPos, true);
+
+					#ifdef ROUND_SUN_MOON
+					vec3 lightMA = mix(lightMorning, lightEvening, mefade);
+					vec3 sunColor = mix(lightMA, sqrt(lightDay * lightMA * LIGHT_DI), timeBrightness);
+					if (isEyeInWater == 1) sunColor = waterColor.rgb;
+					vec3 moonColor = sqrt(lightNight);
+
+					RoundSunMoon(skyReflection, skyRefPos.xyz, sunColor * 4, moonColor * 2);
+					#endif
 					
 					#ifdef AURORA
-					skyReflection += DrawAurora(skyRefPos * 100.0, dither, 12);
+					skyReflection += DrawAurora(skyRefPos * 100.0, dither, 8);
 					#endif
 					
 					#if NIGHT_SKY_MODE == 1
@@ -520,7 +548,7 @@ void main() {
 
 		Fog(albedo.rgb, viewPos);
 
-		if((isEyeInWater == 0 && water > 0.5) || (isEyeInWater == 1 && water < 0.5)) {
+		if (isEyeInWater == 0 && water > 0.5) {
 			float oDepth = texture2D(depthtex1, screenPos.xy).r;
 			vec3 oScreenPos = vec3(gl_FragCoord.xy / vec2(viewWidth, viewHeight), oDepth);
 			#ifdef TAA
@@ -530,8 +558,12 @@ void main() {
 			#endif
 
 			vec4 waterFog = GetWaterFog(viewPos.xyz - oViewPos);
-			albedo = mix(waterFog, vec4(albedo.rgb, 1.0), albedo.a);
+			waterFog *= 1-rainStrength;
+			waterFog *= 1-moonVisibility;
+			waterFog *= 0+eBS;
+			albedo = mix(waterFog, vec4(albedo.rgb, 0.75), albedo.a);
 		}
+
 	}
 
     /* DRAWBUFFERS:01 */

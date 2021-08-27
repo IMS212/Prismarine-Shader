@@ -70,16 +70,16 @@ void main() {
 	#else
 	if ((premult > 0.5 && albedo.a < 0.98)) albedo.a = 0.0;
 	#endif
-	
+
 	#ifdef WATER_TINT
 	if (water > 0.9){
-		albedo.rgb = waterShadowColor.rgb * lightshaftWater.rgb * lightCol.rgb * (WATER_I * 16 * WATER_CAUSTICS_STRENGTH);
+		albedo.rgb = waterShadowColor.rgb * WATER_I;
 	}
 	#endif
 
 	#ifdef PROJECTED_CAUSTICS
 	if (water > 0.9){
-		vec3 caustic = (getCaustics(position.xyz+cameraPosition.xyz) * WATER_CAUSTICS_STRENGTH) * causticCol.rgb * (WATER_I + isEyeInWater);
+		vec3 caustic = (getCaustics(position.xyz+cameraPosition.xyz) * WATER_CAUSTICS_STRENGTH) * causticCol.rgb * (WATER_I + isEyeInWater) * (3 - isEyeInWater - isEyeInWater);
 		albedo.rgb *= caustic;
 	}
 	#endif

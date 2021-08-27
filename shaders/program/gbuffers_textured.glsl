@@ -31,6 +31,7 @@ uniform float screenBrightness;
 uniform float shadowFade;
 uniform float timeAngle, timeBrightness;
 uniform float viewWidth, viewHeight;
+uniform float isTaiga, isJungle, isBadlands, isForest;
 
 uniform ivec2 eyeBrightnessSmooth;
 

@@ -26,6 +26,7 @@ uniform float frameTimeCounter;
 uniform float far, near;
 uniform float viewHeight, viewWidth;
 uniform float eyeAltitude;
+uniform float isTaiga, isJungle, isBadlands, isForest;
 
 uniform ivec2 eyeBrightnessSmooth;
 
@@ -62,7 +63,6 @@ float GetLuminance(vec3 color) {
 	return dot(color,vec3(0.299, 0.587, 0.114));
 }
 
-
 //Includes//
 #include "/lib/color/dimensionColor.glsl"
 #include "/lib/color/waterColor.glsl"
@@ -70,8 +70,11 @@ float GetLuminance(vec3 color) {
 #include "/lib/prismarine/functions.glsl"
 #include "/lib/color/skyColor.glsl"
 #include "/lib/atmospherics/sky.glsl"
+
+#if defined VOLUMETRIC_CLOUDS && defined OVERWORLD
 #include "/lib/prismarine/fragPos.glsl"
 #include "/lib/prismarine/volumetricClouds.glsl"
+#endif
 
 //Program//
 void main() {
@@ -111,14 +114,14 @@ void main() {
 
 	color.rgb += vl;
 
-	#if CLOUDS == 3 && defined OVERWORLD
+	#if defined VOLUMETRIC_CLOUDS && defined OVERWORLD
 	float pixeldepth1 = texture2D(depthtex1, texCoord.xy).x;
 	vc = getVolumetricCloud(pixeldepth1, pixeldepth0, VCLOUDS_HEIGHT_ADJ_FACTOR, 2);
 	#endif
 
 	/* DRAWBUFFERS:0189 */
 	gl_FragData[0] = color;
-	#if defined OVERWORLD && (CLOUDS == 3 || CLOUDS == 4)
+	#if defined VOLUMETRIC_CLOUDS && defined OVERWORLD
 	gl_FragData[2] = vec4(aux8, vc.x);
 	gl_FragData[3] = vec4(aux9, vc.y);
 	#endif

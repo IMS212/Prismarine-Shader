@@ -22,6 +22,7 @@ uniform float rainStrength;
 uniform float timeAngle, timeBrightness;
 uniform float viewWidth, viewHeight;
 uniform float shadowFade;
+uniform float frameTimeCounter;
 
 uniform ivec2 eyeBrightnessSmooth;
 
@@ -31,7 +32,6 @@ uniform sampler2D texture;
 uniform sampler2D gaux1;
 
 #ifdef END
-uniform float frameTimeCounter;
 uniform float worldTime;
 
 uniform vec3 cameraPosition;
@@ -41,8 +41,10 @@ uniform sampler2D noisetex;
 #endif
 
 //Common Variables//
-#if defined END && defined CLOUDS
-float frametime = frameTimeCounter * ANIMATION_SPEED;
+#ifdef WORLD_TIME_ANIMATION
+float frametime = float(worldTime)/20.0*ANIMATION_SPEED;
+#else
+float frametime = frameTimeCounter*ANIMATION_SPEED;
 #endif
 
 float eBS = eyeBrightnessSmooth.y / 240.0;
@@ -51,21 +53,20 @@ float moonVisibility = clamp(dot(-sunVec, upVec) + 0.05, 0.0, 0.1) * 10.0;
 
 //Common Functions//
 float GetLuminance(vec3 color) {
-	return dot(color,vec3(0.299, 0.587, 0.114));
+	return dot(color, vec3(0.299, 0.587, 0.114));
 }
 
 //Includes//
 #ifdef OVERWORLD
 #include "/lib/color/lightColor.glsl"
 #endif
-#if defined CLOUDS && defined END
+#if defined END
 #include "/lib/prismarine/functions.glsl"
 #include "/lib/color/endColor.glsl"
 #include "/lib/color/lightColor.glsl"
 #include "/lib/color/skyColor.glsl"
 #include "/lib/util/dither.glsl"
 #include "/lib/atmospherics/clouds.glsl"
-#include "/lib/atmospherics/sky.glsl"
 #endif
 
 //Program//
@@ -79,12 +80,9 @@ void main() {
 	albedo *= color;
 	albedo.rgb = pow(albedo.rgb,vec3(2.2)) * SKYBOX_BRIGHTNESS * albedo.a;
 
-	#if CLOUDS == 1
-	if (albedo.a > 0.0) {
-		float cloudAlpha = texture2D(gaux1, gl_FragCoord.xy / vec2(viewWidth, viewHeight)).r;
-		float alphaMult = 1.0 - 0.6 * rainStrength;
-		albedo.a *= 1.0 - cloudAlpha / (alphaMult * alphaMult);
-	}
+	#ifdef SKY_DESATURATION
+    vec3 desat = GetLuminance(albedo.rgb) * pow(lightNight,vec3(1.6)) * 4.0;
+	albedo.rgb = mix(desat, albedo.rgb, sunVisibility);
 	#endif
 	#endif
 
@@ -110,10 +108,8 @@ void main() {
 	albedo.rgb += mix(albedo.rgb, cloud.rgb, cloud.a);
 	#endif
 
-	#ifdef SKY_DESATURATION
 	#ifdef END
 	albedo.rgb = GetLuminance(albedo.rgb) * endCol.rgb;
-	#endif
 	#endif
 
 	albedo.rgb *= SKYBOX_BRIGHTNESS * 0.02;

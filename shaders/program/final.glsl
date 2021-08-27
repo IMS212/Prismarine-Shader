@@ -38,6 +38,8 @@ const float drynessHalflife = 50.0;
 const float wetnessHalflife = 300.0;
 
 //Common Functions//
+
+//CA from DrDesten [modified]
 #ifdef CHROMATIC_ABERRATION
 vec2 scaleCoord(vec2 coord, float scale) {
     coord = (coord * scale) - (0.5 * (scale - 1));
@@ -48,9 +50,23 @@ vec3 ChromaticAbberation(vec2 coord, float amount) {
     vec3 col = vec3(0.0);
 
     amount = distance(coord, vec2(0.5)) * amount;
-    col.r = texture2D(colortex1, scaleCoord(coord, 1.0 - amount)).r;
-    col.g = texture2D(colortex1, coord).g;
-    col.b = texture2D(colortex1, scaleCoord(coord, 1.0 + amount)).b;
+    #if CA_COLOR == 0
+    col.r     = texture2D(colortex1, scaleCoord(coord, 1.0 - amount)).r;
+    col.g     = texture2D(colortex1, coord).g;
+    col.b     = texture2D(colortex1, scaleCoord(coord, 1.0 + amount)).b;
+    #elif CA_COLOR == 1
+    col.r     = texture2D(colortex1, coord).r;
+    col.g     = texture2D(colortex1, scaleCoord(coord, 1.0 - amount)).g;
+    col.b     = texture2D(colortex1, scaleCoord(coord, 1.0 + amount)).b;
+    #elif CA_COLOR == 2
+    col.r     = texture2D(colortex1, scaleCoord(coord, 1.0 - amount)).r;
+    col.g     = texture2D(colortex1, scaleCoord(coord, 1.0 + amount)).g;
+    col.b     = texture2D(colortex1, coord).b;
+    #elif CA_COLOR == 3
+    col.r     = texture2D(colortex1, scaleCoord(coord, 1.0 - amount)).r;
+    col.g     = texture2D(colortex1, scaleCoord(coord, 1.0 + amount)).g;
+    col.b     = texture2D(colortex1, scaleCoord(coord, 1.0 + amount)).b;
+    #endif
 
     return col;
 }

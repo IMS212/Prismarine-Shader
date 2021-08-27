@@ -1,9 +1,9 @@
-//FUNCTIONS
-float distx(float dist){
+#if defined VOLUMETRIC_CLOUDS && defined OVERWORLD
+float GetLogarithmicDepth(float dist){
 	return (far * (dist - near)) / (dist * (far - near));
 }
 
-float getDepth(float depth) {
+float GetLinearDepth2(float depth) {
   return 2.0 * near * far / (far + near - (2.0 * depth - 1.0) * (far - near));
 }
 
@@ -11,10 +11,10 @@ float getNoise(vec2 pos){
 	return fract(sin(dot(pos, vec2(12.9898, 4.1414))) * 43758.5453);
 }
 
-float hnoise(vec2 pos){
+float getHeightNoise(vec2 pos){
 	vec2 flr = floor(pos);
 	vec2 frc = fract(pos);
-	frc = frc * frc * (3-2 * frc);
+	frc = frc * frc * (3 - 2 * frc);
 	
 	float noisedl = getNoise(flr);
 	float noisedr = getNoise(flr + vec2(1.0,0.0));
@@ -27,18 +27,20 @@ float hnoise(vec2 pos){
 float getVolumetricNoise(vec3 pos){
 	vec3 flr = floor(pos);
 	vec3 frc = fract(pos);
-	float yadd = 32.0;
-	frc = frc * frc * (3.0-2.0 * frc);
+	frc = frc * frc * (3.0 - 2.0 * frc);
 	
-	float noisebdl = getNoise(flr.xz + flr.y * yadd);
-	float noisebdr = getNoise(flr.xz + flr.y * yadd + vec2(1.0,0.0));
-	float noisebul = getNoise(flr.xz + flr.y * yadd + vec2(0.0,1.0));
-	float noisebur = getNoise(flr.xz + flr.y * yadd + vec2(1.0,1.0));
-	float noisetdl = getNoise(flr.xz + flr.y * yadd + yadd);
-	float noisetdr = getNoise(flr.xz + flr.y * yadd + yadd + vec2(1.0,0.0));
-	float noisetul = getNoise(flr.xz + flr.y * yadd + yadd + vec2(0.0,1.0));
-	float noisetur = getNoise(flr.xz + flr.y * yadd + yadd + vec2(1.0,1.0));
-	float noise= mix(mix(mix(noisebdl,noisebdr,frc.x),mix(noisebul,noisebur,frc.x),frc.z),mix(mix(noisetdl,noisetdr,frc.x),mix(noisetul,noisetur,frc.x),frc.z),frc.y);
+	float noisebdl = getNoise(flr.xz + flr.y * 32);
+	float noisebdr = getNoise(flr.xz + flr.y * 32 + vec2(1.0,0.0));
+	float noisebul = getNoise(flr.xz + flr.y * 32 + vec2(0.0,1.0));
+	float noisebur = getNoise(flr.xz + flr.y * 32 + vec2(1.0,1.0));
+	float noisetdl = getNoise(flr.xz + flr.y * 32);
+	float noisetdr = getNoise(flr.xz + flr.y * 32 + vec2(1.0,0.0));
+	float noisetul = getNoise(flr.xz + flr.y * 32 + vec2(0.0,1.0));
+	float noisetur = getNoise(flr.xz + flr.y * 32 + vec2(1.0,1.0));
+	float noise = mix(mix(mix(noisebdl, noisebdr, frc.x),
+				  mix(noisebul, noisebur, frc.x), frc.z),
+				  mix(mix(noisetdl, noisetdr, frc.x),
+				  mix(noisetul, noisetur, frc.x), frc.z), frc.y);
 	return noise;
 }
 
@@ -95,22 +97,21 @@ float getLQSample(vec3 pos, float height, float verticalThickness, float samples
 	return noise;
 }
 
-vec2 getVolumetricCloud(float pixeldepth, float pixeldepthw, float heightAdjFactor, float vertThicknessFactor) {
+vec2 getVolumetricCloud(float pixeldepth1, float pixeldepth0, float heightAdjFactor, float vertThicknessFactor) {
 	vec2 vc = vec2(0.0);
 	float quality = VCLOUDS_QUALITY / 2;
 	float dither = Bayer64(gl_FragCoord.xy) * quality;
 
 	float maxDist = 2.0 * VCLOUDS_RANGE * far;
-	float minDist = 0.01f + dither;
-	vec4 wpos = vec4(0.0);
+	float minDist = (0.01f + dither);
 
 	for (minDist; minDist < maxDist; ) {
-		if (getDepth(pixeldepth) < minDist || vc.y > 0.999){
+		if (GetLinearDepth2(pixeldepth1) < minDist || vc.y > 0.999){
 			break;
 		}
-		wpos = getWorldPos(getFragPos(texCoord.xy,distx(minDist)));
-		if (length(wpos.xz) < maxDist && getDepth(pixeldepthw) > minDist){
-			float vh = hnoise((wpos.xz + cameraPosition.xz + (frametime * VCLOUDS_SPEED)) * 0.005);
+		vec4 wpos = getWorldPos(getFragPos(texCoord.xy, GetLogarithmicDepth(minDist)));
+		if (length(wpos.xz) < maxDist && GetLinearDepth2(pixeldepth0) > minDist){
+			float vh = getHeightNoise((wpos.xz + cameraPosition.xz + (frametime * VCLOUDS_SPEED)) * 0.005);
 
 			#ifdef WORLD_CURVATURE
 			if (length(wpos.xz) < WORLD_CURVATURE_SIZE) wpos.y += length(wpos.xz) * length(wpos.xyz) / WORLD_CURVATURE_SIZE;
@@ -138,3 +139,4 @@ vec2 getVolumetricCloud(float pixeldepth, float pixeldepthw, float heightAdjFact
 	}
 	return vc;
 }
+#endif

@@ -1,4 +1,30 @@
 #ifdef OVERWORLD
+#if SKY_COLOR_MODE == 1
+vec3 getBiomeskyColor(){
+	vec4 skyCold     = vec4(vec3(BIOMESKY_CR, BIOMESKY_CG, BIOMESKY_CB) / 255.0, 1.0) * BIOMESKY_CI;
+	vec4 skyDesert   = vec4(vec3(BIOMESKY_DR, BIOMESKY_DG, BIOMESKY_DB) / 255.0, 1.0) * BIOMESKY_DI;
+	vec4 skySwamp    = vec4(vec3(BIOMESKY_SR, BIOMESKY_SG, BIOMESKY_SB) / 255.0, 1.0) * BIOMESKY_SI;
+	vec4 skyMushroom = vec4(vec3(BIOMESKY_MR, BIOMESKY_MG, BIOMESKY_MB) / 255.0, 1.0) * BIOMESKY_MI;
+	vec4 skySavanna  = vec4(vec3(BIOMESKY_VR, BIOMESKY_VG, BIOMESKY_VB) / 255.0, 1.0) * BIOMESKY_VI;
+	vec4 skyForest   = vec4(vec3(BIOMESKY_FR, BIOMESKY_FG, BIOMESKY_FB) / 255.0, 1.0) * BIOMESKY_FI;
+	vec4 skyTaiga    = vec4(vec3(BIOMESKY_TR, BIOMESKY_TG, BIOMESKY_TB) / 255.0, 1.0) * BIOMESKY_TI;
+	vec4 skyJungle   = vec4(vec3(BIOMESKY_JR, BIOMESKY_JG, BIOMESKY_JB) / 255.0, 1.0) * BIOMESKY_JI;
+
+	float skyWeight = isCold + isDesert + isMesa + isSwamp + isMushroom + isSavanna + isForest + isJungle + isTaiga;
+
+	vec4 biomeskyCol = mix(
+		vec4(skyCol, 1.0),
+		(
+			skyCold * isCold  +  skyDesert * isDesert  +  skySavanna * isMesa    +
+			skySwamp * isSwamp  +  skyMushroom * isMushroom  +  skySavanna * isSavanna +
+			skyForest * isForest  +  skyJungle * isJungle  +  skyTaiga * isTaiga
+		) / max(skyWeight, 0.0001),
+		skyWeight
+	);
+	return biomeskyCol.rgb;
+}
+#endif
+
 vec3 GetSkyColor(vec3 viewPos, bool isReflection) {
     vec3 nViewPos = normalize(viewPos);
 
@@ -27,6 +53,12 @@ vec3 GetSkyColor(vec3 viewPos, bool isReflection) {
     #endif
 
     vec3 sky = skyCol * baseGradient / (SKY_I * SKY_I);
+
+    #if SKY_COLOR_MODE == 1
+    vec3 biomeSky = getBiomeskyColor() * getBiomeskyColor();
+    sky = biomeSky * baseGradient / (SKY_I * SKY_I * SKY_I);
+    #endif
+
     #ifdef SKY_VANILLA
     sky = mix(sky, fogCol * baseGradient, pow(1.0 - max(VoU, 0.0), 4.0));
     #endif

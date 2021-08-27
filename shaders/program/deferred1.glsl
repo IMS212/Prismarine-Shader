@@ -10,7 +10,7 @@ https://bitslablab.com
 #ifdef FSH
 
 //Varyings//
-varying vec2 texCoord;
+varying vec2 texCoord, lmCoord;
 
 varying vec3 sunVec, upVec, eastVec;
 
@@ -26,6 +26,7 @@ uniform float shadowFade;
 uniform float timeAngle, timeBrightness;
 uniform float viewWidth, viewHeight, aspectRatio;
 uniform float worldTime;
+uniform float isTaiga, isJungle, isBadlands, isForest;
 
 uniform ivec2 eyeBrightnessSmooth;
 
@@ -49,7 +50,6 @@ uniform vec3 previousCameraPosition;
 uniform sampler2D colortex5;
 uniform sampler2D colortex6;
 uniform sampler2D colortex7;
-uniform sampler2D noisetex;
 #endif
 
 //Optifine Constants//
@@ -228,11 +228,6 @@ void main() {
 				skyReflection += DrawRift(skyRefPos * 100.0, dither, 6, 0) * cloudMixRate;
 				#endif
 
-				#if CLOUDS == 1
-				vec4 cloud = DrawCloud(skyRefPos * 100.0, dither, lightCol, ambientCol);
-				skyReflection = mix(skyReflection, cloud.rgb, cloud.a * cloudMixRate);
-				#endif
-
 				float NoU = clamp(dot(normal, upVec), -1.0, 1.0);
 				float NoE = clamp(dot(normal, eastVec), -1.0, 1.0);
 				float vanillaDiffuse = (0.25 * NoU + 0.75) +
@@ -247,9 +242,17 @@ void main() {
 				#endif
 				#ifdef NETHER
 				skyReflection = netherCol.rgb * 0.04;
+				#ifdef NETHER_SMOKE
+				skyReflection.rgb += DrawRift(viewPos.xyz, dither, 4, 1);
+				skyReflection.rgb += DrawRift(viewPos.xyz, dither, 4, 0);
+				#endif
 				#endif
 				#ifdef END
 				skyReflection = endCol.rgb * 0.025;
+				#if END_SKY == 1
+				vec4 cloud = DrawCloud(skyRefPos * 100.0, dither, lightCol, ambientCol);
+				skyReflection = mix(skyReflection, cloud.rgb, cloud.a * cloudMixRate);
+				#endif
 				#endif
 			}
 
@@ -269,6 +272,10 @@ void main() {
 	} else {
 		#ifdef NETHER
 		color.rgb = netherCol.rgb * 0.04;
+		#ifdef NETHER_SMOKE
+		color.rgb += DrawRift(viewPos.xyz, dither, 4, 1);
+		color.rgb += DrawRift(viewPos.xyz, dither, 4, 0);
+		#endif
 		#endif
 		#if defined END && FOG_MODE == 0
 		float VoL = dot(normalize(viewPos.xyz), lightVec);
@@ -310,7 +317,7 @@ void main() {
 #ifdef VSH
 
 //Varyings//
-varying vec2 texCoord;
+varying vec2 texCoord, lmCoord;
 
 varying vec3 sunVec, upVec, eastVec;
 
@@ -322,6 +329,9 @@ uniform mat4 gbufferModelView;
 //Program//
 void main() {
 	texCoord = gl_MultiTexCoord0.xy;
+
+	lmCoord = (gl_TextureMatrix[1] * gl_MultiTexCoord1).xy;
+	lmCoord = clamp((lmCoord - 0.03125) * 1.06667, vec2(0.0), vec2(0.9333, 1.0));
 	
 	gl_Position = ftransform();
 
