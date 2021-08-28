@@ -1,10 +1,11 @@
 #if defined OVERWORLD || defined END
 #include "/lib/lighting/shadows.glsl"
 #endif
-
+#define unmix(a, b, f) = (f - a) / (b - a);
 void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos,
                  vec2 lightmap, float smoothLighting, float NoL, float vanillaDiffuse,
                  float parallaxShadow, float emission, float subsurface) {
+
     #if EMISSIVE == 0 || (!defined ADVANCED_MATERIALS && EMISSIVE == 1)
     emission = 0.0;
     #endif
@@ -42,7 +43,7 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
     vec3 sceneLighting = netherColSqrt.rgb * 0.1;
     #endif
     
-    float newLightmap  = pow(lightmap.x, 10.0) * 1.5 + lightmap.x * 0.7;
+    float newLightmap  = pow(lightmap.x, 2.0) * 1.5 + lightmap.x * 0.7;
     float blocklightStrength = BLOCKLIGHT_I;
 
     #ifdef NETHER
@@ -143,7 +144,28 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
     if (heldItemId == 53 || heldItemId2 == 53) blocklightCol = TORCH.rgb;
     if (heldItemId == 52 || heldItemId2 == 52) blocklightCol = REDSTONE_TORCH.rgb;
     if (heldItemId == 51 || heldItemId2 == 51) blocklightCol = SOUL_TORCH.rgb;
-    vec3 blockLighting =  newLightmap * newLightmap * blocklightCol;
+    vec3 blockLighting = newLightmap * newLightmap * blocklightCol;
+
+    //ALBEDO-BASED
+    //#elif COLORED_LIGHTING_MODE == 6
+    //#ifdef GBUFFERS_TERRAIN
+    //if (lightFlatten1 == 0){ //removes tinting from the emissive block's albedo leaving it as it is
+        //if (albedo.r > albedo.b && albedo.r > albedo.g){
+            //blocklightStrength = 0.1;
+            //blocklightCol = GLOWSTONE.rgb;
+        //}
+        //if (albedo.g > albedo.r && albedo.g > albedo.b){
+            //blocklightStrength = 0.2;
+            //blocklightCol = vec3(0,1,0.25);
+        //}
+        //if (albedo.b > albedo.r || albedo.b > albedo.g){
+            //blocklightStrength = 0.3;
+            //blocklightCol = SOUL_TORCH.rgb;
+        //}
+    //
+    //#endif
+
+    //vec3 blockLighting = newLightmap * newLightmap * blocklightCol * blocklightStrength;
     #endif
     #endif
 
@@ -213,4 +235,5 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
 
     albedo = mix(GetLuminance(albedo) * desatColor, albedo, desatAmount);
     #endif
+
 }

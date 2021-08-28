@@ -15,7 +15,7 @@ varying vec2 texCoord;
 varying vec4 color;
 
 //Uniforms//
-uniform ivec2 eyeBrightnessSmooth;
+uniform ivec2 eyeBrightnessSmooth, eyeBrightness;
 
 uniform sampler2D texture;
 

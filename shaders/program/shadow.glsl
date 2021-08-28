@@ -10,7 +10,7 @@ https://bitslablab.com
 #ifdef FSH
 
 //Varyings//
-varying float mat;
+varying float mat, ice;
 varying vec4 texCoord, position;
 
 varying vec3 sunVec, upVec, eastVec;
@@ -84,6 +84,8 @@ void main() {
 	}
 	#endif
 
+	if (ice > 0.9) albedo *= 0;
+
 	gl_FragData[0] = albedo;
 }
 
@@ -93,7 +95,7 @@ void main() {
 #ifdef VSH
 
 //Varyings//
-varying float mat;
+varying float mat, ice;
 
 varying vec4 texCoord, position;
 varying vec3 sunVec, upVec, eastVec;
@@ -134,10 +136,11 @@ void main() {
 
 	color = gl_Color;
 	
-	mat = 0;
+	mat = 0; ice = 0;
 	if (mc_Entity.x == 10301) mat = 1;
 	if (mc_Entity.x == 10249 || mc_Entity.x == 10252) mat = 2;
 	if (mc_Entity.x == 10300) mat = 3;
+	if (mc_Entity.x == 10511) ice = 1;
 	
 	position = shadowModelViewInverse * shadowProjectionInverse * ftransform();
 	

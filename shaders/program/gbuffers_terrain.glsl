@@ -5,7 +5,7 @@ https://bitslablab.com
 
 //Settings//
 #include "/lib/settings.glsl"
-
+#define GBUFFERS_TERRAIN
 //Fragment Shader///////////////////////////////////////////////////////////////////////////////////
 #ifdef FSH
 
@@ -42,7 +42,9 @@ uniform float shadowFade;
 uniform float timeAngle, timeBrightness;
 uniform float viewWidth, viewHeight;
 
-uniform ivec2 eyeBrightnessSmooth;
+uniform int blockEntityId;
+
+uniform ivec2 eyeBrightnessSmooth, eyeBrightness;
 
 uniform vec3 cameraPosition;
 
@@ -216,22 +218,19 @@ void main() {
 			albedo.rgb /= 0.5 * albedo.rgb + 0.5;
 		}
 		#else
+		if (recolor > 0.5) {
+			albedo.rgb = albedo.rgb * pow(ec, 1.5) / (BLOCKLIGHT_I * BLOCKLIGHT_I);
+			albedo.rgb /= 0.7 * albedo.rgb + 0.7;
+		}
+		if (lava > 0.5) {
+			albedo.rgb = pow(albedo.rgb * ec / BLOCKLIGHT_I, vec3(2.0));
+			albedo.rgb /= 0.5 * albedo.rgb + 0.5;
+		}
 		#endif
 
 		#ifdef WHITE_WORLD
 		albedo.rgb = vec3(0.35);
 		#endif
-
-		vec2 noisePos = (cameraPosition.xz + worldPos.xz);
-		#if NOISEMAP_SHADOWS == 1
-		float noiseMap = texture2D(noisetex, noisePos * 0.0002).r;
-		#elif NOISEMAP_SHADOWS == 2
-		float noiseMap = texture2D(noisetex, noisePos * 0.02).r + SHADING_REDUCTION_FACTOR + SHADING_REDUCTION_FACTOR;
-		#else
-		float noiseMap = 1;
-		#endif
-
-		albedo.rgb *= noiseMap;
 		
 		vec3 outNormal = newNormal;
 		#ifdef NORMAL_PLANTS
@@ -373,10 +372,21 @@ void main() {
 		}
 		#endif
 
-		vec3 tex = texture2D(texture, texCoord).rgb;
+		vec3 t = texture2D(texture, texCoord).rgb;
 		if (isEmissive == 1){
-			if (tex.r != tex.b && tex.r != tex.g && tex.g != tex.b) albedo.rgb = GetGlow(tex);
+			if (t.r != t.b && t.r != t.g && t.g != t.b) albedo.rgb = GetGlow(t);
 		}
+
+		vec2 noisePos = (cameraPosition.xz + worldPos.xz);
+		#if NOISEMAP_SHADOWS == 1
+		float noiseMap = texture2D(noisetex, noisePos * 0.0002).r;
+		#elif NOISEMAP_SHADOWS == 2
+		float noiseMap = texture2D(noisetex, noisePos * 0.02).r + SHADING_REDUCTION_FACTOR + SHADING_REDUCTION_FACTOR;
+		#else
+		float noiseMap = 1;
+		#endif
+
+		albedo.rgb *= noiseMap;
 	} else albedo.a = 0.0;
 
     /* DRAWBUFFERS:0 */

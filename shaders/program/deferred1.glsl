@@ -28,7 +28,7 @@ uniform float viewWidth, viewHeight, aspectRatio;
 uniform float worldTime;
 uniform float isTaiga, isJungle, isBadlands, isForest;
 
-uniform ivec2 eyeBrightnessSmooth;
+uniform ivec2 eyeBrightnessSmooth, eyeBrightness;
 
 uniform vec3 cameraPosition;
 

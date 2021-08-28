@@ -31,11 +31,12 @@ uniform float shadowFade;
 uniform float timeAngle, timeBrightness;
 uniform float viewWidth, viewHeight;
 
-uniform ivec2 eyeBrightnessSmooth;
+uniform ivec2 eyeBrightnessSmooth, eyeBrightness;
 
 uniform vec3 cameraPosition;
 
 uniform sampler2D noisetex;
+uniform sampler2D texture;
 
 uniform mat4 gbufferProjectionInverse;
 uniform mat4 gbufferModelViewInverse;

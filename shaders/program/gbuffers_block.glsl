@@ -41,7 +41,7 @@ uniform float shadowFade;
 uniform float timeAngle, timeBrightness;
 uniform float viewWidth, viewHeight;
 
-uniform ivec2 eyeBrightnessSmooth;
+uniform ivec2 eyeBrightnessSmooth, eyeBrightness;
 
 uniform vec3 cameraPosition;
 
