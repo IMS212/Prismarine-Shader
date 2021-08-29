@@ -17,6 +17,7 @@ https://bitslablab.com
   #define SKY_COLOR_MODE 1 //[0 1]
   #define FOG_COLOR_MODE 2 //[0 1 2]
   #define FOG_MODE 2 //[0 1 2]
+  #define PERBIOME_CLOUDS_COLOR
 
   #define LIGHTSHAFT_CLOUDY_NOISE
   #define LIGHTSHAFT_WATER

@@ -46,8 +46,7 @@ vec3 getBiomeFogColor(vec3 vpos){
 	vec3 biomeFogColRGB = biomeFogCol.rgb;
 	return biomeFogColRGB;
 }
-
-#ifdef VOLUMETRIC_CLOUDS
+#if defined VOLUMETRIC_CLOUDS && defined PERBIOME_CLOUDS_COLOR
 vec3 getBiomeCloudsColor(vec3 vpos){
 	vec4 fogCold     = vec4(vec3(BIOMEFOG_CR, BIOMEFOG_CG, BIOMEFOG_CB) / 255.0, 1.0) * BIOMEFOG_CI;
 	vec4 fogDesert   = vec4(vec3(BIOMEFOG_DR, BIOMEFOG_DG, BIOMEFOG_DB) / 255.0, 1.0) * BIOMEFOG_DI;
@@ -61,7 +60,7 @@ vec3 getBiomeCloudsColor(vec3 vpos){
 	float fogWeight = isCold + isDesert + isMesa + isSwamp + isMushroom + isSavanna + isForest + isJungle + isTaiga;
 
 	vec4 biomeFogCol = mix(
-		vec4(vec3(1), 1.0),
+		vec4(vcSun, 1.0),
 		(
 			fogCold  * isCold  + fogDesert * isDesert + fogSavanna * isMesa    +
 			fogSwamp * isSwamp + fogMushroom * isMushroom + fogSavanna  * isSavanna +
@@ -73,5 +72,7 @@ vec3 getBiomeCloudsColor(vec3 vpos){
 	return biomeFogColRGB;
 }
 #endif
+
 #endif
+
 #endif

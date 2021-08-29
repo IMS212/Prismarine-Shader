@@ -34,8 +34,6 @@ screen.CG_B=Blue Channel
 screen.CG_T=Tint
 
 screen.STARS_CONFIG=Stars Config
-screen.PCLOUDS_COLOR=Planar Clouds
-screen.VCLOUDS_COLOR=Volumetric Clouds
 screen.LIGHTSHAFT_OPTIONS=Volumetric Rays Config 
 screen.COLOR=Color
 screen.LIGHT_COLOR=Lighting Color
@@ -124,9 +122,6 @@ screen.NETHER_B=Basalt Deltas
 screen.END_COLOR=End Color
 screen.END_CLOUDS_COLOR=End Clouds Color
 screen.VOLUMETRIC_FOG=Volumetric Fog Config
-screen.PLANAR_CLOUDS=Planar Clouds Config
-screen.VOLUMETRIC_CLOUDS_CONFIG=Volumetric Clouds Config
-screen.CLOUDS_CONFIG=Planar Clouds Config
 screen.FOG_COLOR=Low-Altitude Fog Color
 screen.LIGHTSHAFT_COLOR=Light Shafts Color
 screen.LENSFLARE_CONFIG=Lens Flare Config
@@ -323,17 +318,13 @@ option.FOG_COLOR_MODE.comment=Changes the overworld fog. Sky colored fog picks t
 value.FOG_COLOR_MODE.2=Per-Biome
 value.FOG_COLOR_MODE.1=Single Color
 value.FOG_COLOR_MODE.0=Sky Colored
-option.CLOUDS=Clouds
+option.VOLUMETRIC_CLOUDS=Volumetric Clouds
+option.VOLUMETRIC_CLOUDS.comment=Work only with Optifine. Performance impact!
 option.END_SKY=End Sky
 value.END_SKY.0=Vanilla
 value.END_SKY.1=Clouds
-option.CLOUDS.comment=Enables clouds. §a[+]§rPlanar clouds benefit from TAA and affect performance. §e[+]§rVanilla clouds require vanilla cloud setting set to default or on. 
 option.END_VOLUMETRIC_FOG=End Volumetric Fog
 option.END_VOLUMETRIC_FOG.comment=Enables cloudy fog in End.
-value.CLOUDS.0=§cOFF
-value.CLOUDS.1=Planar
-value.CLOUDS.2=Vanilla
-value.CLOUDS.3=Volumetric
 option.CLOUD_UPPER_LAYER=Upper Layer
 option.CLOUD_LOWER_LAYER=Lower Layer
 
@@ -363,6 +354,8 @@ value.DISTANT_FADE_STYLE.1=Cylindrical
 
 option.WEATHER_PERBIOME=Per Biome Weather
 option.WEATHER_PERBIOME.comment=Use varied weather color for different biomes. §c[-]§rMay not work under unknown conditions.
+option.PERBIOME_CLOUDS_COLOR=Per Biome Clouds
+option.PERBIOME_CLOUDS_COLOR.comment=Changes the color of clouds depending on your biome.
 
 option.FOG_MODE=Fog Mode
 value.FOG_MODE.0=Linear

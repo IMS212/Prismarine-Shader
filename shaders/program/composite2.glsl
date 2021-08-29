@@ -130,7 +130,7 @@ void main() {
 	color = MotionBlur(color, z, dither);
 	#endif
 
-	#if defined VOLUMETRIC_CLOUDS && defined OVERWORLD && SKY_COLOR_MODE == 1
+	#if defined VOLUMETRIC_CLOUDS && defined OVERWORLD && SKY_COLOR_MODE == 1 && defined PERBIOME_CLOUDS_COLOR
 	vec4 currentPosition = vec4(texCoord.xy, z, 1.0) * 2.0 - 1.0;
 	vec4 viewPos = gbufferProjectionInverse * currentPosition;
 	viewPos = gbufferModelViewInverse * viewPos;
@@ -138,11 +138,11 @@ void main() {
 
 	vec2 vc = vec2(texture2DLod(colortex8, texCoord.xy, float(2.0)).a, texture2DLod(colortex9, texCoord.xy, float(2.0)).a);
 	color = mix(color, mix(vcloudsDownCol * getBiomeCloudsColor(viewPos.xyz), vcloudsCol * getBiomeCloudsColor(viewPos.xyz), vc.x) * (1.0 - rainStrength * 0.25), vc.y * vc.y * VCLOUDS_OPACITY);
-	#endif
-
-	#if defined VOLUMETRIC_CLOUDS && defined OVERWORLD && SKY_COLOR_MODE != 1
+	#else
+	#ifdef VOLUMETRIC_CLOUDS
 	vec2 vc = vec2(texture2DLod(colortex8, texCoord.xy, float(2.0)).a, texture2DLod(colortex9, texCoord.xy, float(2.0)).a);
 	color = mix(color, mix(vcloudsDownCol, vcloudsCol, vc.x) * (1.0 - rainStrength * 0.25), vc.y * vc.y * VCLOUDS_OPACITY);
+	#endif
 	#endif
 
 	/* DRAWBUFFERS:0 */
