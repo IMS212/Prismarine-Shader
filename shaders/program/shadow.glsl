@@ -10,7 +10,7 @@ https://bitslablab.com
 #ifdef FSH
 
 //Varyings//
-varying float mat, ice;
+varying float mat;
 varying vec4 texCoord, position;
 
 varying vec3 sunVec, upVec, eastVec;
@@ -62,6 +62,8 @@ void main() {
 	float disable = float(mat > 1.98 && mat < 2.02);
 	float water = float (mat > 2.98);
 
+	float timeFactor = 0.25 + timeBrightness;
+
 	if (disable > 0.5 || albedo.a < 0.01) discard;
 
     #ifdef SHADOW_COLOR
@@ -73,18 +75,16 @@ void main() {
 
 	#ifdef WATER_TINT
 	if (water > 0.9){
-		albedo.rgb = waterShadowColor.rgb * WATER_I;
+		albedo.rgb = waterShadowColor.rgb * WATER_I * (3 - isEyeInWater - isEyeInWater) * timeFactor;
 	}
 	#endif
 
 	#ifdef PROJECTED_CAUSTICS
 	if (water > 0.9){
-		vec3 caustic = (getCaustics(position.xyz+cameraPosition.xyz) * WATER_CAUSTICS_STRENGTH) * causticCol.rgb * (WATER_I + isEyeInWater) * (3 - isEyeInWater - isEyeInWater);
+		vec3 caustic = (getCaustics(position.xyz+cameraPosition.xyz) * WATER_CAUSTICS_STRENGTH) * causticCol.rgb * (3 - isEyeInWater - isEyeInWater) * timeFactor;
 		albedo.rgb *= caustic;
 	}
 	#endif
-
-	if (ice > 0.9) albedo *= 0;
 
 	gl_FragData[0] = albedo;
 }
@@ -95,7 +95,7 @@ void main() {
 #ifdef VSH
 
 //Varyings//
-varying float mat, ice;
+varying float mat;
 
 varying vec4 texCoord, position;
 varying vec3 sunVec, upVec, eastVec;
@@ -136,11 +136,10 @@ void main() {
 
 	color = gl_Color;
 	
-	mat = 0; ice = 0;
+	mat = 0;
 	if (mc_Entity.x == 10301) mat = 1;
-	if (mc_Entity.x == 10249 || mc_Entity.x == 10252) mat = 2;
+	if (mc_Entity.x == 10249 || mc_Entity.x == 10252 || mc_Entity.x == 10301) mat = 2;
 	if (mc_Entity.x == 10300) mat = 3;
-	if (mc_Entity.x == 10511) ice = 1;
 	
 	position = shadowModelViewInverse * shadowProjectionInverse * ftransform();
 	

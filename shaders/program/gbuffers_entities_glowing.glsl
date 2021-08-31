@@ -101,6 +101,7 @@ float InterleavedGradientNoise() {
 #include "/lib/color/dimensionColor.glsl"
 #include "/lib/color/specularColor.glsl"
 #include "/lib/util/spaceConversion.glsl"
+#include "/lib/color/waterColor.glsl"
 #include "/lib/lighting/forwardLighting.glsl"
 #include "/lib/surface/ggx.glsl"
 

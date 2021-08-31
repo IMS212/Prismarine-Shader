@@ -1,7 +1,9 @@
 #if defined OVERWORLD || defined END
 #include "/lib/lighting/shadows.glsl"
 #endif
-#define unmix(a, b, f) = (f - a) / (b - a);
+
+uniform int blockEntityId;
+
 void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos,
                  vec2 lightmap, float smoothLighting, float NoL, float vanillaDiffuse,
                  float parallaxShadow, float emission, float subsurface) {
@@ -33,6 +35,9 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
     float shadowMult = (1.0 - 0.95 * rainStrength) * shadowFade;
     vec3 sceneLighting = mix(ambientCol, lightCol, fullShadow * shadowMult);
     sceneLighting *= (4.0 - 3.0) * lightmap.y * lightmap.y * (1.0 + scattering * shadow);
+    if (isEyeInWater == 1 && lightmap.y < 1){
+        sceneLighting *= lightmap.y * 16;
+    }
     #endif
 
     #ifdef END

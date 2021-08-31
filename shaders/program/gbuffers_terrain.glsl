@@ -10,7 +10,7 @@ https://bitslablab.com
 #ifdef FSH
 
 //Varyings//
-varying float mat, recolor, isEmissive;
+varying float mat, recolor, isEmissive, isWater;
 
 varying vec2 texCoord, lmCoord;
 
@@ -41,8 +41,6 @@ uniform float screenBrightness;
 uniform float shadowFade;
 uniform float timeAngle, timeBrightness;
 uniform float viewWidth, viewHeight;
-
-uniform int blockEntityId;
 
 uniform ivec2 eyeBrightnessSmooth, eyeBrightness;
 
@@ -107,6 +105,23 @@ vec3 GetGlow(vec3 color){
     return x * x;
 }
 
+vec2 UnderwaterDistort(vec2 texCoord) {
+	vec2 originalTexCoord = texCoord;
+
+	texCoord += vec2(
+		cos(texCoord.y * 32.0 + frameTimeCounter * 3.0),
+		sin(texCoord.x * 32.0 + frameTimeCounter * 1.7)
+	) * 0.0005;
+
+	float mask = float(
+		texCoord.x > 0.0 && texCoord.x < 1.0 &&
+	    texCoord.y > 0.0 && texCoord.y < 1.0
+	)
+	;
+	if (mask < 0.5) texCoord = originalTexCoord;
+	return texCoord;
+}
+
 //Includes//
 #include "/lib/prismarine/functions.glsl"
 #include "/lib/color/blocklightColor.glsl"
@@ -138,6 +153,11 @@ void main() {
     vec4 albedo = texture2D(texture, texCoord) * vec4(color.rgb, 1.0);
 	vec3 newNormal = normal;
 	float smoothness = 0.0;
+
+	if (isWater > 0.9 && isEyeInWater < 0.9){
+		vec2 newcoord = UnderwaterDistort(texCoord.xy);
+		albedo = texture2D(texture, newcoord) * vec4(color.rgb, 1.0);
+	}
 
 	#ifdef ADVANCED_MATERIALS
 	vec2 newCoord = vTexCoord.st * vTexCoordAM.pq + vTexCoordAM.st;
@@ -374,7 +394,7 @@ void main() {
 
 		vec3 t = texture2D(texture, texCoord).rgb;
 		if (isEmissive == 1){
-			if (t.r != t.b && t.r != t.g && t.g != t.b) albedo.rgb = GetGlow(t);
+			if (t.r != t.b && t.b != t.g) albedo.rgb = GetGlow(t);
 		}
 
 		vec2 noisePos = (cameraPosition.xz + worldPos.xz);
@@ -406,7 +426,7 @@ void main() {
 #ifdef VSH
 
 //Varyings//
-varying float mat, recolor, isEmissive;
+varying float mat, recolor, isEmissive, isWater;
 
 varying vec2 texCoord, lmCoord;
 
@@ -498,7 +518,7 @@ void main() {
     
 	color = gl_Color;
 	
-	mat = 0.0; recolor = 0.0; isEmissive = 0.0;
+	mat = 0.0; recolor = 0.0; isEmissive = 0.0; isWater = 0.0;
 
 	if (mc_Entity.x >= 10100 && mc_Entity.x < 10200)
 		mat = 1.0;
@@ -527,6 +547,9 @@ void main() {
 
 	if (mc_Entity.x == 10510)
 		isEmissive = 1.0;
+
+	if (mc_Entity.x == 10300)
+		isWater = 1.0;
 
 	const vec2 sunRotationData = vec2(cos(sunPathRotation * 0.01745329251994), -sin(sunPathRotation * 0.01745329251994));
 	float ang = fract(timeAngle - 0.25);

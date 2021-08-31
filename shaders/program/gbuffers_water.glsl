@@ -549,7 +549,8 @@ void main() {
 		Fog(albedo.rgb, viewPos);
 
 		if (isEyeInWater == 0 && water > 0.5) {
-			float oDepth = texture2D(depthtex1, screenPos.xy).r;
+			vec2 texCoordW = gl_FragCoord.xy / vec2(viewWidth, viewHeight);
+			float oDepth = texture2D(depthtex1, texCoordW.xy).r;
 			vec3 oScreenPos = vec3(gl_FragCoord.xy / vec2(viewWidth, viewHeight), oDepth);
 			#ifdef TAA
 			vec3 oViewPos = ToNDC(vec3(TAAJitter(oScreenPos.xy, -0.5), oScreenPos.z));

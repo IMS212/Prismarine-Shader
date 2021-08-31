@@ -76,6 +76,7 @@ float InterleavedGradientNoise() {
 #include "/lib/color/blocklightColor.glsl"
 #include "/lib/color/dimensionColor.glsl"
 #include "/lib/util/spaceConversion.glsl"
+#include "/lib/color/waterColor.glsl"
 #include "/lib/lighting/forwardLighting.glsl"
 
 #ifdef TAA

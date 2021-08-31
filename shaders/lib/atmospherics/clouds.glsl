@@ -29,6 +29,8 @@ void DrawStars(inout vec3 color, vec3 viewPos) {
 	#ifdef END
 	color += star * pow(lightNight * 16, vec3(0.8));
 	#endif
+
+	color *= STARS_BRIGHTNESS;
 }
 
 void DrawBigStars(inout vec3 color, vec3 viewPos) {

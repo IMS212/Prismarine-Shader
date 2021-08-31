@@ -39,12 +39,9 @@ float getFogSample(vec3 pos, float height, float verticalThickness, float sample
 	vec3 wind = vec3(frametime * 0.25, 0.0, 0.0);
 	
 	if (ymult < 2.0){
-		noise+= getVolumetricNoise(pos * samples * 0.5 - wind * 0.5) * LIGHTSHAFT_HORIZONTAL_THICKNESS;
-		noise+= getVolumetricNoise(pos * samples * 0.25 - wind * 0.4) * 2.0 * LIGHTSHAFT_HORIZONTAL_THICKNESS;
-		noise+= getVolumetricNoise(pos * samples * 0.125 - wind * 0.3) * 3.0 * LIGHTSHAFT_HORIZONTAL_THICKNESS;
-		noise+= getVolumetricNoise(pos * samples * 0.0625 - wind * 0.2) * 4.0 * LIGHTSHAFT_HORIZONTAL_THICKNESS;
-		noise+= getVolumetricNoise(pos * samples * 0.03125 - wind * 0.1) * 5.0 * LIGHTSHAFT_HORIZONTAL_THICKNESS;
-		noise+= getVolumetricNoise(pos * samples * 0.016125) * 6.0 * LIGHTSHAFT_HORIZONTAL_THICKNESS;
+		noise+= getVolumetricNoise(pos * samples * 0.5 - wind * 0.5) * 5.0 * LIGHTSHAFT_HORIZONTAL_THICKNESS;
+		noise+= getVolumetricNoise(pos * samples * 0.25 - wind * 0.3) * 7.0 * LIGHTSHAFT_HORIZONTAL_THICKNESS;
+		noise+= getVolumetricNoise(pos * samples * 0.125 - wind * 0.1) * 9.0 * LIGHTSHAFT_HORIZONTAL_THICKNESS;
 	}
 	noise = clamp(mix(noise * LIGHTSHAFT_AMOUNT, 21.0, 0.25) - (10.0 + 5.0 * ymult), 0.0, 1.0);
 	return noise;
@@ -92,6 +89,10 @@ vec4 GetShadowSpace(vec4 wpos) {
 vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dither) {
 	vec3 vl = vec3(0.0);
 
+	#ifndef LIGHTSHAFT_DAY
+	float timeFactor = 1.0 - timeBrightness;
+	#endif
+
 	bool isThereADragon = gl_Fog.start / far < 0.5; //yes emin thanks for telling people about this in shaderlabs
 	float dragonFactor;
 	if (isThereADragon) dragonFactor = 1;
@@ -103,21 +104,26 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 	#ifdef LIGHTSHAFT_CLOUDY_NOISE
 	#endif
 
+	vec3 screenPos = vec3(texCoord, pixeldepth0);
 	vec4 viewPos = gbufferProjectionInverse * (vec4(texCoord, pixeldepth0, 1.0) * 2.0 - 1.0);
 		viewPos /= viewPos.w;
 	
 	vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.0);
 	float VoL = dot(normalize(viewPos.xyz), lightVec);
 
-
 	#ifdef OVERWORLD
-	float visfactor = 0.05 * (-0.8 * timeBrightness + 1.0) * (3.0 * rainStrength + 1.0);
-	float invvisfactor = 1.0 - visfactor;
+	float visfactor 	= 0.05 * (-0.4 * timeBrightness + 1.0) * (1.0 * rainStrength + 0.1);
+	float invvisfactor	= 1.0 - visfactor;
+	float visibility 	= 1.0 - rainStrength;
+	
+	#ifndef LIGHTSHAFT_DAY
+	visibility *= timeFactor;
+	#endif
 
-	float visibility = clamp(VoL * 0.5 + 0.5, 0.0, 1.0);
 	visibility = visfactor / (1.0 - invvisfactor * visibility) - visfactor;
 	visibility = clamp(visibility * 1.015 / invvisfactor - 0.015, 0.0, 1.0);
-	visibility = mix(1.0, visibility, 0.25 * eBS + 0.75);
+	visibility = mix(1.0, visibility, 0.25 * 1 + 0.75) * 0.14285 * float(pixeldepth0 > 0.56);
+	if (isEyeInWater == 1.0) visibility = visibility * WATER_I;
 
 	float persistence = (LIGHTSHAFT_PERSISTENCE_FACTOR * 2);
 
@@ -145,7 +151,9 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 	visibility *= 0.25 * float(pixeldepth0 > 0.75);
 
 	if (visibility > 0.0) {
-		float maxDist = LIGHTSHAFT_MAX_DISTANCE;
+		float minDistFactor = LIGHTSHAFT_MIN_DISTANCE;
+		if (isEyeInWater == 1.0) minDistFactor = 2.0;
+		float maxDist = LIGHTSHAFT_MAX_DISTANCE * 1.5;
 		
 		float depth0 = GetLinearDepth2(pixeldepth0);
 		float depth1 = GetLinearDepth2(pixeldepth1);
@@ -156,7 +164,7 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 		
 		for(int i = 0; i < LIGHTSHAFT_SAMPLES; i++) {
 			float maxDist = LIGHTSHAFT_MAX_DISTANCE;
-			float minDist = (exp2(i + dither) - 0.95) * LIGHTSHAFT_MIN_DISTANCE;
+			float minDist = (i + dither) * minDistFactor;
 
 			if (minDist >= maxDist) break;
 			if (depth1 < minDist || (depth0 < minDist && color == vec3(0.0))) break;
@@ -216,7 +224,7 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 
 					npos.xyz += vec3(frametime * 2, -vh * 48, 0.0);
 
-					float noise = getFogSample(npos.xyz, LIGHTSHAFT_HEIGHT / 2, LIGHTSHAFT_VERTICAL_THICKNESS, 4);
+					float noise = getFogSample(npos.xyz, LIGHTSHAFT_HEIGHT / 2, LIGHTSHAFT_VERTICAL_THICKNESS, 0.25);
 					shadow *= noise;
 				}
 				#endif

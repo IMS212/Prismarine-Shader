@@ -300,6 +300,7 @@ option.PARALLAX_DISTANCE=Parallax Distance*
 option.PARALLAX_DISTANCE.comment=Adjusts how far parallax occlusion mapping and self shadows can be rendered.
 
 #Atmospherics
+option.STARS_BRIGHTNESS=Stars Brightness
 option.STARS=Stars 
 option.STARS_AMOUNT=Stars Amount 
 option.DAY_STARS=Day Stars 
@@ -362,6 +363,7 @@ value.FOG_MODE.0=Linear
 value.FOG_MODE.1=Volumetric
 value.FOG_MODE.2=Mixed
 
+option.LIGHTSHAFT_DAY=Noon Light Shafts
 option.LIGHTSHAFT_PERSISTENCE=Persistence
 option.LIGHTSHAFT_PERSISTENCE.comment=Changes the maximum length of volumetric rays.
 option.LIGHTSHAFT_PERSISTENCE_FACTOR=Persistence Factor

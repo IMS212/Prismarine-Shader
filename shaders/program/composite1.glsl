@@ -41,8 +41,10 @@ uniform sampler2D depthtex0;
 uniform sampler2D depthtex1;
 uniform sampler2D colortex0;
 uniform sampler2D colortex1;
+#if defined VOLUMETRIC_CLOUDS && defined OVERWORLD
 uniform sampler2D colortex8;
 uniform sampler2D colortex9;
+#endif
 uniform sampler2D noisetex;
 
 //Optifine Constants//
@@ -78,8 +80,10 @@ float GetLuminance(vec3 color) {
 
 //Program//
 void main() {
+	#if defined VOLUMETRIC_CLOUDS && defined OVERWORLD
 	vec3 aux8 = texture2D(colortex8, texCoord.st).rgb;
 	vec3 aux9 = texture2D(colortex9, texCoord.st).rgb;
+	#endif
 	vec4 color = texture2D(colortex0, texCoord.xy);
 	float pixeldepth0 = texture2D(depthtex0, texCoord.xy).x;
 	vec2 vc = vec2(0.0);
@@ -112,7 +116,14 @@ void main() {
     vl *= LIGHT_SHAFT_STRENGTH * (1.0 - rainStrength * eBS * 0.875) * shadowFade *
 		  (1.0 - blindFactor);
 
+	#ifdef LIGHTSHAFT_DAY
 	color.rgb += vl;
+	#else
+	float timeFactor = 1.0 - timeBrightness;
+	if (timeFactor != 0){
+		color.rgb += vl;
+	}
+	#endif
 
 	#if defined VOLUMETRIC_CLOUDS && defined OVERWORLD
 	float pixeldepth1 = texture2D(depthtex1, texCoord.xy).x;

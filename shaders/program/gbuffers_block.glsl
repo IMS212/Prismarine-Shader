@@ -27,7 +27,6 @@ varying vec4 vTexCoord, vTexCoordAM;
 #endif
 
 //Uniforms//
-uniform int blockEntityId;
 uniform int frameCounter;
 uniform int isEyeInWater;
 uniform int worldTime;
@@ -99,6 +98,7 @@ float InterleavedGradientNoise() {
 #include "/lib/color/dimensionColor.glsl"
 #include "/lib/color/specularColor.glsl"
 #include "/lib/util/spaceConversion.glsl"
+#include "/lib/color/waterColor.glsl"
 #include "/lib/lighting/forwardLighting.glsl"
 #include "/lib/surface/ggx.glsl"
 

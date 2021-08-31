@@ -136,8 +136,16 @@ void main() {
 	
     /*DRAWBUFFERS:01*/
 	gl_FragData[0] = color;
+
+	#ifdef LIGHTSHAFT_DAY
 	gl_FragData[1] = vec4(vl, 1.0);
-	
+	#else
+	float timeFactor = 1.0 - timeBrightness;
+	if (timeFactor != 0){
+		gl_FragData[1] = vec4(vl, 1.0);
+	}
+	#endif
+
     #ifdef REFLECTION_PREVIOUS
     /*DRAWBUFFERS:015*/
 	gl_FragData[2] = vec4(pow(color.rgb, vec3(0.125)) * 0.5, float(z0 < 1.0));

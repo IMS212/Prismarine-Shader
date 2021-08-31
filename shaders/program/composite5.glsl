@@ -87,23 +87,17 @@ void RetroDither(inout vec3 color, float dither) {
 	color = max(pow(color.rgb, vec3(4.0)), vec3(0.0));
 }
 
-vec3 GetBloomTile(float lod, vec2 coord, vec2 offset) {
-	float scale = exp2(lod);
-	float resScale = 1.25 * min(360.0, viewHeight) / viewHeight;
-	vec2 centerOffset = vec2(0.125 * pw, 0.125 * ph);
-	vec3 bloom = texture2D(colortex1, (coord / scale + offset) * resScale + centerOffset).rgb;
-	return pow(bloom, vec3(4.0)) * 32.0;
-}
-
 void Bloom(inout vec3 color, vec2 coord) {
-	vec3 blur1 = GetBloomTile(1.0, coord, vec2(0.0      , 0.0   )) * 1.5;
-	vec3 blur2 = GetBloomTile(2.0, coord, vec2(0.51     , 0.0   )) * 1.2;
-	vec3 blur3 = GetBloomTile(3.0, coord, vec2(0.51     , 0.26  ));
-	vec3 blur4 = GetBloomTile(4.0, coord, vec2(0.645    , 0.26  ));
-	vec3 blur5 = GetBloomTile(5.0, coord, vec2(0.7175   , 0.26  ));
-	vec3 blur6 = GetBloomTile(6.0, coord, vec2(0.645    , 0.3325)) * 0.9;
-	vec3 blur7 = GetBloomTile(7.0, coord, vec2(0.670625 , 0.3325)) * 0.7;
 	
+	vec3 blur1 = pow(texture2D(colortex1,coord/pow(2.0,2.0) + vec2(0.0,0.0)).rgb,vec3(4.4));
+	vec3 blur2 = pow(texture2D(colortex1,coord/pow(2.0,3.0) + vec2(0.3,0.0)).rgb,vec3(4.4));
+	vec3 blur3 = pow(texture2D(colortex1,coord/pow(2.0,4.0) + vec2(0.0,0.3)).rgb,vec3(4.4));
+	vec3 blur4 = pow(texture2D(colortex1,coord/pow(2.0,5.0) + vec2(0.1,0.3)).rgb,vec3(4.4));
+	vec3 blur5 = pow(texture2D(colortex1,coord/pow(2.0,6.0) + vec2(0.2,0.3)).rgb,vec3(4.4));
+	vec3 blur6 = pow(texture2D(colortex1,coord/pow(2.0,7.0) + vec2(0.3,0.3)).rgb,vec3(4.4));
+	
+	vec3 blur = (blur1 + blur2 + blur3 + blur4 + blur5 + blur6) * 4;
+
 	#ifdef DIRTY_LENS
 	float newAspectRatio = 1.777777777777778 / aspectRatio;
 	vec2 scale = vec2(max(newAspectRatio, 1.0), max(1.0 / newAspectRatio, 1.0));
@@ -113,12 +107,9 @@ void Bloom(inout vec3 color, vec2 coord) {
 	blur4 *= dirt *  2.0 + 1.0;
 	blur5 *= dirt *  4.0 + 1.0;
 	blur6 *= dirt *  8.0 + 1.0;
-	blur7 *= dirt * 16.0 + 1.0;
 	#endif
 
-	vec3 blur = (blur1 + blur2 + blur3 + blur4 + blur5 + blur6 + blur7) * 0.137;
-
-	color = mix(color, blur, 0.15 * BLOOM_STRENGTH);
+	color = mix(color, blur, 0.01 * BLOOM_STRENGTH);
 }
 
 void AutoExposure(inout vec3 color, inout float exposure, float tempExposure) {
@@ -263,7 +254,7 @@ void main() {
 	
 	/*DRAWBUFFERS:12*/
 	gl_FragData[0] = vec4(color, 1.0);
-	gl_FragData[1] = vec4(temporalData,temporalColor);
+	gl_FragData[1] = vec4(temporalData, temporalColor);
 }
 
 #endif
@@ -296,3 +287,4 @@ void main() {
 }
 
 #endif
+
