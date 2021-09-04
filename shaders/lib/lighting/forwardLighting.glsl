@@ -49,7 +49,7 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
     #endif
     
     float newLightmap  = pow(lightmap.x, 10.0) * 1.5 + lightmap.x * 0.8;
-    newLightmap = pow(newLightmap, 1.05);
+    newLightmap = pow(newLightmap, 1.50);
     float blocklightStrength = BLOCKLIGHT_I;
 
     #ifdef NETHER
