@@ -157,6 +157,10 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 		
 		for(int i = 0; i < LIGHTSHAFT_SAMPLES * 2; i++) {
 			float minDist = (i + dither) * LIGHTSHAFT_MIN_DISTANCE;
+			if (isEyeInWater == 1) minDist = (exp2(i + dither) - 0.95) * 2;
+			#ifdef END
+			minDist = (exp2(i + dither) - 0.95) * 2;
+			#endif
 
 			if (minDist >= maxDist) break;
 			if (depth1 < minDist || (depth0 < minDist && color == vec3(0.0))) break;

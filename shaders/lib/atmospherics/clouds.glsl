@@ -1,3 +1,5 @@
+#include "/lib/color/auroraColor.glsl"
+
 float GetNoise(vec2 pos) {
 	return fract(sin(dot(pos, vec2(12.9898, 4.1414))) * 43758.5453);
 }
@@ -148,7 +150,6 @@ vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol) {
 
 #ifdef OVERWORLD
 #ifdef AURORA
-#include "/lib/color/auroraColor.glsl"
 float AuroraSample(vec2 coord, vec2 wind, float VoU) {
 	float noise = texture2D(noisetex, coord * 0.0625  + wind * 0.25).b * 3.0;
 		  noise+= texture2D(noisetex, coord * 0.03125 + wind * 0.15).b * 3.0;
@@ -203,6 +204,7 @@ vec3 DrawAurora(vec3 viewPos, float dither, int samples) {
 
 	return aurora * visibility;
 }
+#endif
 #endif
 
 float RiftSample(vec2 coord, vec2 wind, float VoU) {
@@ -272,7 +274,7 @@ vec3 DrawRift(vec3 viewPos, float dither, int samples, float riftType) {
 					#elif defined OVERWORLD
 					riftColor = mix(secondRiftLowCol, secondRiftHighCol, pow(currentStep, 0.4)) * 0.4;
 					#elif defined NETHER
-					riftColor = mix(netherCol.rgb, netherCol.rgb, pow(currentStep, 0.4)) * 0.4;
+					riftColor = mix(netherCol.rgb, netherCol.rgb, pow(currentStep, 0.4));
 					#endif
 				}
 				rift += noise * riftColor * exp2(-4.0 * i * sampleStep);
@@ -283,4 +285,3 @@ vec3 DrawRift(vec3 viewPos, float dither, int samples, float riftType) {
 
 	return rift * (moonVisibility - rainStrength);
 }
-#endif
