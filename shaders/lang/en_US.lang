@@ -359,7 +359,7 @@ option.PERBIOME_CLOUDS_COLOR=Per Biome Clouds
 option.PERBIOME_CLOUDS_COLOR.comment=Changes the color of clouds depending on your biome.
 
 option.FOG_MODE=Fog Mode
-value.FOG_MODE.0=Linear
+value.FOG_MODE.0=Exponental
 value.FOG_MODE.1=Volumetric
 value.FOG_MODE.2=Mixed
 
@@ -396,6 +396,9 @@ option.EVENING_FOG_DENSITY=Evening Fog Density
 option.WEATHER_FOG_DENSITY=Weather Fog Density
 option.NETHER_FOG_DENSITY=Nether Fog Density
 option.END_FOG_DENSITY=End Fog Density
+
+option.FOG_FIRST_LAYER_ALTITUDE=First Fog Layer Alt.
+option.FOG_SECOND_LAYER_ALTITUDE=Second Fog Layer Alt.
 
 option.WEATHER_OPACITY=Weather Opacity
 option.WEATHER_OPACITY.comment=Adjusts weather opacity.
@@ -1138,6 +1141,7 @@ option.WAVING_LIQUID=Liquids
 option.WAVING_LIQUID.comment=Allows water and lava to wave.
 option.WAVING_EXTRA=Extras
 option.WAVING_EXTRA.comment=Allows fire and lantern to wave.
+option.WAVING_AMPLITUDE=Waving Amplitude
 
 #Curvature
 option.WORLD_CURVATURE=World Curvature

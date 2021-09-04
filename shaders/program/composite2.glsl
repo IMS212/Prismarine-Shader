@@ -102,6 +102,22 @@ vec3 MotionBlur(vec3 color, float z, float dither) {
 	else return color;
 }
 
+#ifdef VOLUMETRIC_CLOUDS
+float mefade0 = 1.0 - clamp(abs(timeAngle - 0.5) * 8.0 - 1.5, 0.0, 1.0);
+float dfade0 = 1.0 - timeBrightness;
+
+vec3 CalcSunColor0(vec3 morning, vec3 day, vec3 evening) {
+	vec3 me = mix(morning, evening, mefade0);
+	return mix(me, day, 1.0 - dfade0 * sqrt(dfade0));
+}
+
+vec3 CalcLightColor0(vec3 sun, vec3 night, vec3 weatherCol) {
+	vec3 c = mix(night, sun, sunVisibility);
+	c = mix(c, dot(c, vec3(0.299, 0.587, 0.114)) * weatherCol, rainStrength);
+	return c * c;
+}
+#endif
+
 #include "/lib/util/dither.glsl"
 
 #ifdef OUTLINE_OUTER
@@ -130,19 +146,38 @@ void main() {
 	color = MotionBlur(color, z, dither);
 	#endif
 
-	#if defined VOLUMETRIC_CLOUDS && defined OVERWORLD && SKY_COLOR_MODE == 1 && defined PERBIOME_CLOUDS_COLOR
+	#ifdef VOLUMETRIC_CLOUDS
+	vec3 vcMorning    = vec3(VCLOUD_MR,   VCLOUD_MG,   VCLOUD_MB)   * VCLOUD_MI / 255;
+	vec3 vcDay        = vec3(VCLOUD_DR,   VCLOUD_DG,   VCLOUD_DB)   * VCLOUD_DI / 255;
+	vec3 vcEvening    = vec3(VCLOUD_ER,   VCLOUD_EG,   VCLOUD_EB)   * VCLOUD_EI / 255;
+	vec3 vcNight      = vec3(VCLOUD_NR,   VCLOUD_NG,   VCLOUD_NB)   * VCLOUD_NI * 0.3 / 255;
+
+	vec3 vcDownMorning    = vec3(VCLOUDDOWN_MR,   VCLOUDDOWN_MG,   VCLOUDDOWN_MB)   * VCLOUDDOWN_MI / 255;
+	vec3 vcDownDay        = vec3(VCLOUDDOWN_DR,   VCLOUDDOWN_DG,   VCLOUDDOWN_DB)   * VCLOUDDOWN_DI / 255;
+	vec3 vcDownEvening    = vec3(VCLOUDDOWN_ER,   VCLOUDDOWN_EG,   VCLOUDDOWN_EB)   * VCLOUDDOWN_EI / 255;
+	vec3 vcDownNight      = vec3(VCLOUDDOWN_NR,   VCLOUDDOWN_NG,   VCLOUDDOWN_NB)   * VCLOUDDOWN_NI * 0.3 / 255;
+
+	vec3 vcSun = CalcSunColor0(vcMorning, vcDay, vcEvening);
+	vec3 vcDownSun = CalcSunColor0(vcDownMorning, vcDownDay, vcDownEvening);
+	vec3 vcloudsCol     = CalcLightColor0(vcSun, vcNight, weatherCol.rgb * 0.4);
+	vec3 vcloudsDownCol = CalcLightColor0(vcDownSun, vcDownNight, weatherCol.rgb * 0.4);
+	#endif
+
+	#ifdef VOLUMETRIC_CLOUDS
 	vec4 currentPosition = vec4(texCoord.xy, z, 1.0) * 2.0 - 1.0;
 	vec4 viewPos = gbufferProjectionInverse * currentPosition;
 	viewPos = gbufferModelViewInverse * viewPos;
 	viewPos /= viewPos.w;
+	float VoL = dot(normalize(viewPos.xyz), lightVec);
 
-	vec2 vc = vec2(texture2DLod(colortex8, texCoord.xy, float(2.0)).a, texture2DLod(colortex9, texCoord.xy, float(2.0)).a);
-	color = mix(color, mix(vcloudsDownCol * getBiomeCloudsColor(viewPos.xyz), vcloudsCol * getBiomeCloudsColor(viewPos.xyz), vc.x) * (1.0 - rainStrength * 0.25), vc.y * vc.y * VCLOUDS_OPACITY);
-	#else
-	#ifdef VOLUMETRIC_CLOUDS
-	vec2 vc = vec2(texture2DLod(colortex8, texCoord.xy, float(2.0)).a, texture2DLod(colortex9, texCoord.xy, float(2.0)).a);
-	color = mix(color, mix(vcloudsDownCol, vcloudsCol, vc.x) * (1.0 - rainStrength * 0.25), vc.y * vc.y * VCLOUDS_OPACITY);
+	#if defined OVERWORLD && SKY_COLOR_MODE == 1 && defined PERBIOME_CLOUDS_COLOR
+	vcSun *= getBiomeCloudsColor(viewPos.xyz);
+	vcDownSun *= getBiomeCloudsColor(viewPos.xyz);
 	#endif
+
+	float scattering = pow(VoL * shadowFade * 0.5 + 0.5, 6.0);
+	vec2 vc = vec2(texture2DLod(colortex8, texCoord.xy, float(2.0)).a, texture2DLod(colortex9, texCoord.xy, float(2.0)).a);
+	color = mix(color, mix(vcloudsDownCol * (0.85 + 1.15 * scattering), vcloudsCol * (0.85 + 1.15 * scattering), vc.x) * (1.0 - rainStrength * 0.25), vc.y * vc.y * VCLOUDS_OPACITY);
 	#endif
 
 	/* DRAWBUFFERS:0 */

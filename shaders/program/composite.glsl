@@ -141,6 +141,7 @@ void main() {
 	gl_FragData[1] = vec4(vl, 1.0);
 	#else
 	float timeFactor = 1.0 - timeBrightness;
+	if (isEyeInWater == 1) timeFactor = 1;
 	if (timeFactor != 0){
 		gl_FragData[1] = vec4(vl, 1.0);
 	}

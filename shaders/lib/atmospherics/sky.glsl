@@ -25,6 +25,14 @@ vec3 getBiomeskyColor(){
 }
 #endif
 
+float mefade2 = 1.0 - clamp(abs(timeAngle - 0.5) * 8.0 - 1.5, 0.0, 1.0);
+float dfade2 = 1.0 - timeBrightness;
+
+float CalcSkyDensity(float morning, float day, float evening) {
+	float me = mix(morning, evening, mefade2);
+	return mix(me, day, 1.0 - dfade2 * sqrt(dfade2));
+}
+
 vec3 GetSkyColor(vec3 viewPos, bool isReflection) {
     vec3 nViewPos = normalize(viewPos);
 
@@ -34,13 +42,13 @@ vec3 GetSkyColor(vec3 viewPos, bool isReflection) {
     float groundDensity = 0.08 * (4.0 - 3.0 * sunVisibility) *
                           (10.0 * rainStrength * rainStrength + 1.0);
     
-    float exposure = exp2(timeBrightness * 0.75 - 0.75 + SKY_EXPOSURE_D);
+    float exposure = exp2(timeBrightness * 0.75 - 0.75 + CalcSkyDensity(SKY_EXPOSURE_M, SKY_EXPOSURE_D, SKY_EXPOSURE_E));
     float nightExposure = exp2(-3.5 + SKY_EXPOSURE_N);
     float weatherExposure = exp2(SKY_EXPOSURE_W);
 
     float gradientCurve = mix(SKY_HORIZON_F, SKY_HORIZON_N, VoL);
     float baseGradient = exp(-(1.0 - pow(1.0 - max(VoU, 0.0), gradientCurve)) /
-                             (SKY_DENSITY_D + 0.025));
+                             (CalcSkyDensity(SKY_DENSITY_M, SKY_DENSITY_D, SKY_DENSITY_E) + 0.025));
 
     #if SKY_GROUND > 0
     float groundVoU = clamp(-VoU * 1.015 - 0.015, 0.0, 1.0);

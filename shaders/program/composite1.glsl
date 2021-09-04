@@ -106,7 +106,7 @@ void main() {
 		vl *= skylightshaftCol;
 		#endif
 	}
-	if (isEyeInWater == 1) vl *= lightshaftWater.rgb * (timeBrightness + LIGHTSHAFT_WI) * 0.25 * WATER_I;
+	if (isEyeInWater == 1) vl *= lightshaftWater.rgb * (timeBrightness + LIGHTSHAFT_WI) * 0.1;
 	#endif
 
 	#ifdef END
@@ -120,6 +120,7 @@ void main() {
 	color.rgb += vl;
 	#else
 	float timeFactor = 1.0 - timeBrightness;
+	if (isEyeInWater == 1) timeFactor = 1;
 	if (timeFactor != 0){
 		color.rgb += vl;
 	}

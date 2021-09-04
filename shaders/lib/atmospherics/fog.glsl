@@ -133,13 +133,15 @@ void NormalFog(inout vec3 color, vec3 viewPos, float fogType) {
 		vec3 pos = worldPos.xyz + cameraPosition.xyz + vec3(frametime * 4.0, 0, 0) + 100;
 		float height;
 		if (fogType == 0){
-			height = (pos.y - 90) * 0.01;
+			height = (pos.y - FOG_FIRST_LAYER_ALTITUDE) * 0.01;
 		}else{
-			height = (pos.y - 160) * 0.01;
+			height = (pos.y - FOG_SECOND_LAYER_ALTITUDE) * 0.01;
 		}
 			height = pow(height, 8);
 			height = clamp(height, 0, 1);
 		fog *= 1 - height;
+	} else {
+		fog *= 0;
 	}
 
 	vec3 fogColor = vec3(0);

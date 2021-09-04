@@ -80,7 +80,7 @@ void SunGlare(inout vec3 color, vec3 viewPos, vec3 lightCol) {
 	if (isEyeInWater == 1) color += 0.25 * lightCol * visibility;
 	#endif
 	#ifdef SUN_GLARE
-	color += 0.75 * lightCol * visibility * (1.0 + 0.25 * isEyeInWater) * 0.2;
+	color += lightCol * visibility * (1.0 + 0.25 * isEyeInWater) * 0.05;
 	#endif
 }
 
@@ -138,7 +138,7 @@ void main() {
 	if (moonVisibility != 0) albedo.rgb += DrawAurora(viewPos.xyz, dither, 8);
 	#endif
 
-	SunGlare(albedo, viewPos.xyz, lightCol);
+	SunGlare(albedo, viewPos.xyz, skylightCol.rgb);
 
 	albedo.rgb *= 1 * (1.0 + nightVision);
 	#endif
