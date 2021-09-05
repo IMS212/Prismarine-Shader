@@ -49,7 +49,6 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
     #endif
     
     float newLightmap  = pow(lightmap.x, 10.0) * 1.5 + lightmap.x * 0.8;
-    newLightmap = pow(newLightmap, 1.50);
     float blocklightStrength = BLOCKLIGHT_I;
 
     #ifdef NETHER
@@ -150,10 +149,11 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
     if (heldItemId == 53 || heldItemId2 == 53) blocklightCol = TORCH.rgb;
     if (heldItemId == 52 || heldItemId2 == 52) blocklightCol = REDSTONE_TORCH.rgb;
     if (heldItemId == 51 || heldItemId2 == 51) blocklightCol = SOUL_TORCH.rgb;
-    blocklightCol.r = 1.5 - lightmap.x;
-    blocklightCol.b = 1 - lightmap.x;
-    blocklightCol.g = 0.5 * lightmap.x;
-
+    if (lightmap.x <= 0.95){
+        blocklightCol.r *= (newLightmap * newLightmap) * 2;
+        blocklightCol.g *= (3.50 - newLightmap) * newLightmap;
+        blocklightCol.b *= (3.50 - newLightmap - newLightmap) * 4;
+    }
     vec3 blockLighting = newLightmap * newLightmap * blocklightCol;
 
     //ALBEDO-BASED
