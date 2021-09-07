@@ -63,10 +63,16 @@ float GetLuminance(vec3 color) {
 void UnderwaterDistort(inout vec2 texCoord) {
 	vec2 originalTexCoord = texCoord;
 
+	float strength = 1.0;
+
+	#ifdef NETHER
+	strength *= NETHER_HEAT_WAVE_STRENGTH
+	#endif
+
 	texCoord += vec2(
 		cos(texCoord.y * 32.0 + frameTimeCounter * 3.0),
 		sin(texCoord.x * 32.0 + frameTimeCounter * 1.7)
-	) * 0.0005;
+	) * 0.0005 * strength;
 
 	float mask = float(
 		texCoord.x > 0.0 && texCoord.x < 1.0 &&

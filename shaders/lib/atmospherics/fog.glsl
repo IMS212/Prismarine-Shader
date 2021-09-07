@@ -147,13 +147,6 @@ void NormalFog(inout vec3 color, vec3 viewPos, float fogType) {
 	vec3 fogColor = vec3(0);
 	fogColor = GetFogColor(viewPos, fogType);
 
-	#if NIGHT_SKY_MODE == 1
-	if (moonVisibility > 0.0 && rainStrength != 1.0 && isEyeInWater == 0){
-		fogColor += DrawRift(viewPos.xyz, dither, 4, 1);
-		fogColor += DrawRift(viewPos.xyz, dither, 4, 0);
-	}
-	#endif
-
 	#ifdef STARS
 	#ifdef SMALL_STARS
 	DrawStars(fogColor, viewPos.xyz);

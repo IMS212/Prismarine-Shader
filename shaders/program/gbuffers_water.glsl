@@ -427,11 +427,6 @@ void main() {
 				skyReflection += DrawRift(skyRefPos * 100.0, dither, 6, 0);
 				#endif
 
-				#if CLOUDS == 1
-				vec4 cloud = DrawCloud(skyRefPos * 100.0, dither, lightCol, ambientCol);
-				skyReflection = mix(skyReflection, cloud.rgb, cloud.a);
-				#endif
-
 				skyReflection *= (4.0 - 3.0 * eBS) * lightmap.y;
 				#endif
 
@@ -508,11 +503,6 @@ void main() {
 					skyReflection += DrawRift(skyRefPos * 100.0, dither, 6, 0);
 					#endif
 
-					#if CLOUDS == 1
-					vec4 cloud = DrawCloud(skyRefPos * 100.0, dither, lightCol, ambientCol);
-					skyReflection = mix(skyReflection, cloud.rgb, cloud.a);
-					#endif
-
 					skyReflection = mix(
 						vanillaDiffuse * minLightCol,
 						skyReflection * (4.0 - 3.0 * eBS),
@@ -558,11 +548,13 @@ void main() {
 			vec3 oViewPos = ToNDC(oScreenPos);
 			#endif
 
+			float lightmapFactor = 1.50 - lightmap.y;
+
 			vec4 waterFog = GetWaterFog(viewPos.xyz - oViewPos);
 			waterFog *= 1-rainStrength;
 			waterFog *= 1-moonVisibility;
 			waterFog *= 0+eBS;
-			albedo = mix(waterFog, vec4(albedo.rgb, 0.75), albedo.a);
+			albedo = mix(waterFog * lightmapFactor, vec4(albedo.rgb, 0.75), albedo.a);
 		}
 
 	}

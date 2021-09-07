@@ -18,9 +18,7 @@ uniform float viewWidth, viewHeight, aspectRatio;
 uniform sampler2D colortex1;
 
 //Optifine Constants//
-#ifdef LIGHTSHAFT
 const bool colortex1MipmapEnabled = true;
-#endif
 
 //Common Functions//
 float GetLuminance(vec3 color) {

@@ -208,8 +208,10 @@ vec3 DrawAurora(vec3 viewPos, float dither, int samples) {
 #endif
 
 float RiftSample(vec2 coord, vec2 wind, float VoU) {
-	float noise = texture2D(noisetex, coord * 0.1250  + wind * 0.2).b;
-		  noise+= texture2D(noisetex, coord * 0.0625 + wind * 0.15).b;	
+	float noise = texture2D(noisetex, coord * 0.5000  + wind * 0.30).b;
+		  noise = texture2D(noisetex, coord * 0.2500  + wind * 0.25).b;
+		  noise+= texture2D(noisetex, coord * 0.1250  + wind * 0.20).b;
+		  noise+= texture2D(noisetex, coord * 0.0625  + wind * 0.15).b;	
 		  noise+= texture2D(noisetex, coord * 0.03125 + wind * 0.10).b;
 		  noise+= texture2D(noisetex, coord * 0.01575 + wind * 0.05).b;
 		  noise+= texture2D(noisetex, coord * 0.007150).b;
@@ -272,7 +274,7 @@ vec3 DrawRift(vec3 viewPos, float dither, int samples, float riftType) {
 					#if defined END
 					riftColor = mix(secondRiftLowCol, secondRiftHighCol, pow(currentStep, 0.4)) * vec3(END_R * 6.0, END_G * 0.5, END_B * 2.0);
 					#elif defined OVERWORLD
-					riftColor = mix(secondRiftLowCol, secondRiftHighCol, pow(currentStep, 0.4)) * 0.4;
+					riftColor = mix(secondRiftLowCol, secondRiftHighCol, pow(currentStep, 0.4)) * 0.25;
 					#elif defined NETHER
 					riftColor = mix(netherCol.rgb, netherCol.rgb, pow(currentStep, 0.4));
 					#endif

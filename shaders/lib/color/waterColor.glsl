@@ -7,5 +7,6 @@ vec4 waterShadowColor = waterSColorSqrt * waterSColorSqrt;
 vec4 waterCColorSqrt = vec4(vec3(0.25, 0.50, 0.75), 1.0) * WATER_I;
 vec4 causticCol = waterCColorSqrt * waterCColorSqrt;
 
-const float waterAlpha = WATER_A;
-const float waterFogRange = 64.0 / WATER_FOG_DENSITY;
+float waterAlpha = WATER_A;
+float density = WATER_FOG_DENSITY;
+float waterFogRange = 64.0 / density;

@@ -25,6 +25,7 @@ screen.FOGWEATHER=Fog & Weather Config
 screen.WATER=Water
 
 screen.POST_EFFECTS=Post Effects
+screen.BLUR=Blur Effects
 
 screen.CGT=Color Grading & Tonemap
 screen.COLOR_GRADING=Color Grading Config
@@ -69,8 +70,8 @@ screen.LIGHT_N=Light (Night)
 screen.AMBIENT_N=Ambient (Night)
 screen.MINLIGHT=Minimum Light
 screen.BLOCKLIGHT_COLOR=Blocklight Color
-screen.SKY_COLOR_SIMPLE=Simple Sky Color
-screen.SKY_COLOR_DEFAULT=Base Sky Color
+screen.SKY_DENSITY=Density
+screen.SKY_EXPOSURE=Exposure
 screen.SKY_COLOR=Sky Color
 screen.FOG_TINT=Tint
 screen.WATER_COLOR=Water Color
@@ -410,6 +411,10 @@ option.SKY_DENSITY_N=Night Density
 option.SKY_EXPOSURE_N=Night Exposure
 option.SKY_DENSITY_W=Weather Density
 option.SKY_EXPOSURE_W=Weather Exposure
+option.SKY_DENSITY_E=Evening Density
+option.SKY_EXPOSURE_E=Evening Exposure
+option.SKY_DENSITY_M=Morning Density
+option.SKY_EXPOSURE_M=Morning Exposure
 option.SKY_HORIZON_N=Near Horizon
 option.SKY_HORIZON_F=Far Horizon
 option.SKY_GROUND_BRIGHTNESS=Sky Ground Brightness
@@ -573,6 +578,8 @@ value.WATER_PIXEL.0=OFF
 
 #Post Effects
 option.NETHER_HEAT_WAVE=Nether Heat Wave
+option.NETHER_HEAT_WAVE_STRENGTH=Heat Wave Strength
+
 option.CHROMATIC_ABERRATION=Chromatic Aberration 
 option.CHROMATIC_ABERRATION_STRENGTH=Ch. Aberration Strength
 option.CA_COLOR=Ch. Aberration Color
@@ -583,9 +590,15 @@ value.CA_COLOR.3=RGB
 option.Sharpen=Image Sharpening
 
 option.DOF=Depth of Field
-option.DOF.comment=Enables camera focus effect.
+option.DOF.comment=Enables camera focus effect. §e[*]&f Doesn't work with Distant Blur.
 option.DOF_STRENGTH=DoF Strength
 option.DOF_STRENGTH.comment=Adjusts the focus strength, higher value blurs quicker.
+
+option.DISTANT_BLUR=Distant Blur
+option.DISTANT_BLUR.comment=Applies blur to the far objects.
+option.DISTANT_BLUR_STRENGTH=Blur Strength
+option.DISTANT_BLUR_RANGE=Blur Range
+option.DISTANT_BLUR_RANGE.comment=Changes the distance of blur. Bigger values decrease the distance making the blur closer to you.
 
 option.MOTION_BLUR=Motion Blur
 option.MOTION_BLUR.comment=Enables camera motion based blurring.
