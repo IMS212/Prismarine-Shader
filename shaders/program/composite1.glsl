@@ -119,9 +119,10 @@ void main() {
 	#ifdef LIGHTSHAFT_DAY
 	color.rgb += vl;
 	#else
-	float timeFactor = 1.0 - timeBrightness;
-	if (isEyeInWater == 1) timeFactor = 1;
-	if (timeFactor != 0){
+	float visibilityFactor = 1.0 - timeBrightness;
+	if (visibilityFactor <= 0.025) visibilityFactor = 1 - eBS;
+	if (isEyeInWater == 1) visibilityFactor = 1;
+	if (visibilityFactor != 0){
 		color.rgb += vl;
 	}
 	#endif

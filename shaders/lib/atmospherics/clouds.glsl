@@ -208,22 +208,22 @@ vec3 DrawAurora(vec3 viewPos, float dither, int samples) {
 #endif
 
 float RiftSample(vec2 coord, vec2 wind, float VoU) {
-	float noise = texture2D(noisetex, coord * 0.5000  + wind * 0.30).b;
-		  noise = texture2D(noisetex, coord * 0.2500  + wind * 0.25).b;
-		  noise+= texture2D(noisetex, coord * 0.1250  + wind * 0.20).b;
-		  noise+= texture2D(noisetex, coord * 0.0625  + wind * 0.15).b;	
-		  noise+= texture2D(noisetex, coord * 0.03125 + wind * 0.10).b;
-		  noise+= texture2D(noisetex, coord * 0.01575 + wind * 0.05).b;
+	float noise = texture2D(noisetex, coord * 0.5000  + wind * 0.20).b;
+		  noise = texture2D(noisetex, coord * 0.2500  + wind * 0.15).b;
+		  noise+= texture2D(noisetex, coord * 0.1250  + wind * 0.10).b;
+		  noise+= texture2D(noisetex, coord * 0.0625  + wind * 0.05).b;	
+		  noise+= texture2D(noisetex, coord * 0.03125).b;
+		  noise+= texture2D(noisetex, coord * 0.01575).b;
 		  noise+= texture2D(noisetex, coord * 0.007150).b;
-	noise = max(1.0 - 2.0 * (0.5 * VoU + 0.5) * abs(noise - 3.25), 0.0);
+	noise = max(1.0 - 2.0 * (0.5 * VoU + 0.5) * abs(noise - 4), 0.0);
 
 	return noise;
 }
 
 vec3 DrawRift(vec3 viewPos, float dither, int samples, float riftType) {
 	dither *= 0.25;
-	float VoU = dot(normalize(viewPos.xyz), upVec);
-	VoU = abs(VoU);
+
+	float VoU = abs(dot(normalize(viewPos.xyz), upVec));
 	float sampleStep = 1.0 / samples;
 	float currentStep = dither * sampleStep;
 
@@ -238,19 +238,19 @@ vec3 DrawRift(vec3 viewPos, float dither, int samples, float riftType) {
 	if (VoU > 0.0) {
 		vec3 wpos = normalize((gbufferModelViewInverse * vec4(viewPos, 1.0)).xyz);
 		for(int i = 0; i < samples; i++) {
-			vec3 planeCoord = wpos * ((0.0 + currentStep * 16.0)) * 0.002;
+			vec3 planeCoord = wpos * ((0.0 + currentStep * 16.0)) * 0.00175;
 
 			float iDither = i + dither;
-			vec2 coord = cameraPosition.xz * 0.00008 + planeCoord.xz;
+			vec2 coord = cameraPosition.xz * 0.00006 + planeCoord.xz;
 
 			if (riftType == 0){
 				coord += vec2(coord.y, -coord.x) * 0.75;
-				coord += cos(mix(vec2(cos(iDither * 1), sin(iDither * 2.00)), vec2(cos(iDither * 3.0), sin(iDither * 4.00)), iDither) * 0.0020);
+				coord += cos(mix(vec2(cos(iDither * 1), sin(iDither * 2.00)), vec2(cos(iDither * 3.0), sin(iDither * 4.00)), iDither) * 0.0015);
 				coord += sin(mix(vec2(cos(iDither * 2), sin(iDither * 2.50)), vec2(cos(iDither * 3.0), sin(iDither * 3.50)), iDither) * 0.0005);
-				coord += cos(mix(vec2(cos(iDither * 3), sin(iDither * 3.75)), vec2(cos(iDither * 4.5), sin(iDither * 5.25)), iDither) * 0.0015);
+				coord += cos(mix(vec2(cos(iDither * 3), sin(iDither * 3.75)), vec2(cos(iDither * 4.5), sin(iDither * 5.25)), iDither) * 0.0010);
 			}else{
 				coord += vec2(coord.y, -coord.x) * 1.25;
-				coord += cos(mix(vec2(cos(iDither * 0.50), sin(iDither * 1.00)), vec2(cos(iDither * 1.50), sin(iDither * 2.00)), iDither) * 0.0010);
+				coord += cos(mix(vec2(cos(iDither * 0.50), sin(iDither * 1.00)), vec2(cos(iDither * 1.50), sin(iDither * 2.00)), iDither) * 0.0025);
 				coord += sin(mix(vec2(cos(iDither * 1.00), sin(iDither * 2.00)), vec2(cos(iDither * 3.00), sin(iDither * 4.00)), iDither) * 0.0015);
 				coord += cos(mix(vec2(cos(iDither * 1.50), sin(iDither * 3.00)), vec2(cos(iDither * 4.50), sin(iDither * 6.00)), iDither) * 0.0005);
 			}

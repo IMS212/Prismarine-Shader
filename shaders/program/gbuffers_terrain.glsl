@@ -10,7 +10,7 @@ https://bitslablab.com
 #ifdef FSH
 
 //Varyings//
-varying float mat, recolor, isEmissive, isWater;
+varying float mat, recolor, isEmissive, isPoppy;
 
 varying vec2 texCoord, lmCoord;
 
@@ -153,11 +153,6 @@ void main() {
     vec4 albedo = texture2D(texture, texCoord) * vec4(color.rgb, 1.0);
 	vec3 newNormal = normal;
 	float smoothness = 0.0;
-
-	if (isWater > 0.9 && isEyeInWater < 0.9){
-		vec2 newcoord = UnderwaterDistort(texCoord.xy);
-		albedo = texture2D(texture, newcoord) * vec4(color.rgb, 1.0);
-	}
 
 	#ifdef ADVANCED_MATERIALS
 	vec2 newCoord = vTexCoord.st * vTexCoordAM.pq + vTexCoordAM.st;
@@ -426,7 +421,7 @@ void main() {
 #ifdef VSH
 
 //Varyings//
-varying float mat, recolor, isEmissive, isWater;
+varying float mat, recolor, isEmissive, isPoppy;
 
 varying vec2 texCoord, lmCoord;
 
@@ -518,7 +513,7 @@ void main() {
     
 	color = gl_Color;
 	
-	mat = 0.0; recolor = 0.0; isEmissive = 0.0; isWater = 0.0;
+	mat = 0.0; recolor = 0.0; isEmissive = 0.0; isPoppy = 0.0;
 
 	if (mc_Entity.x >= 10100 && mc_Entity.x < 10200)
 		mat = 1.0;
@@ -548,8 +543,8 @@ void main() {
 	if (mc_Entity.x == 10510)
 		isEmissive = 1.0;
 
-	if (mc_Entity.x == 10300)
-		isWater = 1.0;
+	if (mc_Entity.x == 10511)
+		isPoppy = 1.0;
 
 	const vec2 sunRotationData = vec2(cos(sunPathRotation * 0.01745329251994), -sin(sunPathRotation * 0.01745329251994));
 	float ang = fract(timeAngle - 0.25);

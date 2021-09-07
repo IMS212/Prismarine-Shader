@@ -90,8 +90,9 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 	vec3 vl = vec3(0.0);
 
 	#ifndef LIGHTSHAFT_DAY
-	float timeFactor = 1.0 - timeBrightness;
-	if (isEyeInWater == 1) timeFactor = 1;
+	float visibilityFactor = 1.0 - timeBrightness;
+	if (visibilityFactor <= 0.025) visibilityFactor = 1 - eBS;
+	if (isEyeInWater == 1) visibilityFactor = 1;
 	#endif
 
 	bool isThereADragon = gl_Fog.start / far < 0.5; //yes emin thanks for telling people about this in shaderlabs
@@ -123,7 +124,7 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 	visibility = mix(1.0, visibility, 0.25 * 1 + 0.75) * 0.14285 * float(pixeldepth0 > 0.56);
 
 	#ifndef LIGHTSHAFT_DAY
-	visibility *= timeFactor;
+	visibility *= visibilityFactor;
 	#endif
 	
 	#ifdef LIGHTSHAFT_PERSISTENCE
@@ -147,7 +148,7 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 
 	if (visibility > 0.0) {
 		float minDistFactor = LIGHTSHAFT_MIN_DISTANCE;
-		minDistFactor *= 1 + (cameraPosition.y * 0.01);
+		minDistFactor *= 0.5 + (cameraPosition.y * 0.025);
 		float maxDist = LIGHTSHAFT_MAX_DISTANCE * 1.5;
 		
 		float depth0 = GetLinearDepth2(pixeldepth0);
@@ -212,7 +213,8 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 					shadow *= noise;
 				}
 				#elif defined LIGHTSHAFT_CLOUDY_NOISE && defined OVERWORLD
-				if (isEyeInWater != 1){
+				float timeFactor = 1.0 - timeBrightness;
+				if (isEyeInWater != 1 && timeFactor > 0.025){
 					vec3 npos = worldposition.xyz + cameraPosition.xyz;
 
 					float vh = getHeightNoise((worldposition.xz + cameraPosition.xz + (frametime * 2)) * 0.005);

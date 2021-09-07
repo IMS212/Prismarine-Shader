@@ -147,15 +147,6 @@ void NormalFog(inout vec3 color, vec3 viewPos, float fogType) {
 	vec3 fogColor = vec3(0);
 	fogColor = GetFogColor(viewPos, fogType);
 
-	#ifdef STARS
-	#ifdef SMALL_STARS
-	DrawStars(fogColor, viewPos.xyz);
-	#endif
-	#ifdef BIG_STARS
-	DrawBigStars(fogColor, viewPos.xyz);
-	#endif
-	#endif
-
 	if (isEyeInWater == 1) density *= 0.0;
 
 	#if DISTANT_FADE == 1 || DISTANT_FADE == 3

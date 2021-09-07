@@ -140,9 +140,10 @@ void main() {
 	#ifdef LIGHTSHAFT_DAY
 	gl_FragData[1] = vec4(vl, 1.0);
 	#else
-	float timeFactor = 1.0 - timeBrightness;
-	if (isEyeInWater == 1) timeFactor = 1;
-	if (timeFactor != 0){
+	float visibilityFactor = 1.0 - timeBrightness;
+	if (visibilityFactor <= 0.025) visibilityFactor = 1 - eBS;
+	if (isEyeInWater == 1) visibilityFactor = 1;
+	if (visibilityFactor != 0){
 		gl_FragData[1] = vec4(vl, 1.0);
 	}
 	#endif
