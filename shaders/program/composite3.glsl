@@ -15,7 +15,7 @@ varying vec2 texCoord;
 //Uniforms//
 uniform float viewWidth, viewHeight, aspectRatio;
 uniform float centerDepthSmooth;
-
+uniform float far;
 uniform mat4 gbufferProjection, gbufferProjectionInverse, gbufferModelViewInverse, shadowModelView, shadowProjection;
 
 uniform sampler2D colortex0;
@@ -134,7 +134,7 @@ vec3 DepthOfField(vec3 color, float z, vec4 viewPos) {
 	
 	#ifdef DISTANT_BLUR
 	vec3 worldPos = ToWorld(viewPos.xyz);
-	coc = min(length(worldPos) * DISTANT_BLUR_RANGE * 0.00025, DISTANT_BLUR_STRENGTH * 0.025) * DISTANT_BLUR_STRENGTH;
+	coc = 1.0 - (far - (length(worldPos) + pow(DISTANT_BLUR_RANGE, 0.125))) * 5.0 / (DISTANT_BLUR_STRENGTH * far);
 	#endif
 
 	if (coc > 0.0 && hand < 0.5) {
