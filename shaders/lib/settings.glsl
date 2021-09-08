@@ -564,8 +564,8 @@ https://bitslablab.com
 
 //Post Effects//
   #define DISTANT_BLUR
-  #define DISTANT_BLUR_STRENGTH 4.0 //[1.0 2.0 3.0 4.0 5.0 6.0 7.0 8.0]
-  #define DISTANT_BLUR_RANGE 4 //[1 2 3 4 5 6 7 8]
+  #define DISTANT_BLUR_STRENGTH 2.0 //[1.0 1.5 2.0 2.5 3.0 3.5 4.0]
+  #define DISTANT_BLUR_RANGE 3 //[1 2 3 4 5 6 7 8]
 //#define DOF
   #define DOF_STRENGTH 8.0 //[1.0 2.0 4.0 8.0 16.0 32.0 64.0 128.0 256.0 384.0 512.0]
 //#define MOTION_BLUR
