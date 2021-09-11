@@ -11,7 +11,7 @@ https://bitslablab.com
 
 //Varyings//
 varying float mat;
-varying vec4 texCoord, position;
+varying vec4 texCoord, position0;
 
 varying vec3 sunVec, upVec, eastVec;
 
@@ -52,7 +52,7 @@ float moonVisibility = clamp((dot(-sunVec, upVec) + 0.05) * 10.0, 0.0, 1.0);
 //Program//
 void main() {
     #if MC_VERSION >= 11300
-	if (blockEntityId == 10250) discard;
+	if (blockEntityId == 10205) discard;
 	#endif
 
     vec4 albedo = texture2D(tex, texCoord.xy);
@@ -61,9 +61,6 @@ void main() {
     float premult = float(mat > 0.98 && mat < 1.02);
 	float disable = float(mat > 1.98 && mat < 2.02);
 	float water = float (mat > 2.98);
-
-	float timeFactor = 0.25 + timeBrightness;
-
 	if (disable > 0.5 || albedo.a < 0.01) discard;
 
     #ifdef SHADOW_COLOR
@@ -75,13 +72,13 @@ void main() {
 
 	#ifdef WATER_TINT
 	if (water > 0.9){
-		albedo.rgb = waterShadowColor.rgb * WATER_I * (3 - isEyeInWater - isEyeInWater) * timeFactor;
+		albedo.rgb = waterShadowColor.rgb * WATER_I * (3 - isEyeInWater - isEyeInWater);
 	}
 	#endif
 
 	#ifdef PROJECTED_CAUSTICS
 	if (water > 0.9){
-		vec3 caustic = (getCaustics(position.xyz+cameraPosition.xyz) * WATER_CAUSTICS_STRENGTH) * causticCol.rgb * (2.5 - isEyeInWater) * timeFactor;
+		vec3 caustic = (getCaustics(position0.xyz+cameraPosition.xyz) * WATER_CAUSTICS_STRENGTH) * causticCol.rgb * (2.5 - isEyeInWater);
 		albedo.rgb *= caustic;
 	}
 	#endif
@@ -97,7 +94,7 @@ void main() {
 //Varyings//
 varying float mat;
 
-varying vec4 texCoord, position;
+varying vec4 texCoord, position0;
 varying vec3 sunVec, upVec, eastVec;
 varying vec4 color;
 
@@ -137,11 +134,13 @@ void main() {
 	color = gl_Color;
 	
 	mat = 0;
-	if (mc_Entity.x == 10301) mat = 1;
-	if (mc_Entity.x == 10249 || mc_Entity.x == 10252 || mc_Entity.x == 10301) mat = 2;
+	if (mc_Entity.x == 10301 || mc_Entity.x == 10302) mat = 1;
+	if (mc_Entity.x == 10300 || mc_Entity.x == 10204) mat = 2;
 	if (mc_Entity.x == 10300) mat = 3;
 	
-	position = shadowModelViewInverse * shadowProjectionInverse * ftransform();
+	position0 = shadowModelViewInverse * shadowProjectionInverse * ftransform();
+
+	vec4 position = shadowModelViewInverse * shadowProjectionInverse * ftransform();
 	
 	float istopv = gl_MultiTexCoord0.t < mc_midTexCoord.t ? 1.0 : 0.0;
 	position.xyz = WavingBlocks(position.xyz, istopv);
@@ -149,14 +148,6 @@ void main() {
 	#ifdef WORLD_CURVATURE
 	position.y -= WorldCurvature(position.xz);
 	#endif
-
-	const vec2 sunRotationData = vec2(cos(sunPathRotation * 0.01745329251994), -sin(sunPathRotation * 0.01745329251994));
-	float ang = fract(timeAngle - 0.25);
-	ang = (ang + (cos(ang * 3.14159265358979) * -0.5 + 0.5 - ang) / 3.0) * 6.28318530717959;
-	sunVec = normalize((gbufferModelView * vec4(vec3(-sin(ang), cos(ang) * sunRotationData) * 2000.0, 1.0)).xyz);
-
-	upVec = normalize(gbufferModelView[1].xyz);
-	eastVec = normalize(gbufferModelView[0].xyz);
 	
 	gl_Position = shadowProjection * shadowModelView * position;
 

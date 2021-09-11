@@ -100,27 +100,12 @@ float InterleavedGradientNoise() {
 	return fract(n + frameCounter / 8.0);
 }
 
+#ifdef GLOWING_THINGS
 vec3 GetGlow(vec3 color){
     vec3 x = max(vec3(0), color);
     return x * x;
 }
-
-vec2 UnderwaterDistort(vec2 texCoord) {
-	vec2 originalTexCoord = texCoord;
-
-	texCoord += vec2(
-		cos(texCoord.y * 32.0 + frameTimeCounter * 3.0),
-		sin(texCoord.x * 32.0 + frameTimeCounter * 1.7)
-	) * 0.0005;
-
-	float mask = float(
-		texCoord.x > 0.0 && texCoord.x < 1.0 &&
-	    texCoord.y > 0.0 && texCoord.y < 1.0
-	)
-	;
-	if (mask < 0.5) texCoord = originalTexCoord;
-	return texCoord;
-}
+#endif
 
 //Includes//
 #include "/lib/prismarine/functions.glsl"
@@ -387,10 +372,12 @@ void main() {
 		}
 		#endif
 
+		#ifdef GLOWING_THINGS
 		vec3 t = texture2D(texture, texCoord).rgb;
 		if (isEmissive == 1){
 			if (t.r != t.b && t.b != t.g) albedo.rgb = GetGlow(t);
 		}
+		#endif
 
 		vec2 noisePos = (cameraPosition.xz + worldPos.xz);
 		#if NOISEMAP_SHADOWS == 1
