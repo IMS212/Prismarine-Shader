@@ -102,7 +102,7 @@ void main() {
 	newTexCoord = floor(newTexCoord * view) / view;
 	#endif
 
-	#ifdef CHROMATIC_ABERRATION2
+	#ifdef CHROMATIC_ABERRATION
 	vec3 color = getChromaticAbberation(texCoord, aberrationStrength);
 	#else
 	vec3 color = texture2D(colortex1, texCoord).rgb;

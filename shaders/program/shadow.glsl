@@ -43,6 +43,40 @@ float frametime = frameTimeCounter * ANIMATION_SPEED;
 float sunVisibility  = clamp((dot( sunVec, upVec) + 0.05) * 10.0, 0.0, 1.0);
 float moonVisibility = clamp((dot(-sunVec, upVec) + 0.05) * 10.0, 0.0, 1.0);
 
+const float aberrationStrength = float(CHROMATIC_ABERRATION_STRENGTH) / 512;
+//CA from DrDesten [modified]
+#ifdef CHROMATIC_ABERRATION
+vec2 scaleCoord(vec2 coord, float scale) {
+    coord = (coord * scale) - (0.5 * (scale - 1));
+    return clamp(coord, 0, 0.999999);
+}
+
+vec3 getChromaticAbberation(vec2 coord, float amount) {
+    vec3 col = vec3(0.0);
+
+    amount = distance(coord, vec2(0.5)) * amount;
+    #if CA_COLOR == 0
+    col.r     = texture2D(tex, scaleCoord(coord, 1.0 - amount)).r;
+    col.g     = texture2D(tex, coord).g;
+    col.b     = texture2D(tex, scaleCoord(coord, 1.0 + amount)).b;
+    #elif CA_COLOR == 1
+    col.r     = texture2D(tex, coord).r;
+    col.g     = texture2D(tex, scaleCoord(coord, 1.0 - amount)).g;
+    col.b     = texture2D(tex, scaleCoord(coord, 1.0 + amount)).b;
+    #elif CA_COLOR == 2
+    col.r     = texture2D(tex, scaleCoord(coord, 1.0 - amount)).r;
+    col.g     = texture2D(tex, scaleCoord(coord, 1.0 + amount)).g;
+    col.b     = texture2D(tex, coord).b;
+    #elif CA_COLOR == 3
+    col.r     = texture2D(tex, scaleCoord(coord, 1.0 - amount)).r;
+    col.g     = texture2D(tex, scaleCoord(coord, 1.0 + amount)).g;
+    col.b     = texture2D(tex, scaleCoord(coord, 1.0 + amount)).b;
+    #endif
+
+    return col;
+}
+#endif
+
 #include "/lib/color/waterColor.glsl"
 #include "/lib/color/lightColor.glsl"
 #include "/lib/prismarine/functions.glsl"
@@ -69,6 +103,8 @@ void main() {
 	#else
 	if ((premult > 0.5 && albedo.a < 0.98)) albedo.a = 0.0;
 	#endif
+
+	if (water > 0.9) albedo.rgb *= getChromaticAbberation(texCoord.xy, aberrationStrength);
 
 	#ifdef WATER_TINT
 	if (water > 0.9){
