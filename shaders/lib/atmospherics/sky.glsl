@@ -37,7 +37,7 @@ vec3 GetSkyColor(vec3 viewPos, bool isReflection) {
     vec3 nViewPos = normalize(viewPos);
 
     float VoU = clamp(dot(nViewPos,  upVec), -1.0, 1.0);
-    float VoL = clamp(dot(nViewPos, sunVec), -1.0, 1.0);
+    float VoL = clamp(dot(nViewPos, sunVec), -1.5, 1.0);
 
     float groundDensity = 0.08 * (4.0 - 3.0 * sunVisibility) *
                           (10.0 * rainStrength * rainStrength + 1.0);
