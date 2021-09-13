@@ -47,26 +47,31 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
     #else
     vec3 sceneLighting = netherColSqrt.rgb * 0.1;
     #endif
-    
+
     float newLightmap  = pow(lightmap.x, 10.0) * 1.5 + lightmap.x * 0.8;
-    float blocklightStrength = BLOCKLIGHT_I;
+    float lightMapBrightnessFactor = 4 - pow(lightmap.x, 4) - pow(lightmap.x, 4) - pow(lightmap.x, 4) - pow(lightmap.x, 4);
+    blocklightCol *= lightMapBrightnessFactor;
 
     #ifdef LIGHTMAP_BRIGHTNESS_RECOLOR
     if (lightmap.x <= 0.95){
-        blocklightCol.r *= (newLightmap * newLightmap) * 2 * LIGHTMAP_R;
-        blocklightCol.g *= (3.50 - newLightmap) * newLightmap * LIGHTMAP_G;
-        blocklightCol.b *= (3.50 - newLightmap - newLightmap) * 4 * LIGHTMAP_B;
+        blocklightCol.r *= (pow(newLightmap, 6)) * 3 * LIGHTMAP_R;
+        blocklightCol.g *= (3.50 - newLightmap) * newLightmap * 1.25 * LIGHTMAP_G;
+        blocklightCol.b *= (3.50 - newLightmap - newLightmap) * 2.50 * LIGHTMAP_B;
     }
     #endif
 
+    #ifdef LIGHTMAP_DIM_CUTOFF
+    blocklightCol *= pow(newLightmap, DIM_CUTOFF_FACTOR);
+    #endif
+
     #ifdef NETHER
-    vec3 blocklightColSqrtNether = vec3(BLOCKLIGHT_R_NETHER, BLOCKLIGHT_G_NETHER, BLOCKLIGHT_B_NETHER) * blocklightStrength / 300.0;
+    vec3 blocklightColSqrtNether = vec3(BLOCKLIGHT_R_NETHER, BLOCKLIGHT_G_NETHER, BLOCKLIGHT_B_NETHER) * BLOCKLIGHT_I / 300.0;
     vec3 blocklightColNether = blocklightColSqrtNether * blocklightColSqrtNether;
     vec3 blockLighting = blocklightColNether * newLightmap * newLightmap;
     #endif
 
     #ifdef END
-    vec3 blocklightColSqrtEnd = vec3(BLOCKLIGHT_R_END, BLOCKLIGHT_G_END, BLOCKLIGHT_B_END) * blocklightStrength / 300.0;
+    vec3 blocklightColSqrtEnd = vec3(BLOCKLIGHT_R_END, BLOCKLIGHT_G_END, BLOCKLIGHT_B_END) * BLOCKLIGHT_I / 300.0;
     vec3 blocklightColEnd = blocklightColSqrtEnd * blocklightColSqrtEnd;
     vec3 blockLighting = blocklightColEnd * newLightmap * newLightmap;
     #endif
@@ -83,7 +88,7 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
 	float redColStatic    = texture2D(noisetex, (cameraPosition.xz + worldPos.xz) * 0.0004).r;
 	float greenColStatic  = texture2D(noisetex, (cameraPosition.xz + worldPos.xz) * 0.0006).r;
 	float blueColStatic   = texture2D(noisetex, (cameraPosition.xz + worldPos.xz) * 0.0008).r;
-    blocklightCol   = vec3(redCol * redColStatic, greenColStatic, blueCol * blueColStatic) * blocklightStrength;
+    blocklightCol   = vec3(redCol * redColStatic, greenColStatic, blueCol * blueColStatic) * BLOCKLIGHT_I;
     vec3 blockLighting =  newLightmap * newLightmap * blocklightCol;
     
     #elif CLM_MAINCOL == 1
@@ -94,7 +99,7 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
 	float redColStatic    = texture2D(noisetex, (cameraPosition.xz + worldPos.xz) * 0.0004).r;
 	float greenColStatic  = texture2D(noisetex, (cameraPosition.xz + worldPos.xz) * 0.0006).r;
 	float blueColStatic   = texture2D(noisetex, (cameraPosition.xz + worldPos.xz) * 0.0006).r;
-    blocklightCol   = vec3(redCol * redColStatic, greenCol * greenColStatic, blueColStatic) * blocklightStrength;
+    blocklightCol   = vec3(redCol * redColStatic, greenCol * greenColStatic, blueColStatic) * BLOCKLIGHT_I;
     vec3 blockLighting =  newLightmap * newLightmap * blocklightCol;
 
     #elif CLM_MAINCOL == 2
@@ -105,7 +110,7 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
 	float redColStatic    = texture2D(noisetex, (cameraPosition.xz + worldPos.xz) * 0.0006).r;
 	float greenColStatic  = texture2D(noisetex, (cameraPosition.xz + worldPos.xz) * 0.0006).r;
 	float blueColStatic   = texture2D(noisetex, (cameraPosition.xz + worldPos.xz) * 0.0008).r;
-    blocklightCol   = vec3(redColStatic, greenCol * greenColStatic, blueCol * blueColStatic) * blocklightStrength;
+    blocklightCol   = vec3(redColStatic, greenCol * greenColStatic, blueCol * blueColStatic) * BLOCKLIGHT_I;
     vec3 blockLighting =  newLightmap * newLightmap * blocklightCol;
 
     #endif
@@ -116,7 +121,7 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
     #ifdef OVERWORLD
     #if COLORED_LIGHTING_MODE == 3
     vec2 pos = (cameraPosition.xz + worldPos.xz);
-    blocklightCol = x4(ntmix(pos, pos, pos, 0.00025)) * blocklightStrength * 2;
+    blocklightCol = x4(ntmix(pos, pos, pos, 0.00025)) * BLOCKLIGHT_I * 2;
     if (heldItemId == 64 || heldItemId2 == 64) blocklightCol = TORCH.rgb;
     if (heldItemId == 63 || heldItemId2 == 63) blocklightCol = SOUL_TORCH.rgb;
     if (heldItemId == 62 || heldItemId2 == 62) blocklightCol = JACKOLANTERN.rgb;
@@ -164,21 +169,21 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
     //#ifdef GBUFFERS_TERRAIN
     //if (lightFlatten1 == 0){ //removes tinting from the emissive block's albedo leaving it as it is
         //if (albedo.r > albedo.b && albedo.r > albedo.g){
-            //blocklightStrength = 0.1;
+            //BLOCKLIGHT_I = 0.1;
             //blocklightCol = GLOWSTONE.rgb;
         //}
         //if (albedo.g > albedo.r && albedo.g > albedo.b){
-            //blocklightStrength = 0.2;
+            //BLOCKLIGHT_I = 0.2;
             //blocklightCol = vec3(0,1,0.25);
         //}
         //if (albedo.b > albedo.r || albedo.b > albedo.g){
-            //blocklightStrength = 0.3;
+            //BLOCKLIGHT_I = 0.3;
             //blocklightCol = SOUL_TORCH.rgb;
         //}
     //
     //#endif
 
-    //vec3 blockLighting = newLightmap * newLightmap * blocklightCol * blocklightStrength;
+    //vec3 blockLighting = newLightmap * newLightmap * blocklightCol * BLOCKLIGHT_I;
     #endif
     #endif
 

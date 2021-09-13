@@ -47,8 +47,6 @@ uniform sampler2D shadowcolor0;
 uniform sampler2D noisetex;
 #endif
 
-//Attributes//
-
 //Optifine Constants//
 const bool colortex5Clear = false;
 

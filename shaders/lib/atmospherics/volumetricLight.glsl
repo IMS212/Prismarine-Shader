@@ -148,7 +148,7 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 
 	if (visibility > 0.0) {
 		float minDistFactor = LIGHTSHAFT_MIN_DISTANCE;
-		minDistFactor *= 0.5 + (cameraPosition.y * 0.025);
+		if (cameraPosition.y > 0) minDistFactor *= 0.5 + (cameraPosition.y * 0.025);
 		float maxDist = LIGHTSHAFT_MAX_DISTANCE * 1.5;
 		
 		float depth0 = GetLinearDepth2(pixeldepth0);

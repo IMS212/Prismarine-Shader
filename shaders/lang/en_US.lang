@@ -34,6 +34,7 @@ screen.CG_G=Green Channel
 screen.CG_B=Blue Channel
 screen.CG_T=Tint
 
+screen.NEBULA_CONFIG=Nebula Config
 screen.STARS_CONFIG=Stars Config
 screen.LIGHTSHAFT_OPTIONS=Volumetric Rays Config 
 screen.COLOR=Color
@@ -156,7 +157,7 @@ screen.CURVATURE=Curvature
 
 #Settings
 option.ABOUT=Prismarine
-option.ABOUT.comment=Based on BSL by Capt Tatsu - bitslablab.com. Prismarine shader by Septonious and mlgimposter.
+option.ABOUT.comment=Based on BSL by Capt Tatsu - bitslablab.com. Prismarine Shader by Septonious and mlgimposter.
 value.ABOUT.0=BSL Edit
 
 #Lighting
@@ -314,6 +315,19 @@ option.BIG_STARS=Big Stars
 option.SMALL_STARS=Small Stars 
 option.END_STARS=End Stars
 
+option.NEBULA_STRETCHING=Stretching
+option.NEBULA_STRETCHING.comment=Increases vertical stretching of nebulas.
+option.NEBULA_DISTORTION=Distortion
+option.NEBULA_DISTORTION.comment=Makes the shape more chaotic and fantasy.
+option.NEBULA_BRIGHTNESS=Brightness
+option.NEBULA_DITHERING_STRENGTH=Dithering Strength
+option.NEBULA_OFFSET_FACTOR=Offset Factor
+option.NEBULA_OFFSET_FACTOR.comment=Changes nebula movement speed
+option.NEBULA_AMOUNT=Amount
+option.NEBULA_STARS=Nebula Stars 
+option.NEBULA_AURORA_CHECK=Aurora Visibility Check
+option.NEBULA_AURORA_CHECK.comment=Automatically hides nebulas if there are auroras on the sky.
+
 option.ROUND_SUN_MOON_SIZE=Sun/Moon Size
 option.SUN_GLARE=Sun Glare 
 option.SUN_GLARE.comment=Adds a bright circle of light around sun/moon.
@@ -370,6 +384,7 @@ value.FOG_MODE.1=Volumetric
 value.FOG_MODE.2=Mixed
 
 option.LIGHTSHAFT_DAY=Noon Light Shafts
+option.LIGHTSHAFT_NIGHT=Night Light Shafts
 option.LIGHTSHAFT_PERSISTENCE=Persistence
 option.LIGHTSHAFT_PERSISTENCE.comment=Changes the maximum length of volumetric rays.
 option.LIGHTSHAFT_PERSISTENCE_FACTOR=Persistence Factor
@@ -899,6 +914,9 @@ value.COLORED_LIGHTING_MODE.3=XZ-pos (Static)
 value.COLORED_LIGHTING_MODE.4=Handlight
 option.LIGHTMAP_BRIGHTNESS_RECOLOR=Brightness Recolor
 option.LIGHTMAP_BRIGHTNESS_RECOLOR.comment=Changes the color of lightmap depending on its brightness. Can look cursed sometimes ;P
+option.LIGHTMAP_DIM_CUTOFF=Dim Parts Cutoff 
+option.LIGHTMAP_DIM_CUTOFF.comment=Removed dim parts of the block lightmap.
+option.DIM_CUTOFF_FACTOR=Dim Cutoff Factor
 option.LIGHTMAP_R=Red Value
 option.LIGHTMAP_B=Blue Value
 option.LIGHTMAP_G=Green Value

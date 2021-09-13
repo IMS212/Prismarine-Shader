@@ -114,7 +114,7 @@ void main() {
 
 	#ifdef PROJECTED_CAUSTICS
 	if (water > 0.9){
-		vec3 caustic = (getCaustics(position0.xyz+cameraPosition.xyz) * WATER_CAUSTICS_STRENGTH) * causticCol.rgb * (2.5 - isEyeInWater);
+		vec3 caustic = (getCaustics(position0.xyz+cameraPosition.xyz) * WATER_CAUSTICS_STRENGTH) * causticCol.rgb * (2.25 - isEyeInWater - moonVisibility);
 		albedo.rgb *= caustic;
 	}
 	#endif
