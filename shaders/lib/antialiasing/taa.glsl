@@ -3,6 +3,7 @@ BSL Shaders v7.2.01 by Capt Tatsu
 https://bitslablab.com 
 */ 
 
+#ifdef TAA
 //Previous frame reprojection from Chocapic13
 vec2 Reprojection(vec3 pos) {
 	pos = pos * 2.0 - 1.0;
@@ -66,3 +67,4 @@ vec4 TemporalAA(inout vec3 color, float tempData) {
 	color = mix(color, tempColor, blendFactor);
 	return vec4(tempData, color);
 }
+#endif

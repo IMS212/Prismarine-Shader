@@ -24,6 +24,10 @@ vec4 RoughReflection(vec3 viewPos, vec3 normal, float dither, float smoothness) 
 			if (color.a > 0.001) color.rgb = texture2DLod(colortexR, pos.st, 1.0).rgb;
 			#ifdef REFLECTION_PREVIOUS
 			color.rgb = pow(color.rgb * 2.0, vec3(8.0));
+			#else
+			#if ALPHA_BLEND == 0
+			color.rgb = pow(color.rgb, vec3(2.2));
+			#endif
 			#endif
 		}else{
 			for(int i = -2; i <= 2; i++) {
@@ -36,6 +40,10 @@ vec4 RoughReflection(vec3 viewPos, vec3 normal, float dither, float smoothness) 
 
 						#ifdef REFLECTION_PREVIOUS
 						sample = pow(sample * 2.0, vec3(8.0));
+						#else
+						#if ALPHA_BLEND == 0
+						sample = pow(sample, vec3(2.2));
+						#endif
 						#endif
 
 						color.rgb += sample;

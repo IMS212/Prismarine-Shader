@@ -29,7 +29,6 @@ varying vec4 vTexCoord, vTexCoordAM;
 uniform int frameCounter;
 uniform int isEyeInWater;
 uniform int worldTime;
-uniform int heldItemId, heldItemId2;
 
 uniform float blindFactor, nightVision;
 uniform float far, near;
@@ -39,9 +38,8 @@ uniform float screenBrightness;
 uniform float shadowFade;
 uniform float timeAngle, timeBrightness;
 uniform float viewWidth, viewHeight;
-uniform float isTaiga, isJungle, isBadlands, isForest;
 
-uniform ivec2 eyeBrightnessSmooth, eyeBrightness;
+uniform ivec2 eyeBrightnessSmooth;
 
 uniform vec3 cameraPosition, previousCameraPosition;
 
@@ -119,7 +117,7 @@ float GetWaterHeightMap(vec3 worldPos, vec2 offset) {
 	float noiseB = texture2D(noisetex, (worldPos.xz + wind) / 96.0 + offset).r;
 	noiseA *= noiseA; noiseB *= noiseB;
 	#endif
-	
+
 	#if WATER_NORMALS > 0
 	noise = mix(noiseA, noiseB, WATER_DETAIL);
 	#endif
@@ -165,17 +163,7 @@ vec3 GetWaterNormal(vec3 worldPos, vec3 viewPos, vec3 viewVector) {
 	return normalMap * normalStrength + vec3(0.0, 0.0, 1.0 - normalStrength);
 }
 
-void RoundSunMoon(inout vec3 color, vec3 viewPos, vec3 sunColor, vec3 moonColor) {
-	float VoL = dot(normalize(viewPos),sunVec);
-	float isMoon = float(VoL < 0.0);
-	float sun = pow(abs(VoL), 800.0 * isMoon + 800.0) * (1.0 - sqrt(rainStrength));
-
-	vec3 sunMoonCol = mix(moonColor * moonVisibility, sunColor * sunVisibility, float(VoL > 0.0));
-	color += sun * sunMoonCol * ROUND_SUN_MOON_SIZE;
-}
-
 //Includes//
-#include "/lib/prismarine/functions.glsl"
 #include "/lib/color/blocklightColor.glsl"
 #include "/lib/color/dimensionColor.glsl"
 #include "/lib/color/skyColor.glsl"
@@ -184,8 +172,6 @@ void RoundSunMoon(inout vec3 color, vec3 viewPos, vec3 sunColor, vec3 moonColor)
 #include "/lib/util/dither.glsl"
 #include "/lib/util/spaceConversion.glsl"
 #include "/lib/atmospherics/sky.glsl"
-#include "/lib/color/fogColor.glsl"
-#include "/lib/atmospherics/clouds.glsl"
 #include "/lib/atmospherics/fog.glsl"
 #include "/lib/atmospherics/waterFog.glsl"
 #include "/lib/lighting/forwardLighting.glsl"
@@ -308,7 +294,9 @@ void main() {
 			#elif WATER_MODE == 3
 			albedo.rgb = color.rgb * color.rgb * 0.35;
 			#endif
+			#if WATER_ALPHA_MODE == 0
 			albedo.a = waterAlpha;
+			#endif
 			baseReflectance = vec3(0.02);
 		}
 
@@ -321,7 +309,7 @@ void main() {
 		float vanillaDiffuse = (0.25 * NoU + 0.75) + (0.667 - abs(NoE)) * (1.0 - abs(NoU)) * 0.15;
 			  vanillaDiffuse*= vanillaDiffuse;
 
-		float parallaxShadow = 0.0;
+		float parallaxShadow = 1.0;
 		#ifdef ADVANCED_MATERIALS
 		vec3 rawAlbedo = albedo.rgb * 0.999 + 0.001;
 		albedo.rgb *= ao;
@@ -386,13 +374,14 @@ void main() {
 		float fresnel = pow(clamp(1.0 + dot(newNormal, normalize(viewPos)), 0.0, 1.0), 5.0);
 
 		if (water > 0.5 || ((translucent + glass) > 0.5 && albedo.a < 0.95)) {
+			#if REFLECTION > 0
 			vec4 reflection = vec4(0.0);
 			vec3 skyReflection = vec3(0.0);
 	
 			fresnel = fresnel * 0.98 + 0.02;
 			fresnel*= max(1.0 - isEyeInWater * 0.5 * water, 0.5);
 			
-			#ifdef REFLECTION
+			#if REFLECTION == 2
 			reflection = SimpleReflection(viewPos, newNormal, dither);
 			reflection.rgb = pow(reflection.rgb * 2.0, vec3(8.0));
 			#endif
@@ -403,23 +392,36 @@ void main() {
 
 				#ifdef OVERWORLD
 				skyReflection = GetSkyColor(skyRefPos, true);
-
-				#ifdef ROUND_SUN_MOON
-				vec3 lightMA = mix(lightMorning, lightEvening, mefade);
-				vec3 sunColor = mix(lightMA, sqrt(lightDay * lightMA * LIGHT_DI), timeBrightness);
-				if (isEyeInWater == 1) sunColor = waterColor.rgb;
-				vec3 moonColor = sqrt(lightNight);
-
-				RoundSunMoon(skyReflection, skyRefPos.xyz, sunColor * 4, moonColor * 2);
 				#endif
-				
+
+				#ifdef NETHER
+				skyReflection = netherCol.rgb * 0.04;
+				#endif
+
+				#ifdef END
+				skyReflection = endCol.rgb * 0.01;
+				#endif
+
+				#if defined OVERWORLD || defined END
 				vec3 specular = GetSpecularHighlight(newNormal, viewPos,  0.9, vec3(0.02),
 													 specularColor, shadow, color.a);
-				
-				skyReflection += specular / ((4.0 - 3.0 * eBS) * fresnel * albedo.a);
+				#if ALPHA_BLEND == 0
+				float specularAlpha = pow(mix(albedo.a, 1.0, fresnel), 2.2) * fresnel;
+				#else
+				float specularAlpha = mix(albedo.a , 1.0, fresnel) * fresnel;
+				#endif
 
+				skyReflection += specular / ((4.0 - 3.0 * eBS) * specularAlpha);
+
+				#if END_SKY == 1 && defined END
+				vec4 cloud = DrawCloud(skyRefPos * 100.0, dither, lightCol, ambientCol);
+				skyReflection = mix(skyReflection, cloud.rgb, cloud.a);
+				#endif
+				#endif
+
+				#ifdef OVERWORLD
 				#ifdef AURORA
-				skyReflection += DrawAurora(skyRefPos * 100.0, dither, 8);
+				skyReflection += DrawAurora(skyRefPos * 100.0, dither, 12);
 				#endif
 
 				#if NIGHT_SKY_MODE == 1
@@ -430,19 +432,6 @@ void main() {
 				skyReflection *= (4.0 - 3.0 * eBS) * lightmap.y;
 				#endif
 
-				#ifdef NETHER
-				skyReflection = netherCol.rgb * 0.04;
-				#endif
-
-				#ifdef END
-				skyReflection = endCol.rgb * 0.01;
-				
-				vec3 specular = GetSpecularHighlight(newNormal, viewPos,  0.9, vec3(0.02),
-													 specularColor, shadow, color.a);
-				
-				skyReflection += specular / ((4.0 - 3.0 * eBS) * fresnel * albedo.a);
-				#endif
-
 				skyReflection *= clamp(1.0 - isEyeInWater, 0.0, 1.0);
 			}
 			
@@ -450,6 +439,7 @@ void main() {
 			
 			albedo.rgb = mix(albedo.rgb, reflection.rgb, fresnel);
 			albedo.a = mix(albedo.a, 1.0, fresnel);
+			#endif
 		}else{
 			#ifdef ADVANCED_MATERIALS
 			skyOcclusion = lightmap.y * lightmap.y * (3.0 - 2.0 * lightmap.y);
@@ -484,18 +474,9 @@ void main() {
 					#ifdef OVERWORLD
 					vec3 skyRefPos = reflect(normalize(viewPos.xyz), newNormal);
 					skyReflection = GetSkyColor(skyRefPos, true);
-
-					#ifdef ROUND_SUN_MOON
-					vec3 lightMA = mix(lightMorning, lightEvening, mefade);
-					vec3 sunColor = mix(lightMA, sqrt(lightDay * lightMA * LIGHT_DI), timeBrightness);
-					if (isEyeInWater == 1) sunColor = waterColor.rgb;
-					vec3 moonColor = sqrt(lightNight);
-
-					RoundSunMoon(skyReflection, skyRefPos.xyz, sunColor * 4, moonColor * 2);
-					#endif
 					
 					#ifdef AURORA
-					skyReflection += DrawAurora(skyRefPos * 100.0, dither, 8);
+					skyReflection += DrawAurora(skyRefPos * 100.0, dither, 12);
 					#endif
 					
 					#if NIGHT_SKY_MODE == 1
@@ -538,7 +519,7 @@ void main() {
 
 		Fog(albedo.rgb, viewPos);
 
-		if (isEyeInWater == 0 && water > 0.5) {
+		if ((isEyeInWater == 0 && water > 0.5) || (isEyeInWater == 1 && water < 0.5)) {
 			vec2 texCoordW = gl_FragCoord.xy / vec2(viewWidth, viewHeight);
 			float oDepth = texture2D(depthtex1, texCoordW.xy).r;
 			vec3 oScreenPos = vec3(gl_FragCoord.xy / vec2(viewWidth, viewHeight), oDepth);
@@ -557,6 +538,9 @@ void main() {
 			albedo = mix(waterFog * lightmapFactor, vec4(albedo.rgb, 0.75), albedo.a);
 		}
 
+		#if ALPHA_BLEND == 0
+		albedo.rgb = pow(max(albedo.rgb, vec3(0.0)), vec3(1.0 / 2.2));
+		#endif
 	}
 
     /* DRAWBUFFERS:01 */

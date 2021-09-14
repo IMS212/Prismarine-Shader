@@ -5,12 +5,12 @@ https://bitslablab.com
 
 //Settings//
 #include "/lib/settings.glsl"
-#define GBUFFERS_TERRAIN
+
 //Fragment Shader///////////////////////////////////////////////////////////////////////////////////
 #ifdef FSH
 
 //Varyings//
-varying float mat, recolor, isEmissive, isPoppy;
+varying float mat, recolor, isEmissive;
 
 varying vec2 texCoord, lmCoord;
 
@@ -32,7 +32,6 @@ varying vec4 vTexCoord, vTexCoordAM;
 uniform int frameCounter;
 uniform int isEyeInWater;
 uniform int worldTime;
-uniform int heldItemId, heldItemId2;
 
 uniform float frameTimeCounter;
 uniform float nightVision;
@@ -42,7 +41,7 @@ uniform float shadowFade;
 uniform float timeAngle, timeBrightness;
 uniform float viewWidth, viewHeight;
 
-uniform ivec2 eyeBrightnessSmooth, eyeBrightness;
+uniform ivec2 eyeBrightnessSmooth;
 
 uniform vec3 cameraPosition;
 
@@ -52,7 +51,6 @@ uniform mat4 shadowProjection;
 uniform mat4 shadowModelView;
 
 uniform sampler2D texture;
-uniform sampler2D noisetex;
 
 #ifdef ADVANCED_MATERIALS
 uniform ivec2 atlasSize;
@@ -64,6 +62,8 @@ uniform sampler2D normals;
 uniform float wetness;
 
 uniform mat4 gbufferModelView;
+
+uniform sampler2D noisetex;
 #endif
 #endif
 
@@ -108,7 +108,6 @@ vec3 GetGlow(vec3 color){
 #endif
 
 //Includes//
-#include "/lib/prismarine/functions.glsl"
 #include "/lib/color/blocklightColor.glsl"
 #include "/lib/color/waterColor.glsl"
 #include "/lib/color/dimensionColor.glsl"
@@ -166,11 +165,11 @@ void main() {
 		float candle   = float(mat > 4.98 && mat < 5.02);
 
 		float metalness      = 0.0;
-		float emission       = (emissive + candle) * 0.125 + (lava * 0.25);
+		float emission       = (emissive + candle + lava) * 0.4;
 		float subsurface     = (foliage + candle) * 0.5 + leaves;
 		vec3 baseReflectance = vec3(0.04);
 		
-		if (lava < 0.5) emission *= dot(albedo.rgb, albedo.rgb);
+		emission *= dot(albedo.rgb, albedo.rgb) * 0.333;
 		
 		vec3 screenPos = vec3(gl_FragCoord.xy / vec2(viewWidth, viewHeight), gl_FragCoord.z);
 		#ifdef TAA
@@ -364,11 +363,8 @@ void main() {
 
 		#if defined OVERWORLD && defined WATER_TINT
 		if (isEyeInWater == 1){
-			float lightFactor = pow(x2(lightmap.y), 0.5) * (1.0 - pow(x2(lightmap.y), 0.5)) * (1.0 - lightmap.x) * 250;
-			vec3 pos = worldPos.xyz+cameraPosition.xyz;
-			vec3 tint = lightFactor * waterColor.rgb * lightCol.rgb * x4(WATER_I);
-			albedo.rgb += (1 - lightmap.x) * (albedo.rgb * x2(waterColor.rgb * lightCol.rgb) * 250 + 250 * albedo.rgb * x2(waterColor.rgb * lightCol.rgb));
-			albedo.rgb *= (1.0 + tint) * (0.2 + lightmap.x);
+			vec3 tint = 16 * waterColor.rgb * lightCol;
+			albedo.rgb = albedo.rgb * tint * (1.25 - rainStrength);
 		}
 		#endif
 
@@ -388,7 +384,9 @@ void main() {
 		float noiseMap = 1;
 		#endif
 
-		albedo.rgb *= noiseMap;
+		#if ALPHA_BLEND == 0
+		albedo.rgb = pow(max(albedo.rgb, vec3(0.0)), vec3(1.0 / 2.2));
+		#endif
 	} else albedo.a = 0.0;
 
     /* DRAWBUFFERS:0 */
@@ -408,7 +406,7 @@ void main() {
 #ifdef VSH
 
 //Varyings//
-varying float mat, recolor, isEmissive, isPoppy;
+varying float mat, recolor, isEmissive;
 
 varying vec2 texCoord, lmCoord;
 
@@ -500,7 +498,7 @@ void main() {
     
 	color = gl_Color;
 	
-	mat = 0.0; recolor = 0.0; isEmissive = 0.0; isPoppy = 0.0;
+	mat = 0.0; recolor = 0.0; isEmissive = 0.0;
 
 	if (mc_Entity.x >= 10100 && mc_Entity.x < 10200)
 		mat = 1.0;
@@ -512,10 +510,10 @@ void main() {
 		mat = 3.0;
 	if (mc_Entity.x == 10203)
 		mat = 4.0;
-	if (mc_Entity.x == 10207)
+	if (mc_Entity.x == 10208)
 		mat = 5.0;
 
-	if (mc_Entity.x == 10201 || mc_Entity.x == 10205)
+	if (mc_Entity.x == 10201 || mc_Entity.x == 10205 || mc_Entity.x == 10206)
 		recolor = 1.0;
 
 	if (mc_Entity.x == 10202)
@@ -524,14 +522,11 @@ void main() {
 	if (mc_Entity.x == 10203)
 		lmCoord.x += 0.0667;
 
-	if (mc_Entity.x == 10400)
-		color.a = 1.0;
-
 	if (mc_Entity.x == 10510)
 		isEmissive = 1.0;
 
-	if (mc_Entity.x == 10511)
-		isPoppy = 1.0;
+	if (mc_Entity.x == 10400)
+		color.a = 1.0;
 
 	const vec2 sunRotationData = vec2(cos(sunPathRotation * 0.01745329251994), -sin(sunPathRotation * 0.01745329251994));
 	float ang = fract(timeAngle - 0.25);

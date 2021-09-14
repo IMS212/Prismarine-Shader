@@ -10,7 +10,7 @@ https://bitslablab.com
 #ifdef FSH
 
 //Varyings//
-varying vec2 texCoord, lmCoord;
+varying vec2 texCoord;
 
 varying vec3 sunVec, upVec;
 
@@ -63,16 +63,10 @@ float GetLuminance(vec3 color) {
 void UnderwaterDistort(inout vec2 texCoord) {
 	vec2 originalTexCoord = texCoord;
 
-	float strength = 1.0;
-
-	#ifdef NETHER
-	strength *= NETHER_HEAT_WAVE_STRENGTH
-	#endif
-
 	texCoord += vec2(
 		cos(texCoord.y * 32.0 + frameTimeCounter * 3.0),
 		sin(texCoord.x * 32.0 + frameTimeCounter * 1.7)
-	) * 0.0005 * strength;
+	) * 0.0005;
 
 	float mask = float(
 		texCoord.x > 0.0 && texCoord.x < 1.0 &&
@@ -102,7 +96,6 @@ vec3 GetBloomTile(float lod, vec2 coord, vec2 offset) {
 }
 
 void Bloom(inout vec3 color, vec2 coord) {
-
 	vec3 blur1 = GetBloomTile(1.0, coord, vec2(0.0      , 0.0   )) * 1.5;
 	vec3 blur2 = GetBloomTile(2.0, coord, vec2(0.51     , 0.0   )) * 1.2;
 	vec3 blur3 = GetBloomTile(3.0, coord, vec2(0.51     , 0.26  ));
@@ -192,6 +185,7 @@ vec2 GetLightPos() {
 void main() {
     vec2 newTexCoord = texCoord;
 	if (isEyeInWater == 1.0) UnderwaterDistort(newTexCoord);
+	
 	#ifdef NETHER_HEAT_WAVE
 	#ifdef NETHER
 	UnderwaterDistort(newTexCoord);
@@ -279,7 +273,7 @@ void main() {
 #ifdef VSH
 
 //Varyings//
-varying vec2 texCoord, lmCoord;
+varying vec2 texCoord;
 
 varying vec3 sunVec, upVec;
 
@@ -292,9 +286,6 @@ uniform mat4 gbufferModelView;
 void main() {
 	texCoord = gl_MultiTexCoord0.xy;
 	
-	lmCoord = (gl_TextureMatrix[1] * gl_MultiTexCoord1).xy;
-	lmCoord = clamp((lmCoord - 0.03125) * 1.06667, vec2(0.0), vec2(0.9333, 1.0));
-
 	gl_Position = ftransform();
 
 	const vec2 sunRotationData = vec2(cos(sunPathRotation * 0.01745329251994), -sin(sunPathRotation * 0.01745329251994));

@@ -1,3 +1,4 @@
+#if (defined OVERWORLD && FOG_MODE == 1 || FOG_MODE == 2) || (defined END && defined END_VOLUMETRIC_FOG)
 float getNoise(vec2 pos){
 	return fract(sin(dot(pos, vec2(12.9898, 4.1414))) * 43758.5453);
 }
@@ -122,6 +123,10 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 	visibility = visfactor / (1.0 - invvisfactor * visibility) - visfactor;
 	visibility = clamp(visibility * 1.015 / invvisfactor - 0.015, 0.0, 1.0);
 	visibility = mix(1.0, visibility, 0.25 * 1 + 0.75) * 0.14285 * float(pixeldepth0 > 0.56);
+	
+	#ifndef LIGHTSHAFT_NIGHT
+	visibility *= 1 - moonVisibility;
+	#endif
 
 	#ifndef LIGHTSHAFT_DAY
 	visibility *= visibilityFactor;
@@ -155,13 +160,14 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 		float depth1 = GetLinearDepth2(pixeldepth1);
 		vec4 worldposition = vec4(0.0);
 		vec4 shadowposition = vec4(0.0);
-		
-		vec3 watercol = lightshaftWater.rgb * LIGHTSHAFT_WI * 0.25 * WATER_I; //don't ask, just don't ask
+
+		float scattering = pow(VoL * shadowFade * 0.5 + 0.5, 6.0);
+		vec3 watercol = lightshaftWater * lightCol.rgb * LIGHTSHAFT_WI * WATER_I; //don't ask, just don't ask
 		
 		for(int i = 0; i < LIGHTSHAFT_SAMPLES; i++) {
 			float minDist = (i + dither) * minDistFactor;
 
-			if (isEyeInWater == 1) minDist = (exp2(i + dither) - 0.95) * 2;
+			if (isEyeInWater == 1) minDist = (exp2(i + dither) - 0.95) * 8;
 			
 			#ifdef END
 			minDist = (exp2(i + dither) - 0.95) * 2;
@@ -201,7 +207,7 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 				vec3 shadow = clamp(shadowCol * (1.0 - shadow0) + shadow0, vec3(0.0), vec3(1.0));
 
 				if (depth0 < minDist) shadow *= color;
-				else if (isEyeInWater == 1.0) shadow *= watercol * 256 * LIGHTSHAFT_WI * (1.0 + eBS);
+				else if (isEyeInWater == 1.0) shadow *= watercol * 1024 * LIGHTSHAFT_WI * (1.0 + eBS);
 
 				#if defined END_VOLUMETRIC_FOG && defined END
 				if (isEyeInWater != 1){
@@ -240,3 +246,4 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 	
 	return vl;
 }
+#endif

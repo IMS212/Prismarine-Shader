@@ -62,6 +62,8 @@ float frametime = frameTimeCounter * ANIMATION_SPEED;
 #endif
 
 //Common Functions//
+vec3 lightVec = sunVec * ((timeAngle < 0.5325 || timeAngle > 0.9675) ? 1.0 : -1.0);
+
 float GetLuminance(vec3 color) {
 	return dot(color,vec3(0.299, 0.587, 0.114));
 }
@@ -103,6 +105,10 @@ void main() {
 	vec4 viewPos = gbufferProjectionInverse * (screenPos * 2.0 - 1.0);
 	viewPos /= viewPos.w;
 	
+	#if ALPHA_BLEND == 0
+	color.rgb = pow(color.rgb, vec3(2.2));
+	#endif
+
 	#ifdef OUTLINE_ENABLED
 	vec4 outerOutline = vec4(0.0), innerOutline = vec4(0.0);
 	float outlineMask = GetOutlineMask();
@@ -132,23 +138,15 @@ void main() {
 	vec3 vl = vec3(0.0);
     #endif
 	
+	vec3 reflectionColor = pow(color.rgb, vec3(0.125)) * 0.5;
+	
     /*DRAWBUFFERS:01*/
 	gl_FragData[0] = color;
-
-	#ifdef LIGHTSHAFT_DAY
 	gl_FragData[1] = vec4(vl, 1.0);
-	#else
-	float visibilityFactor = 1.0 - timeBrightness;
-	if (visibilityFactor <= 0.025) visibilityFactor = 1 - eBS;
-	if (isEyeInWater == 1) visibilityFactor = 1;
-	if (visibilityFactor != 0){
-		gl_FragData[1] = vec4(vl, 1.0);
-	}
-	#endif
-
+	
     #ifdef REFLECTION_PREVIOUS
     /*DRAWBUFFERS:015*/
-	gl_FragData[2] = vec4(pow(color.rgb, vec3(0.125)) * 0.5, float(z0 < 1.0));
+	gl_FragData[2] = vec4(reflectionColor, float(z0 < 1.0));
 	#endif
 }
 
@@ -182,3 +180,4 @@ void main() {
 }
 
 #endif
+

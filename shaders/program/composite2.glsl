@@ -17,6 +17,7 @@ varying vec3 sunVec, upVec, lightVec;
 //Uniforms//
 uniform int isEyeInWater;
 uniform int worldTime;
+uniform int frameCounter;
 
 uniform float blindFactor;
 uniform float rainStrength;
@@ -25,7 +26,6 @@ uniform float timeAngle, timeBrightness;
 uniform float frameTimeCounter;
 uniform float viewHeight, viewWidth, aspectRatio;
 uniform float eyeAltitude;
-uniform float isTaiga, isJungle, isBadlands, isForest;
 
 uniform ivec2 eyeBrightnessSmooth;
 
@@ -175,9 +175,8 @@ void main() {
 	vcDownSun *= getBiomeCloudsColor(viewPos.xyz);
 	#endif
 
-	float scattering = pow(VoL * shadowFade * 0.5 + 0.5, 6.0);
 	vec2 vc = vec2(texture2DLod(colortex8, texCoord.xy, float(2.0)).a, texture2DLod(colortex9, texCoord.xy, float(2.0)).a);
-	color = mix(color, mix(vcloudsDownCol * (0.85 + 1.15 * scattering), vcloudsCol * (0.85 + 1.15 * scattering), vc.x) * (1.0 - rainStrength * 0.25), vc.y * vc.y * VCLOUDS_OPACITY);
+	color = mix(color, mix(vcloudsDownCol, vcloudsCol, vc.x) * (1.0 - rainStrength * 0.25), vc.y * vc.y * VCLOUDS_OPACITY);
 	#endif
 
 	/* DRAWBUFFERS:0 */

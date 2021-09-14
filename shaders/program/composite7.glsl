@@ -18,7 +18,9 @@ uniform float viewWidth, viewHeight, aspectRatio;
 uniform sampler2D colortex1;
 
 //Optifine Constants//
+#if FOG_MODE == 1 || FOG_MODE == 2
 const bool colortex1MipmapEnabled = true;
+#endif
 
 //Common Functions//
 float GetLuminance(vec3 color) {

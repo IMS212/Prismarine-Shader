@@ -10,7 +10,7 @@ https://bitslablab.com
 #ifdef FSH
 
 //Varyings//
-varying vec2 texCoord, lmCoord;
+varying vec2 texCoord;
 
 varying vec3 sunVec, upVec, eastVec;
 
@@ -26,19 +26,19 @@ uniform float shadowFade;
 uniform float timeAngle, timeBrightness;
 uniform float viewWidth, viewHeight, aspectRatio;
 uniform float worldTime;
-uniform float isTaiga, isJungle, isBadlands, isForest;
 
-uniform ivec2 eyeBrightnessSmooth, eyeBrightness;
+uniform ivec2 eyeBrightnessSmooth;
 
 uniform vec3 cameraPosition;
 
 uniform mat4 gbufferProjection, gbufferPreviousProjection, gbufferProjectionInverse;
 uniform mat4 gbufferModelView, gbufferPreviousModelView, gbufferModelViewInverse;
 
-uniform sampler2D noisetex;
 uniform sampler2D colortex0;
 uniform sampler2D colortex3;
 uniform sampler2D depthtex0;
+
+uniform sampler2D noisetex;
 
 #ifdef AO
 uniform sampler2D colortex4;
@@ -131,6 +131,7 @@ float GetAmbientOcclusion(float z){
 	}
 	ao /= tw;
 	if(tw < 0.0001) ao = texture2DLod(colortex4, texCoord, 2.0).r;
+	//if(sin(frameTimeCounter*2.0)+0.5>texCoord.x) ao = 1.0;
 	
 	//return pow(texture2DLod(colortex4, texCoord, 2.0).r, AO_STRENGTH);
 	return pow(ao, AO_STRENGTH);
@@ -155,10 +156,7 @@ void GlowOutline(inout vec3 color){
 #include "/lib/color/blocklightColor.glsl"
 #include "/lib/color/waterColor.glsl"
 #include "/lib/util/dither.glsl"
-#include "/lib/prismarine/functions.glsl"
 #include "/lib/atmospherics/sky.glsl"
-#include "/lib/atmospherics/clouds.glsl"
-#include "/lib/color/fogColor.glsl"
 #include "/lib/atmospherics/fog.glsl"
 
 #ifdef OUTLINE_ENABLED
@@ -181,6 +179,10 @@ void main() {
 	float z         = texture2D(depthtex0, texCoord).r;
 
 	float dither = Bayer64(gl_FragCoord.xy);
+
+	#if ALPHA_BLEND == 0
+	color.rgb = pow(color.rgb, vec3(2.2));
+	#endif
 	
 	vec4 screenPos = vec4(texCoord, z, 1.0);
 	vec4 viewPos = gbufferProjectionInverse * (screenPos * 2.0 - 1.0);
@@ -220,7 +222,7 @@ void main() {
 				#endif
 
 				#ifdef AURORA
-				skyReflection += DrawAurora(skyRefPos * 100.0, dither, 12) * cloudMixRate;
+				skyReflection += DrawAurora(skyRefPos * 100.0, dither, 6) * cloudMixRate;
 				#endif
 
 				#if NIGHT_SKY_MODE == 1
@@ -240,6 +242,7 @@ void main() {
 					skyOcclusion
 				);
 				#endif
+
 				#ifdef NETHER
 				skyReflection = netherCol.rgb * 0.04;
 				#ifdef NETHER_SMOKE
@@ -247,6 +250,7 @@ void main() {
 				skyReflection.rgb += DrawRift(viewPos.xyz, dither, 4, 0);
 				#endif
 				#endif
+				
 				#ifdef END
 				skyReflection = endCol.rgb * 0.025;
 				#if END_SKY == 1
@@ -302,12 +306,18 @@ void main() {
 	float isGlowing = texture2D(colortex3, texCoord).b;
 	if (isGlowing > 0.5) GlowOutline(color.rgb);
 	#endif
+
+	vec3 reflectionColor = pow(color.rgb, vec3(0.125)) * 0.5;
+
+	#if ALPHA_BLEND == 0
+	color.rgb = pow(color.rgb, vec3(1.0 / 2.2));
+	#endif
     
     /* DRAWBUFFERS:0 */
     gl_FragData[0] = color;
 	#ifndef REFLECTION_PREVIOUS
 	/*DRAWBUFFERS:05*/
-	gl_FragData[1] = vec4(pow(color.rgb, vec3(0.125)) * 0.5, float(z < 1.0));
+	gl_FragData[1] = vec4(reflectionColor, float(z < 1.0));
 	#endif
 }
 
@@ -317,7 +327,7 @@ void main() {
 #ifdef VSH
 
 //Varyings//
-varying vec2 texCoord, lmCoord;
+varying vec2 texCoord;
 
 varying vec3 sunVec, upVec, eastVec;
 
@@ -329,9 +339,6 @@ uniform mat4 gbufferModelView;
 //Program//
 void main() {
 	texCoord = gl_MultiTexCoord0.xy;
-
-	lmCoord = (gl_TextureMatrix[1] * gl_MultiTexCoord1).xy;
-	lmCoord = clamp((lmCoord - 0.03125) * 1.06667, vec2(0.0), vec2(0.9333, 1.0));
 	
 	gl_Position = ftransform();
 

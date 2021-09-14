@@ -93,7 +93,7 @@ float getCloudSample(vec3 pos, float height, float verticalThickness, float samp
 	return noise;
 }
 
-vec2 getVolumetricCloud(float pixeldepth1, float pixeldepth0, float heightAdjFactor, float vertThicknessFactor) {
+vec2 getVolumetricCloud(float pixeldepth1, float pixeldepth0, float heightAdjFactor, float vertThicknessFactor, vec3 viewPos) {
 	vec2 vc = vec2(0.0);
 	float quality = VCLOUDS_QUALITY / 2;
 	float dither = Bayer64(gl_FragCoord.xy) * quality;

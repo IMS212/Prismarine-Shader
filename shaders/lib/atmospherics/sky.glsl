@@ -1,4 +1,5 @@
 #ifdef OVERWORLD
+uniform float isTaiga, isJungle, isForest;
 #if SKY_COLOR_MODE == 1
 vec3 getBiomeskyColor(){
 	vec4 skyCold     = vec4(vec3(BIOMESKY_CR, BIOMESKY_CG, BIOMESKY_CB) / 255.0, 1.0) * BIOMESKY_CI;

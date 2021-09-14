@@ -27,10 +27,10 @@ varying vec4 vTexCoord, vTexCoordAM;
 #endif
 
 //Uniforms//
+uniform int blockEntityId;
 uniform int frameCounter;
 uniform int isEyeInWater;
 uniform int worldTime;
-uniform int heldItemId, heldItemId2;
 
 uniform float frameTimeCounter;
 uniform float nightVision;
@@ -40,7 +40,7 @@ uniform float shadowFade;
 uniform float timeAngle, timeBrightness;
 uniform float viewWidth, viewHeight;
 
-uniform ivec2 eyeBrightnessSmooth, eyeBrightness;
+uniform ivec2 eyeBrightnessSmooth;
 
 uniform vec3 cameraPosition;
 
@@ -50,7 +50,6 @@ uniform mat4 shadowProjection;
 uniform mat4 shadowModelView;
 
 uniform sampler2D texture;
-uniform sampler2D noisetex;
 
 #ifdef ADVANCED_MATERIALS
 uniform ivec2 atlasSize;
@@ -93,12 +92,10 @@ float InterleavedGradientNoise() {
 }
 
 //Includes//
-#include "/lib/prismarine/functions.glsl"
 #include "/lib/color/blocklightColor.glsl"
 #include "/lib/color/dimensionColor.glsl"
 #include "/lib/color/specularColor.glsl"
 #include "/lib/util/spaceConversion.glsl"
-#include "/lib/color/waterColor.glsl"
 #include "/lib/lighting/forwardLighting.glsl"
 #include "/lib/surface/ggx.glsl"
 
@@ -150,11 +147,11 @@ void main() {
 		vec2 lightmap = clamp(lmCoord, vec2(0.0), vec2(1.0));
 		
 		float metalness      = 0.0;
-		float emission       = float(blockEntityId == 10201);
+		float emission       = float(blockEntityId == 10205);
 		float subsurface     = float(blockEntityId == 10109) * 0.5;
 		vec3 baseReflectance = vec3(0.04);
 		
-		emission *= length(albedo.rgb);
+		emission *= dot(albedo.rgb, albedo.rgb) * 0.333;
 
 		vec3 screenPos = vec3(gl_FragCoord.xy / vec2(viewWidth, viewHeight), gl_FragCoord.z);
 		#ifdef TAA
@@ -197,7 +194,7 @@ void main() {
     	albedo.rgb = pow(albedo.rgb, vec3(2.2));
 
 		#ifdef EMISSIVE_RECOLOR
-		if (blockEntityId == 10201 && dot(color.rgb, vec3(1.0)) > 2.66) {
+		if (blockEntityId == 10205 && dot(color.rgb, vec3(1.0)) > 2.66) {
 			float ec = length(albedo.rgb);
 			albedo.rgb = blocklightCol * (ec * 0.63 / BLOCKLIGHT_I) + ec * 0.07;
 		}
@@ -275,6 +272,11 @@ void main() {
 		#if defined ADVANCED_MATERIALS && defined REFLECTION_SPECULAR && defined REFLECTION_ROUGH
 		normalMap = mix(vec3(0.0, 0.0, 1.0), normalMap, smoothness);
 		newNormal = clamp(normalize(normalMap * tbnMatrix), vec3(-1.0), vec3(1.0));
+		#endif
+
+		#if ALPHA_BLEND == 0
+		albedo.rgb = pow(max(albedo.rgb, vec3(0.0)), vec3(1.0 / 2.2));
+		if(blockEntityId == 10205) albedo.a = sqrt(albedo.a);
 		#endif
 	}
 

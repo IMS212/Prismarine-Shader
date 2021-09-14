@@ -17,6 +17,7 @@ varying vec3 sunVec, upVec, lightVec;
 //Uniforms//
 uniform int isEyeInWater;
 uniform int worldTime;
+uniform int frameCounter;
 
 uniform float blindFactor;
 uniform float rainStrength;
@@ -26,7 +27,6 @@ uniform float frameTimeCounter;
 uniform float far, near;
 uniform float viewHeight, viewWidth;
 uniform float eyeAltitude;
-uniform float isTaiga, isJungle, isBadlands, isForest;
 
 uniform ivec2 eyeBrightnessSmooth;
 
@@ -84,9 +84,13 @@ void main() {
 	vec3 aux8 = texture2D(colortex8, texCoord.st).rgb;
 	vec3 aux9 = texture2D(colortex9, texCoord.st).rgb;
 	#endif
+
+	#ifdef VOLUMETRIC_CLOUDS
+	vec2 vc = vec2(0.0);
+	#endif
+	
 	vec4 color = texture2D(colortex0, texCoord.xy);
 	float pixeldepth0 = texture2D(depthtex0, texCoord.xy).x;
-	vec2 vc = vec2(0.0);
 
 	vec3 vl = texture2DLod(colortex1, texCoord.xy, 1.5).rgb;
 	vl *= vl;
@@ -106,7 +110,7 @@ void main() {
 		vl *= skylightshaftCol;
 		#endif
 	}
-	if (isEyeInWater == 1) vl *= lightshaftWater.rgb * (timeBrightness + LIGHTSHAFT_WI) * 0.1;
+	if (isEyeInWater == 1) vl *= lightshaftWater.rgb * (timeBrightness + LIGHTSHAFT_WI) * 0.01;
 	#endif
 
 	#ifdef END
@@ -116,20 +120,11 @@ void main() {
     vl *= LIGHT_SHAFT_STRENGTH * (1.0 - rainStrength * eBS * 0.875) * shadowFade *
 		  (1.0 - blindFactor);
 
-	#ifdef LIGHTSHAFT_DAY
 	color.rgb += vl;
-	#else
-	float visibilityFactor = 1.0 - timeBrightness;
-	if (visibilityFactor <= 0.025) visibilityFactor = 1 - eBS;
-	if (isEyeInWater == 1) visibilityFactor = 1;
-	if (visibilityFactor != 0){
-		color.rgb += vl;
-	}
-	#endif
 
 	#if defined VOLUMETRIC_CLOUDS && defined OVERWORLD
 	float pixeldepth1 = texture2D(depthtex1, texCoord.xy).x;
-	vc = getVolumetricCloud(pixeldepth1, pixeldepth0, VCLOUDS_HEIGHT_ADJ_FACTOR, 2);
+	vc = getVolumetricCloud(pixeldepth1, pixeldepth0, VCLOUDS_HEIGHT_ADJ_FACTOR, 2, viewPos.xyz);
 	#endif
 
 	/* DRAWBUFFERS:0189 */

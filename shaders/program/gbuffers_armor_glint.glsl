@@ -15,7 +15,7 @@ varying vec2 texCoord;
 varying vec4 color;
 
 //Uniforms//
-uniform ivec2 eyeBrightnessSmooth, eyeBrightness;
+uniform ivec2 eyeBrightnessSmooth;
 
 uniform sampler2D texture;
 
@@ -26,6 +26,10 @@ float eBS = eyeBrightnessSmooth.y / 240.0;
 void main() {
 	vec4 albedo = texture2D(texture, texCoord) * color;
 	albedo.rgb = pow(albedo.rgb,vec3(2.2)) / (4.0 - 3.0 * eBS);
+
+	#if ALPHA_BLEND == 0
+	albedo.rgb = pow(max(albedo.rgb, vec3(0.0)), vec3(1.0 / 2.2));
+	#endif
 	
     /* DRAWBUFFERS:0 */
 	gl_FragData[0] = albedo;

@@ -23,6 +23,10 @@ void main() {
     #ifdef WHITE_WORLD
 	albedo.rgb = vec3(2.0);
 	#endif
+
+	#if ALPHA_BLEND == 0
+	albedo.rgb = pow(max(albedo.rgb, vec3(0.0)), vec3(1.0 / 2.2));
+	#endif
 	
     /* DRAWBUFFERS:0 */
 	gl_FragData[0] = albedo;

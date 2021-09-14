@@ -7,14 +7,17 @@ vec4 GetWaterFog(vec3 viewPos) {
     fog = 1.0 - exp(-3.0 * fog);
     
     #if WATER_MODE == 0 || WATER_MODE == 2
-    vec3 waterFogColor = vec3(WATER_R * 0.2, WATER_G * 0.6, WATER_B * 1.3) / 255 * WATER_I * WATER_I;
+    float VoL = dot(normalize(viewPos), lightVec);
+    float scattering = pow(VoL * shadowFade * 0.5 + 0.5, 6.0);
+    vec3 waterFogColor = waterColor.rgb * waterColor.rgb * (2.25 - rainStrength - rainStrength);
+    if (isEyeInWater == 1) waterFogColor *= (1 + scattering + scattering + scattering + scattering + scattering + scattering + scattering + scattering + scattering + scattering);
     #elif  WATER_MODE == 1 || WATER_MODE == 3
     vec3 waterFogColor = fogColor * fogColor * 0.5;
     #endif
     waterFogColor *= 1.0 - blindFactor;
 
     #ifdef OVERWORLD
-    vec3 waterFogTint = lightCol * shadowFade * (1 + timeBrightness);
+    vec3 waterFogTint = lightCol * lightCol * shadowFade * (1 + timeBrightness);
     #endif
     #ifdef NETHER
     vec3 waterFogTint = netherCol.rgb;

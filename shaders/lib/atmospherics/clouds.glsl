@@ -12,9 +12,9 @@ void DrawStars(inout vec3 color, vec3 viewPos) {
 	coord = floor(coord * 1024.0) / 1024.0;
 	
 	float VoU = clamp(dot(normalize(viewPos), normalize(upVec)), 0.0, 1.0);
-	float multiplier = sqrt(sqrt(VoU)) * 5.0 * (1.0 - rainStrength) * STARS_AMOUNT;
+	float multiplier = sqrt(sqrt(VoU)) * 5.0 * (1.0 - rainStrength);
 	
-	float star = 1.0;
+	float star = 1.25 * STARS_AMOUNT;
 	if (VoU > 0.0) {
 		star *= GetNoise(coord.xy);
 		star *= GetNoise(coord.xy + 0.10);
@@ -23,13 +23,13 @@ void DrawStars(inout vec3 color, vec3 viewPos) {
 	star = clamp(star - 0.7125, 0.0, 1.0) * multiplier;
 	
 	#ifdef DAY_STARS
-	color += star * pow(lightNight, vec3(0.8));
+	color += star * pow(vec3(0.75, 0.85, 1.00), vec3(0.8));
 	#else
-	if (moonVisibility > 0.0) color += star * pow(lightNight, vec3(0.8));
+	if (moonVisibility > 0.0) color += star * pow(vec3(1.75, 1.85, 2.00), vec3(0.8));
 	#endif
 
 	#ifdef END
-	color += star * pow(lightNight * 16, vec3(0.8));
+	color += star * pow(vec3(1.15, 0.85, 1.00) * 16, vec3(0.8));
 	#endif
 
 	color *= STARS_BRIGHTNESS;
@@ -43,9 +43,9 @@ void DrawBigStars(inout vec3 color, vec3 viewPos) {
 	coord = floor(coord * 1024.0) / 1024.0;
 	
 	float VoU = clamp(dot(normalize(viewPos), normalize(upVec)), 0.0, 1.0);
-	float multiplier = sqrt(sqrt(VoU)) * 3.0 * (1.0 - rainStrength) * STARS_AMOUNT;
+	float multiplier = sqrt(sqrt(VoU)) * 3.0 * (1.0 - rainStrength);
 	
-	float star = 1.0;
+	float star = 1.25 * STARS_AMOUNT;
 	if (VoU > 0.0) {
 		star *= GetNoise(coord.xy);
 		star *= GetNoise(coord.xy + 0.10);
@@ -54,13 +54,13 @@ void DrawBigStars(inout vec3 color, vec3 viewPos) {
 	star = clamp(star - 0.7125, 0.0, 1.0) * multiplier;
 		
 	#ifdef DAY_STARS
-	color += star * pow(lightNight, vec3(0.8));
+	color += star * pow(vec3(0.75, 0.85, 1.00), vec3(0.8));
 	#else
-	if (moonVisibility > 0.0) color += star * pow(lightNight, vec3(0.8));
+	if (moonVisibility > 0.0) color += star * pow(vec3(0.75, 0.85, 1.00), vec3(0.8));
 	#endif
 
 	#ifdef END
-	color += star * pow(lightNight * 16 * endCol.rgb, vec3(1.0));
+	color += star * pow(vec3(1.15, 0.85, 1.00) * 16 * endCol.rgb, vec3(1.0));
 	#endif
 }
 

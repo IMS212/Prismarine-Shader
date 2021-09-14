@@ -21,7 +21,6 @@ varying vec4 color;
 uniform int frameCounter;
 uniform int isEyeInWater;
 uniform int worldTime;
-uniform int heldItemId, heldItemId2;
 
 uniform float frameTimeCounter;
 uniform float nightVision;
@@ -31,12 +30,9 @@ uniform float shadowFade;
 uniform float timeAngle, timeBrightness;
 uniform float viewWidth, viewHeight;
 
-uniform ivec2 eyeBrightnessSmooth, eyeBrightness;
+uniform ivec2 eyeBrightnessSmooth;
 
 uniform vec3 cameraPosition;
-
-uniform sampler2D noisetex;
-uniform sampler2D texture;
 
 uniform mat4 gbufferProjectionInverse;
 uniform mat4 gbufferModelViewInverse;
@@ -72,11 +68,9 @@ float InterleavedGradientNoise() {
 }
 
 //Includes//
-#include "/lib/prismarine/functions.glsl"
 #include "/lib/color/blocklightColor.glsl"
 #include "/lib/color/dimensionColor.glsl"
 #include "/lib/util/spaceConversion.glsl"
-#include "/lib/color/waterColor.glsl"
 #include "/lib/lighting/forwardLighting.glsl"
 
 #ifdef TAA
@@ -126,6 +120,10 @@ void main() {
 		vec3 shadow = vec3(0.0);
 		GetLighting(albedo.rgb, shadow, viewPos, worldPos, lightmap, 1.0, NoL, vanillaDiffuse,
 				    1.0, 0.0, 0.0);
+
+		#if ALPHA_BLEND == 0
+		albedo.rgb = pow(max(albedo.rgb, vec3(0.0)), vec3(1.0 / 2.2));
+		#endif
 	}
 
     /* DRAWBUFFERS:0 */

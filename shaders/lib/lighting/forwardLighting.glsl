@@ -2,7 +2,7 @@
 #include "/lib/lighting/shadows.glsl"
 #endif
 
-uniform int blockEntityId;
+uniform int heldItemId, heldItemId2;
 
 void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos,
                  vec2 lightmap, float smoothLighting, float NoL, float vanillaDiffuse,
@@ -53,12 +53,16 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
     blocklightCol *= lightMapBrightnessFactor;
 
     #ifdef LIGHTMAP_BRIGHTNESS_RECOLOR
-    if (lightmap.x <= 0.95){
+    float lightFlatten1 = clamp(1.0 - pow(1.0 - emission, 128.0), 0.0, 1.0);
+    if (lightFlatten1 == 0){
         blocklightCol.r *= (pow(newLightmap, 6)) * 3 * LIGHTMAP_R;
         blocklightCol.g *= (3.50 - newLightmap) * newLightmap * 1.25 * LIGHTMAP_G;
         blocklightCol.b *= (3.50 - newLightmap - newLightmap) * 2.50 * LIGHTMAP_B;
+    } else {
+        blocklightCol *= 2 * BLOCKLIGHT_I;
     }
     #endif
+
 
     #ifdef LIGHTMAP_DIM_CUTOFF
     blocklightCol *= pow(newLightmap, DIM_CUTOFF_FACTOR);

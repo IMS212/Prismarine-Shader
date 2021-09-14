@@ -19,7 +19,10 @@ uniform sampler2D texture;
 void main() {
 	//Texture
 	vec4 albedo = texture2D(texture, texCoord);
+
+	#if ALPHA_BLEND == 1
 	albedo.rgb = pow(albedo.rgb,vec3(2.2)) * 2.25;
+	#endif
 	
 	#ifdef WHITE_WORLD
 	albedo.a = 0.0;

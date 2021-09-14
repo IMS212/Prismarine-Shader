@@ -2,6 +2,9 @@
 uniform vec3 fogColor;
 #endif
 
+#include "/lib/color/fogColor.glsl"
+#include "/lib/atmospherics/clouds.glsl"
+
 float mefade0 = 1.0 - clamp(abs(timeAngle - 0.5) * 8.0 - 1.5, 0.0, 1.0);
 float dfade0 = 1.0 - timeBrightness;
 
@@ -31,6 +34,7 @@ vec3 GetFogColor(vec3 viewPos, float fogType) {
 	float densitySun = CalcFogDensity(MORNING_FOG_DENSITY, DAY_FOG_DENSITY, EVENING_FOG_DENSITY);
 	float density = CalcDensity(densitySun, NIGHT_FOG_DENSITY) * FOG_DENSITY;
 	if (fogType == 0) density *= 4;
+	if (isEyeInWater == 1) density *= 0.0;
     float nightDensity = NIGHT_FOG_DENSITY;
     float weatherDensity = WEATHER_FOG_DENSITY;
     float exposure = exp2(timeBrightness * 0.75 - 1.00);
@@ -147,24 +151,22 @@ void NormalFog(inout vec3 color, vec3 viewPos, float fogType) {
 	vec3 fogColor = vec3(0);
 	fogColor = GetFogColor(viewPos, fogType);
 
-	if (isEyeInWater == 1) density *= 0.0;
-
 	#if DISTANT_FADE == 1 || DISTANT_FADE == 3
 	if(isEyeInWater != 2.0){
-		float vanillaFog = 1.0 - (far - (fogFactor + 20.0)) * 5.0 / (FOG_DENSITY * far);
+		float vanillaFog = 1.0 - (far - (fogFactor + 20.0)) * 5.0 / ((density + isEyeInWater + isEyeInWater) * far);
 		vanillaFog = clamp(vanillaFog, 0.0, 1.0);
 		if (isEyeInWater == 1) vanillaFog *= 0.0;
 	
 		if(vanillaFog > 0.0){
 			vec3 vanillaFogColor = vec3(0.0);
 			if (isEyeInWater == 0.0){
-				vanillaFogColor = GetSkyColor(viewPos, false);
+				vanillaFogColor = GetSkyColor(viewPos, false) * 2;
 				#if NIGHT_SKY_MODE == 1
-				if (moonVisibility > 0.0 && rainStrength != 1.0 && isEyeInWater == 0){
-					vanillaFogColor += DrawRift(viewPos.xyz, dither, 4, 1);
-					vanillaFogColor += DrawRift(viewPos.xyz, dither, 4, 0);
-				}
+				vanillaFogColor += DrawRift(viewPos.xyz, dither, 4, 1);
+				vanillaFogColor += DrawRift(viewPos.xyz, dither, 4, 0);
 				#endif
+			} else {
+				vanillaFogColor = waterColor.rgb * WATER_I;
 			}
 			vanillaFogColor *= (4.0 - 3.0) * (1.0 + nightVision);
 

@@ -26,7 +26,6 @@ uniform float rainStrength;
 uniform float shadowFade;
 uniform float timeAngle, timeBrightness;
 uniform float viewWidth, viewHeight;
-uniform float isTaiga, isJungle, isBadlands, isForest;
 
 uniform ivec2 eyeBrightnessSmooth;
 
@@ -135,7 +134,7 @@ void main() {
 	#endif
 
 	#ifdef AURORA
-	if (moonVisibility != 0) albedo.rgb += DrawAurora(viewPos.xyz, dither, 8);
+	if (moonVisibility != 0) albedo.rgb += DrawAurora(viewPos.xyz, dither, 6);
 	#endif
 
 	SunGlare(albedo, viewPos.xyz, skylightCol.rgb);

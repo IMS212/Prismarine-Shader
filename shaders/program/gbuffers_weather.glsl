@@ -79,6 +79,11 @@ void main() {
 		#if defined FOG && MC_VERSION < 11500
 		if (gl_FragCoord.z > 0.991) Defog(albedo.rgb);
 		#endif
+
+		#if ALPHA_BLEND == 0
+		albedo.rgb = pow(max(albedo.rgb, vec3(0.0)), vec3(1.0 / 2.2));
+		albedo.a *= 1.4;
+		#endif
 	}
 	
 /* DRAWBUFFERS:0 */
