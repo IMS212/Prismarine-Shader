@@ -89,7 +89,7 @@ vec4 GetShadowSpace(vec4 wpos) {
 //Light shafts from Robobo1221 (modified)
 vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dither) {
 	vec3 vl = vec3(0.0);
-
+	dither *= 0.75;
 	#ifndef LIGHTSHAFT_DAY
 	float visibilityFactor = 1.0 - timeBrightness;
 	if (visibilityFactor <= 0.025) visibilityFactor = 1 - eBS;
