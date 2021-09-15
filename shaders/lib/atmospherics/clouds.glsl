@@ -124,15 +124,12 @@ vec3 DrawAurora(vec3 viewPos, float dither, int samples) {
 
 float RiftSample(vec2 coord, vec2 wind, float VoU) {
 	float noise = texture2D(noisetex, coord * 1.0000  + wind * 0.25).b;
-		  noise = texture2D(noisetex, coord * 0.5000  + wind * 0.20).b;
-		  noise = texture2D(noisetex, coord * 0.2500  + wind * 0.15).b;
+		  noise+= texture2D(noisetex, coord * 0.5000  + wind * 0.20).b;
+		  noise+= texture2D(noisetex, coord * 0.2500  + wind * 0.15).b;
 		  noise+= texture2D(noisetex, coord * 0.1250  + wind * 0.10).b;
 		  noise+= texture2D(noisetex, coord * 0.0625  + wind * 0.05).b;	
-		  noise+= texture2D(noisetex, coord * 0.03125).b;
-		  noise+= texture2D(noisetex, coord * 0.01575).b;
-		  noise+= texture2D(noisetex, coord * 0.007150).b;
 	noise *= NEBULA_AMOUNT;
-	noise = max(1.0 - 2.0 * (0.5 * VoU + 0.5) * abs(noise - 4), 0.0);
+	noise = max(1.0 - 2.0 * (0.5 * VoU + 0.5) * abs(noise - 3.5), 0.0);
 
 	return noise;
 }
@@ -168,7 +165,7 @@ vec3 DrawRift(vec3 viewPos, float dither, int samples, float riftType) {
 	if (VoU > 0.0) {
 		vec3 wpos = normalize((gbufferModelViewInverse * vec4(viewPos, 1.0)).xyz);
 		for(int i = 0; i < samples; i++) {
-			vec3 planeCoord = wpos * ((0.0 + currentStep * 16.0)) * 0.002 * NEBULA_STRETCHING;
+			vec3 planeCoord = wpos * ((0.0 + currentStep * 16.0)) * 0.001 * NEBULA_STRETCHING;
 			vec2 coord = cameraPosition.xz * 0.0000225 * NEBULA_OFFSET_FACTOR + planeCoord.xz;
 
 			if (riftType == 0){
@@ -212,7 +209,7 @@ vec3 DrawRift(vec3 viewPos, float dither, int samples, float riftType) {
 				noise *= max(sqrt(1.0 - length(planeCoord.xz) * 2.5), 0.0);
 				if (riftType == 0){
 					#if defined END
-					riftColor = mix(riftLowCol, riftHighCol, pow(currentStep, 0.4)) * vec3(END_R * 8.0, END_G * 0.5, END_B * 4.0);
+					riftColor = mix(riftLowCol, riftHighCol, pow(currentStep, 0.4)) * vec3(END_R * 8.0, END_G * 0.5, END_B * 4.0) * 0.50;
 					#elif defined OVERWORLD
 					riftColor = mix(riftLowCol, riftHighCol, pow(currentStep, 0.4));
 					#elif defined NETHER
@@ -220,7 +217,7 @@ vec3 DrawRift(vec3 viewPos, float dither, int samples, float riftType) {
 					#endif
 				}else{
 					#if defined END
-					riftColor = mix(secondRiftLowCol, secondRiftHighCol, pow(currentStep, 0.4)) * vec3(END_R * 10.0, END_G * 0.25, END_B * 6.0);
+					riftColor = mix(secondRiftLowCol, secondRiftHighCol, pow(currentStep, 0.4)) * vec3(END_R * 10.0, END_G * 0.25, END_B * 6.0) * 0.75;
 					#elif defined OVERWORLD
 					riftColor = mix(secondRiftLowCol, secondRiftHighCol, pow(currentStep, 0.4));
 					#elif defined NETHER

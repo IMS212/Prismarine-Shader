@@ -146,7 +146,7 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 	#ifdef END
 	VoL = pow(VoL * 0.5 + 0.5, 16.0) * 0.75 + 0.25;
 	float visibility = VoL;
-	visibility *= (0.5 + dragonFactor);
+	visibility *= (0.25 + dragonFactor);
 	#endif
 
 	#ifdef NETHER
