@@ -17,6 +17,7 @@ varying vec3 sunVec, upVec;
 //Uniforms//
 uniform int isEyeInWater;
 uniform int worldTime;
+uniform int frameCounter;
 
 uniform float blindFactor;
 uniform float frameTimeCounter;

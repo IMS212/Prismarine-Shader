@@ -163,7 +163,14 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 		vec4 shadowposition = vec4(0.0);
 
 		float scattering = pow(VoL * shadowFade * 0.5 + 0.5, 6.0);
-		vec3 watercol = lightshaftWater * lightCol.rgb * LIGHTSHAFT_WI * WATER_I; //don't ask, just don't ask
+		
+		#if defined OVERWORLD
+		vec3 watercol = vec3(LIGHTSHAFT_WR, LIGHTSHAFT_WG, LIGHTSHAFT_WB) * LIGHTSHAFT_WI / 255.0 * lightCol.rgb * LIGHTSHAFT_WI * WATER_I;
+		#elif defined END
+		vec3 watercol = vec3(LIGHTSHAFT_WR, LIGHTSHAFT_WG, LIGHTSHAFT_WB) * LIGHTSHAFT_WI / 255.0 * endCol.rgb * LIGHTSHAFT_WI * WATER_I;
+		#else
+		vec3 watercol = vec3(1);
+		#endif
 		
 		for(int i = 0; i < LIGHTSHAFT_SAMPLES; i++) {
 			float minDist = (i + dither) * minDistFactor;

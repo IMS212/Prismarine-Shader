@@ -73,6 +73,10 @@ float GetLuminance(vec3 color) {
 #include "/lib/color/skyColor.glsl"
 #include "/lib/atmospherics/sky.glsl"
 
+#ifdef PERBIOME_LIGHTSHAFTS
+#include "/lib/color/fogColor.glsl"
+#endif
+
 #if defined VOLUMETRIC_CLOUDS && defined OVERWORLD
 #include "/lib/prismarine/fragPos.glsl"
 #include "/lib/prismarine/volumetricClouds.glsl"
@@ -92,11 +96,12 @@ void main() {
 	vec4 color = texture2D(colortex0, texCoord.xy);
 	float pixeldepth0 = texture2D(depthtex0, texCoord.xy).x;
 
-	vec3 vl = texture2DLod(colortex1, texCoord.xy, 1.5).rgb;
-	vl *= vl;
-
 	vec4 viewPos = gbufferProjectionInverse * (vec4(texCoord.xy, pixeldepth0, 1.0) * 2.0 - 1.0);
 		 viewPos /= viewPos.w;
+
+	#if ((FOG_MODE == 1 || FOG_MODE == 2) && defined OVERWORLD) || (defined END_VOLUMETRIC_FOG && defined END)
+	vec3 vl = texture2DLod(colortex1, texCoord.xy, 1.5).rgb;
+	vl *= vl;
 
 	#ifdef OVERWORLD
 	if (isEyeInWater == 0){
@@ -109,8 +114,12 @@ void main() {
 		vec3 skylightshaftCol = CalcLightColor(lightshaftCol0, lightshaftNight * 0.50, waterColor.rgb);
 		vl *= skylightshaftCol;
 		#endif
+
+		#ifdef PERBIOME_LIGHTSHAFTS
+		vl *= getBiomeFogColor(viewPos.xyz);
+		#endif
 	}
-	if (isEyeInWater == 1) vl *= lightshaftWater.rgb * (timeBrightness + LIGHTSHAFT_WI) * 0.01;
+	if (isEyeInWater == 1) vl *= vec3(LIGHTSHAFT_WR, LIGHTSHAFT_WG, LIGHTSHAFT_WB) * LIGHTSHAFT_WI / 255.0 * (timeBrightness + LIGHTSHAFT_WI) * 0.01;
 	#endif
 
 	#ifdef END
@@ -121,6 +130,7 @@ void main() {
 		  (1.0 - blindFactor);
 
 	color.rgb += vl;
+	#endif
 
 	#if defined VOLUMETRIC_CLOUDS && defined OVERWORLD
 	float pixeldepth1 = texture2D(depthtex1, texCoord.xy).x;

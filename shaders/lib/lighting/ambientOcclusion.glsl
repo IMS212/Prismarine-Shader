@@ -1,4 +1,3 @@
-#ifdef AO
 vec2 OffsetDist(float x) {
 	float n = fract(x * 8.0) * 3.1415;
     return vec2(cos(n), sin(n)) * x;
@@ -44,4 +43,3 @@ float AmbientOcclusion(float dither) {
 	
 	return ao;
 }
-#endif

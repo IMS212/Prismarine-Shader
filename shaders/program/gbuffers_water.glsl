@@ -414,7 +414,7 @@ void main() {
 				skyReflection += specular / ((4.0 - 3.0 * eBS) * specularAlpha);
 
 				#if END_SKY == 1 && defined END
-				vec4 cloud = DrawCloud(skyRefPos * 100.0, dither, lightCol, ambientCol);
+				vec4 cloud = DrawCloud(skyRefPos * 100.0, dither);
 				skyReflection = mix(skyReflection, cloud.rgb, cloud.a);
 				#endif
 				#endif

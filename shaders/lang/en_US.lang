@@ -155,7 +155,8 @@ screen.WAVING=Waving Blocks
 screen.CURVATURE=Curvature
 
 #Settings
-option.ABOUT=Prismarine Shader
+option.ABOUT=Discord
+value.ABOUT.0=discord.gg/DzM9WseeA8z
 option.ABOUT.comment=BSL by Capt Tatsu. Prismarine by Septonious and mlgimposter.
 
 #Lighting

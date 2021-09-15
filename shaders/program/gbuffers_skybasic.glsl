@@ -88,9 +88,8 @@ void SunGlare(inout vec3 color, vec3 viewPos, vec3 lightCol) {
 #include "/lib/color/waterColor.glsl"
 #include "/lib/color/skyColor.glsl"
 #include "/lib/util/dither.glsl"
-#include "/lib/prismarine/functions.glsl"
-#include "/lib/atmospherics/clouds.glsl"
 #include "/lib/atmospherics/sky.glsl"
+#include "/lib/atmospherics/clouds.glsl"
 
 //Program//
 void main() {
@@ -115,6 +114,10 @@ void main() {
     vec3 moonColor = sqrt(lightNight);
 
 	RoundSunMoon(albedo, viewPos.xyz, sunColor, moonColor);
+	#endif
+
+	#ifdef END
+	albedo.rgb = pow(albedo.rgb, vec3(2.2));
 	#endif
 
 	#ifdef STARS

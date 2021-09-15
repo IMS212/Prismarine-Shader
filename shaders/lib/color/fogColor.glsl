@@ -28,7 +28,7 @@ vec3 fogcolorNight      = vec3(FOGCOLOR_NR,   FOGCOLOR_NG,   FOGCOLOR_NB)   * FO
 vec3 fogcolorSun    = CalcSunColor1(fogcolorMorning, fogcolorDay, fogcolorEvening);
 vec4 fogColorC    	= vec4(CalcLightColor1(fogcolorSun, fogcolorNight, weatherCol.rgb), 1);
 
-#if FOG_COLOR_MODE == 2
+#if FOG_COLOR_MODE == 2 || defined PERBIOME_LIGHTSHAFTS
 vec3 getBiomeFogColor(vec3 vpos){
 	vec4 fogCold     = vec4(vec3(BIOMEFOG_CR, BIOMEFOG_CG, BIOMEFOG_CB) / 255.0, 1.0) * BIOMEFOG_CI;
 	vec4 fogDesert   = vec4(vec3(BIOMEFOG_DR, BIOMEFOG_DG, BIOMEFOG_DB) / 255.0, 1.0) * BIOMEFOG_DI;

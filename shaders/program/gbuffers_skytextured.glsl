@@ -33,6 +33,7 @@ uniform sampler2D gaux1;
 
 #ifdef END
 uniform float worldTime;
+uniform int frameCounter;
 
 uniform vec3 cameraPosition;
 
@@ -61,7 +62,6 @@ float GetLuminance(vec3 color) {
 #include "/lib/color/lightColor.glsl"
 #endif
 #if defined END
-#include "/lib/prismarine/functions.glsl"
 #include "/lib/color/endColor.glsl"
 #include "/lib/color/lightColor.glsl"
 #include "/lib/color/skyColor.glsl"
@@ -87,7 +87,7 @@ void main() {
 	#endif
 
 	#ifdef END
-	albedo.rgb = pow(albedo.rgb,vec3(2.2));
+	albedo.rgb = endCol.rgb * 0.25 * vec3(0.75, 1.00, 1.25);
 
 	vec3 nViewPos = normalize(viewPos.xyz);
 	float NdotU = dot(nViewPos, upVec);
@@ -104,8 +104,8 @@ void main() {
 	#endif
 
 	#if END_SKY == 1
-	vec4 cloud = DrawCloud(viewPos.xyz, dither, lightCol, ambientCol);
-	albedo.rgb += mix(albedo.rgb, cloud.rgb, cloud.a);
+	albedo.rgb += DrawRift(viewPos.xyz, dither, 4, 1);
+	albedo.rgb += DrawRift(viewPos.xyz, dither, 4, 0);
 	#endif
 
 	#ifdef END

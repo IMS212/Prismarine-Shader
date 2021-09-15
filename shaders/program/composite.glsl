@@ -142,7 +142,9 @@ void main() {
 	
     /*DRAWBUFFERS:01*/
 	gl_FragData[0] = color;
+	#if ((FOG_MODE == 1 || FOG_MODE == 2) && defined OVERWORLD) || (defined END_VOLUMETRIC_FOG && defined END)
 	gl_FragData[1] = vec4(vl, 1.0);
+	#endif
 	
     #ifdef REFLECTION_PREVIOUS
     /*DRAWBUFFERS:015*/

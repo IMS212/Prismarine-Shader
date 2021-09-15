@@ -254,7 +254,7 @@ void main() {
 				#ifdef END
 				skyReflection = endCol.rgb * 0.025;
 				#if END_SKY == 1
-				vec4 cloud = DrawCloud(skyRefPos * 100.0, dither, lightCol, ambientCol);
+				vec4 cloud = DrawCloud(skyRefPos * 100.0, dither);
 				skyReflection = mix(skyReflection, cloud.rgb, cloud.a * cloudMixRate);
 				#endif
 				#endif

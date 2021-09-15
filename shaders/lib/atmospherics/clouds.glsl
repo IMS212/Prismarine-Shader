@@ -1,4 +1,5 @@
 #include "/lib/color/auroraColor.glsl"
+#include "/lib/prismarine/functions.glsl"
 
 float GetNoise(vec2 pos) {
 	return fract(sin(dot(pos, vec2(12.9898, 4.1414))) * 43758.5453);
@@ -23,7 +24,7 @@ void DrawStars(inout vec3 color, vec3 viewPos) {
 	star = clamp(star - 0.7125, 0.0, 1.0) * multiplier;
 	
 	#ifdef DAY_STARS
-	color += star * pow(vec3(0.75, 0.85, 1.00), vec3(0.8));
+	color += star * vec3(0.75, 0.85, 1.00);
 	#else
 	if (moonVisibility > 0.0) color += star * pow(vec3(1.75, 1.85, 2.00), vec3(0.8));
 	#endif
@@ -54,9 +55,9 @@ void DrawBigStars(inout vec3 color, vec3 viewPos) {
 	star = clamp(star - 0.7125, 0.0, 1.0) * multiplier;
 		
 	#ifdef DAY_STARS
-	color += star * pow(vec3(0.75, 0.85, 1.00), vec3(0.8));
+	color += star * vec3(0.75, 0.85, 1.00);
 	#else
-	if (moonVisibility > 0.0) color += star * pow(vec3(0.75, 0.85, 1.00), vec3(0.8));
+	if (moonVisibility > 0.0) color += star * vec3(0.75, 0.85, 1.00);
 	#endif
 
 	#ifdef END
@@ -65,6 +66,9 @@ void DrawBigStars(inout vec3 color, vec3 viewPos) {
 }
 
 #ifdef END
+vec3 cloudlightEnd      = vec3(CLOUDS_END_R,   CLOUDS_END_G,   CLOUDS_END_B)   * CLOUDS_END_I / 64.0;
+vec3 cloudambientEnd    = vec3(CLOUDS_END_R,   CLOUDS_END_G,   CLOUDS_END_B)   * CLOUDS_END_I * 0.2 / 64.0;
+
 float CloudSample(vec2 coord, vec2 wind, float currentStep, float sampleStep, float sunCoverage) {
 	float noiseCoverage = abs(currentStep - 0.125) * (currentStep > 0.125 ? 1.12 : 4.0);
 	noiseCoverage = noiseCoverage * noiseCoverage * 4.0;
@@ -84,28 +88,25 @@ float CloudSample(vec2 coord, vec2 wind, float currentStep, float sampleStep, fl
 	return noise;
 }
 
-vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol) {
+vec4 DrawCloud(vec3 viewPos, float dither) {
 	dither *= 0.25;
 
-	int samples = CLOUDS_NOISE_SAMPLES;
+	int samples = 4;
 	
 	float cloud = 0.0, cloudLighting = 0.0;
 
 	float sampleStep = 1.2 / samples;
 	float currentStep = dither * sampleStep;
 	
-	float brightness = CLOUD_BRIGHTNESS - rainStrength;
-	if (CLOUD_BRIGHTNESS == 1) brightness = 1;
-	float VoS = dot(normalize(viewPos), sunVec);
+	float brightness = 2;
 	float VoU = dot(normalize(viewPos), upVec);
 	float VoL = dot(normalize(viewPos), lightVec);
-	float cloudHeightFactor = x2(max(1.2 - 0.002 * CLOUDS_HEIGHT_FACTOR * cameraPosition.y, 0.0));
-	float cloudHeight = CLOUD_HEIGHT * cloudHeightFactor * CLOUD_HEIGHT_MULTIPLIER * 0.05;
+	float cloudHeight = 8;
 	float sunCoverage = pow(clamp(abs(VoL) * 2.0 - 1.0, 0.0, 1.0), 12.0) * (1.0 - rainStrength);
 
 	vec2 wind = vec2(
-		frametime * CLOUD_SPEED * 0.0005,
-		sin(frametime * CLOUD_SPEED * 0.004) * 0.006
+		frametime * 0.0005,
+		sin(frametime * 0.004) * 0.006
 	) * CLOUD_HEIGHT / 15.0;
 
 	vec3 cloudColor = vec3(0.0);
@@ -114,7 +115,7 @@ vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol) {
 		vec3 wpos = normalize((gbufferModelViewInverse * vec4(viewPos, 1.0)).xyz);
 		for(int i = 0; i < samples; i++) {
 			float minDist = i + dither;
-			vec3 planeCoord = wpos * ((cloudHeight + currentStep * 1.5) / wpos.y) * CLOUD_VERTICAL_THICKNESS * 16;
+			vec3 planeCoord = wpos * ((cloudHeight + currentStep * 1.5) / wpos.y) * 0.0025;
 			vec2 coord = cameraPosition.xz * 0.0003 + planeCoord.xz;
 				 coord += cos(mix(vec2(cos(minDist * 0.75), sin(minDist * 1.75)), vec2(cos(minDist * 2.75), sin(minDist * 3.75)), minDist) * 0.0015);
 				 coord += sin(mix(vec2(cos(minDist * 1.75), sin(minDist * 2.75)), vec2(cos(minDist * 3.25), sin(minDist * 4.75)), minDist) * 0.0010);
@@ -144,7 +145,7 @@ vec4 DrawCloud(vec3 viewPos, float dither, vec3 lightCol, vec3 ambientCol) {
 	}
 	cloudColor *= brightness * (0.5 - 0.25 * (1.0 - sunVisibility) * (1.0 - rainStrength));
 	
-	return vec4(cloudColor, cloud * cloud * CLOUD_OPACITY);
+	return vec4(cloudColor, cloud * cloud);
 }
 #endif
 
@@ -224,11 +225,16 @@ vec3 DrawRift(vec3 viewPos, float dither, int samples, float riftType) {
 	dither *= NEBULA_DITHERING_STRENGTH;
 
 	float auroraVisibility = 0.0;
+	float visFactor = 1.0;
 
 	#ifdef NEBULA_AURORA_CHECK
-	#if defined AURORA && defined WEATHER_PERBIOME
+	#if defined AURORA && defined WEATHER_PERBIOME && defined OVERWORLD
 	auroraVisibility = isCold * isCold;
 	#endif
+	#endif
+
+	#ifdef OVERWORLD
+	visFactor = (moonVisibility - rainStrength) * (moonVisibility - auroraVisibility) * (1 - auroraVisibility);
 	#endif
 
 	float VoU = abs(dot(normalize(viewPos.xyz), upVec));
@@ -279,7 +285,7 @@ vec3 DrawRift(vec3 viewPos, float dither, int samples, float riftType) {
 			}
 
 			star = clamp(star - 0.7125, 0.0, 1.0) * multiplier * 2;
-			star * pow(lightNight, vec3(0.8));
+			star * vec3(0.75, 0.85, 1.00);
 			star *= STARS_BRIGHTNESS * 128;
 			#endif
 			
@@ -290,7 +296,7 @@ vec3 DrawRift(vec3 viewPos, float dither, int samples, float riftType) {
 				noise *= max(sqrt(1.0 - length(planeCoord.xz) * 2.5), 0.0);
 				if (riftType == 0){
 					#if defined END
-					riftColor = mix(riftLowCol, riftHighCol, pow(currentStep, 0.4)) * vec3(END_R * 6.0, END_G * 0.5, END_B * 2.0);
+					riftColor = mix(riftLowCol, riftHighCol, pow(currentStep, 0.4)) * vec3(END_R * 8.0, END_G * 0.5, END_B * 4.0);
 					#elif defined OVERWORLD
 					riftColor = mix(riftLowCol, riftHighCol, pow(currentStep, 0.4));
 					#elif defined NETHER
@@ -298,7 +304,7 @@ vec3 DrawRift(vec3 viewPos, float dither, int samples, float riftType) {
 					#endif
 				}else{
 					#if defined END
-					riftColor = mix(secondRiftLowCol, secondRiftHighCol, pow(currentStep, 0.4)) * vec3(END_R * 6.0, END_G * 0.5, END_B * 2.0);
+					riftColor = mix(secondRiftLowCol, secondRiftHighCol, pow(currentStep, 0.4)) * vec3(END_R * 10.0, END_G * 0.25, END_B * 6.0);
 					#elif defined OVERWORLD
 					riftColor = mix(secondRiftLowCol, secondRiftHighCol, pow(currentStep, 0.4));
 					#elif defined NETHER
@@ -312,5 +318,5 @@ vec3 DrawRift(vec3 viewPos, float dither, int samples, float riftType) {
 		}
 	}
 
-	return rift * NEBULA_BRIGHTNESS * (moonVisibility - rainStrength) * (moonVisibility - auroraVisibility);
+	return rift * NEBULA_BRIGHTNESS * visFactor;
 }
