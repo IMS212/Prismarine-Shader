@@ -137,7 +137,7 @@ void main() {
 	#endif
 
 	#ifdef AURORA
-	if (moonVisibility != 0) albedo.rgb += DrawAurora(viewPos.xyz, dither, 6);
+	if (moonVisibility != 0) albedo.rgb += DrawAurora(viewPos.xyz, dither, 8);
 	#endif
 
 	SunGlare(albedo, viewPos.xyz, skylightCol.rgb);

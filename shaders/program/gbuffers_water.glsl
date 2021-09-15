@@ -400,6 +400,12 @@ void main() {
 
 				#ifdef END
 				skyReflection = endCol.rgb * 0.01;
+
+				#if END_SKY == 1
+				skyReflection += DrawRift(viewPos.xyz, dither, 4, 1);
+				skyReflection += DrawRift(viewPos.xyz, dither, 4, 0);
+				#endif
+
 				#endif
 
 				#if defined OVERWORLD || defined END
@@ -412,11 +418,6 @@ void main() {
 				#endif
 
 				skyReflection += specular / ((4.0 - 3.0 * eBS) * specularAlpha);
-
-				#if END_SKY == 1 && defined END
-				vec4 cloud = DrawCloud(skyRefPos * 100.0, dither);
-				skyReflection = mix(skyReflection, cloud.rgb, cloud.a);
-				#endif
 				#endif
 
 				#ifdef OVERWORLD
@@ -497,6 +498,12 @@ void main() {
 
 					#ifdef END
 					skyReflection = endCol.rgb * 0.01;
+
+					#if END_SKY == 1
+					skyReflection += DrawRift(viewPos.xyz, dither, 4, 1);
+					skyReflection += DrawRift(viewPos.xyz, dither, 4, 0);
+					#endif
+
 					#endif
 				}
 
