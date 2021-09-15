@@ -10,7 +10,7 @@ https://bitslablab.com
 #ifdef FSH
 
 //Varyings//
-varying vec4 texCoord;
+varying vec2 texCoord;
 
 varying vec3 sunVec, upVec, lightVec;
 
@@ -85,8 +85,8 @@ float GetLuminance(vec3 color) {
 //Program//
 void main() {
 	#if defined VOLUMETRIC_CLOUDS && defined OVERWORLD
-	vec3 aux8 = texture2D(colortex8, texCoord.st).rgb;
-	vec3 aux9 = texture2D(colortex9, texCoord.st).rgb;
+	vec3 aux8 = texture2D(colortex8, texCoord.xy).rgb;
+	vec3 aux9 = texture2D(colortex9, texCoord.xy).rgb;
 	#endif
 
 	#ifdef VOLUMETRIC_CLOUDS
@@ -151,7 +151,7 @@ void main() {
 #ifdef VSH
 
 //Varyings//
-varying vec4 texCoord;
+varying vec2 texCoord;
 
 varying vec3 sunVec, upVec;
 
@@ -162,7 +162,7 @@ uniform mat4 gbufferModelView;
 
 //Program//
 void main() {
-	texCoord = gl_MultiTexCoord0;
+	texCoord = gl_MultiTexCoord0.xy;
 	
 	gl_Position = ftransform();
 

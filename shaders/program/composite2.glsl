@@ -10,7 +10,7 @@ https://bitslablab.com
 #ifdef FSH
 
 //Varyings//
-varying vec4 texCoord;
+varying vec2 texCoord;
 
 varying vec3 sunVec, upVec, lightVec;
 
@@ -88,7 +88,7 @@ vec3 MotionBlur(vec3 color, float z, float dither) {
 		vec2 velocity = (currentPosition - previousPosition).xy;
 		velocity = velocity / (1.0 + length(velocity)) * MOTION_BLUR_STRENGTH * 0.02;
 			
-		vec2 coord = texCoord.st - velocity * (1.5 + dither);
+		vec2 coord = texCoord.xy - velocity * (1.5 + dither);
 		for(int i = 0; i < 5; i++, coord += velocity) {
 			vec2 sampleCoord = clamp(coord, doublePixel, 1.0 - doublePixel);
 			float mask = float(texture2D(depthtex1, sampleCoord).r > 0.56);
@@ -133,9 +133,9 @@ vec3 CalcLightColor0(vec3 sun, vec3 night, vec3 weatherCol) {
 #endif
 
 void main() {
-	vec3 color = texture2DLod(colortex0, texCoord.st, 0.0).rgb;
+	vec3 color = texture2DLod(colortex0, texCoord.xy, 0.0).rgb;
 	float dither = Bayer64(gl_FragCoord.xy);
-	float z = texture2D(depthtex1, texCoord.st).x;
+	float z = texture2D(depthtex1, texCoord.xy).x;
 
 	#ifdef MOTION_BLUR
 
@@ -189,7 +189,7 @@ void main() {
 #ifdef VSH
 
 //Varyings//
-varying vec4 texCoord;
+varying vec2 texCoord;
 
 varying vec3 sunVec, upVec;
 
@@ -200,7 +200,7 @@ uniform mat4 gbufferModelView;
 
 //Program//
 void main() {
-	texCoord = gl_MultiTexCoord0;
+	texCoord = gl_MultiTexCoord0.xy;
 	
 	gl_Position = ftransform();
 
