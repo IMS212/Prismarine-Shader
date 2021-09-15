@@ -165,7 +165,7 @@ vec3 DrawRift(vec3 viewPos, float dither, int samples, float riftType) {
 	if (VoU > 0.0) {
 		vec3 wpos = normalize((gbufferModelViewInverse * vec4(viewPos, 1.0)).xyz);
 		for(int i = 0; i < samples; i++) {
-			vec3 planeCoord = wpos * ((0.0 + currentStep * 16.0)) * 0.001 * NEBULA_STRETCHING;
+			vec3 planeCoord = wpos * ((16.0 + currentStep * -8.0)) * 0.001 * NEBULA_STRETCHING;
 			vec2 coord = cameraPosition.xz * 0.0000225 * NEBULA_OFFSET_FACTOR + planeCoord.xz;
 
 			if (riftType == 0){
@@ -209,7 +209,7 @@ vec3 DrawRift(vec3 viewPos, float dither, int samples, float riftType) {
 				noise *= max(sqrt(1.0 - length(planeCoord.xz) * 2.5), 0.0);
 				if (riftType == 0){
 					#if defined END
-					riftColor = mix(riftLowCol, riftHighCol, pow(currentStep, 0.4)) * vec3(END_R * 8.0, END_G * 0.5, END_B * 4.0) * 0.50;
+					riftColor = mix(riftLowCol, riftHighCol, pow(currentStep, 0.4)) * vec3(END_R * 8.0, END_G * 0.5, END_B * 4.0) * 0.25;
 					#elif defined OVERWORLD
 					riftColor = mix(riftLowCol, riftHighCol, pow(currentStep, 0.4));
 					#elif defined NETHER
@@ -217,7 +217,7 @@ vec3 DrawRift(vec3 viewPos, float dither, int samples, float riftType) {
 					#endif
 				}else{
 					#if defined END
-					riftColor = mix(secondRiftLowCol, secondRiftHighCol, pow(currentStep, 0.4)) * vec3(END_R * 10.0, END_G * 0.25, END_B * 6.0) * 0.75;
+					riftColor = mix(secondRiftLowCol, secondRiftHighCol, pow(currentStep, 0.4)) * vec3(END_R * 10.0, END_G * 0.25, END_B * 6.0) * 0.50;
 					#elif defined OVERWORLD
 					riftColor = mix(secondRiftLowCol, secondRiftHighCol, pow(currentStep, 0.4));
 					#elif defined NETHER
