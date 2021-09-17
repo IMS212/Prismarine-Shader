@@ -10,7 +10,7 @@ https://bitslablab.com
 #ifdef FSH
 
 //Varyings//
-varying vec2 texCoord;
+varying vec2 texCoord, lmCoord;
 
 varying vec3 sunVec, upVec, eastVec;
 
@@ -176,6 +176,7 @@ void GlowOutline(inout vec3 color){
 //Program//
 void main() {
     vec4 color      = texture2D(colortex0, texCoord);
+	vec2 lightmap = clamp(lmCoord, vec2(0.0), vec2(1.0));
 	float z         = texture2D(depthtex0, texCoord).r;
 
 	float dither = Bayer64(gl_FragCoord.xy);
@@ -238,7 +239,7 @@ void main() {
 
 				skyReflection = mix(
 					vanillaDiffuse * minLightCol,
-					skyReflection * (4.0 - 3.0 * eBS),
+					skyReflection * eBS,
 					skyOcclusion
 				);
 				#endif
@@ -329,7 +330,7 @@ void main() {
 #ifdef VSH
 
 //Varyings//
-varying vec2 texCoord;
+varying vec2 texCoord, lmCoord;
 
 varying vec3 sunVec, upVec, eastVec;
 
@@ -341,6 +342,9 @@ uniform mat4 gbufferModelView;
 //Program//
 void main() {
 	texCoord = gl_MultiTexCoord0.xy;
+
+	lmCoord = (gl_TextureMatrix[1] * gl_MultiTexCoord1).xy;
+	lmCoord = clamp((lmCoord - 0.03125) * 1.06667, vec2(0.0), vec2(0.9333, 1.0));
 	
 	gl_Position = ftransform();
 

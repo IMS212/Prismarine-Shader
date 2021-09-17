@@ -29,6 +29,17 @@ vec3 getBiomeskyColor(){
 float mefade2 = 1.0 - clamp(abs(timeAngle - 0.5) * 8.0 - 1.5, 0.0, 1.0);
 float dfade2 = 1.0 - timeBrightness;
 
+vec3 CalcSunSkyColor(vec3 morning, vec3 day, vec3 evening) {
+	vec3 me = mix(morning, evening, mefade2);
+	return mix(me, day, 1.0 - dfade2 * sqrt(dfade2));
+}
+
+vec3 CalcSkyColor(vec3 sun, vec3 night, vec3 weatherCol) {
+	vec3 c = mix(night, sun, sunVisibility);
+	c = mix(c, dot(c, vec3(0.299, 0.587, 0.114)) * weatherCol, rainStrength);
+	return c * c;
+}
+
 float CalcSkyDensity(float morning, float day, float evening) {
 	float me = mix(morning, evening, mefade2);
 	return mix(me, day, 1.0 - dfade2 * sqrt(dfade2));
@@ -61,11 +72,13 @@ vec3 GetSkyColor(vec3 viewPos, bool isReflection) {
     float ground = 1.0;
     #endif
 
-    vec3 sky = skyCol * baseGradient / (SKY_I * SKY_I);
+    vec3 weatherSky = weatherCol.rgb * weatherCol.rgb * weatherExposure;
+
+    vec3 sky = skyCol * CalcSkyColor(CalcSunSkyColor(skyCol, skyCol * skylightDay, skyCol), skyCol * skylightNight, weatherSky.rgb) * baseGradient / (SKY_I * SKY_I);
 
     #if SKY_COLOR_MODE == 1
-    vec3 biomeSky = getBiomeskyColor() * getBiomeskyColor();
-    sky = biomeSky * baseGradient / (SKY_I * SKY_I * SKY_I);
+    vec3 biomeSky = CalcSkyColor(CalcSunSkyColor(skyCol, getBiomeskyColor() * getBiomeskyColor(), skyCol), skyCol * skylightNight, weatherSky.rgb);
+    sky = biomeSky * skyCol * baseGradient / (SKY_I * SKY_I * SKY_I);
     #endif
 
     #ifdef SKY_VANILLA
@@ -83,7 +96,7 @@ vec3 GetSkyColor(vec3 viewPos, bool isReflection) {
 
     sky = mix(
         sqrt(sky * (1.0 - lightMix)), 
-        sqrt(lightSky), 
+        sqrt(lightSky) * (2 - VoU), 
         lightMix
     );
     sky *= sky;
@@ -93,7 +106,6 @@ vec3 GetSkyColor(vec3 viewPos, bool isReflection) {
     sky = mix(nightSky, sky, sunVisibility * sunVisibility);
 
     float rainGradient = exp(-max(VoU, 0.0) / SKY_DENSITY_W);
-    vec3 weatherSky = weatherCol.rgb * weatherCol.rgb * weatherExposure;
     weatherSky *= GetLuminance(ambientCol / (weatherSky)) * (0.2 * sunVisibility + 0.2);
     sky = mix(sky, weatherSky * rainGradient, rainStrength);
 

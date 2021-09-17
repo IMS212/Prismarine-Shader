@@ -27,7 +27,7 @@ uniform int isEyeInWater;
 uniform int worldTime;
 
 uniform sampler2D noisetex;
-uniform sampler2D tex;
+uniform sampler2D texture;
 
 uniform mat4 gbufferProjectionInverse;
 uniform mat4 gbufferModelViewInverse;
@@ -55,7 +55,7 @@ void main() {
 	if (blockEntityId == 10205) discard;
 	#endif
 
-    vec4 albedo = texture2D(tex, texCoord.xy);
+    vec4 albedo = texture2D(texture, texCoord.xy);
 	albedo.rgb *= color.rgb;
 
     float premult = float(mat > 0.98 && mat < 1.02);
@@ -83,7 +83,7 @@ void main() {
 	}
 	#endif
 
-	gl_FragData[0] = albedo;
+	gl_FragData[0] = albedo * COLORED_SHADOW_BRIGHTNESS;
 }
 
 #endif

@@ -49,13 +49,15 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
     #endif
 
     float newLightmap  = pow(lightmap.x, 10.0) * 1.5 + lightmap.x * 0.8;
+    float lightmapBrightness = lightmap.x * 15;
     float lightMapBrightnessFactor = 4 - pow(lightmap.x, 4) - pow(lightmap.x, 4) - pow(lightmap.x, 4) - pow(lightmap.x, 4);
     blocklightCol *= lightMapBrightnessFactor;
+    blocklightCol *= 1.25 - eBS;
 
     #ifdef LIGHTMAP_BRIGHTNESS_RECOLOR
     float lightFlatten1 = clamp(1.0 - pow(1.0 - emission, 128.0), 0.0, 1.0);
     if (lightFlatten1 == 0){
-        blocklightCol.r *= (pow(newLightmap, 6)) * 3 * LIGHTMAP_R;
+        blocklightCol.r *= (pow(newLightmap, 4)) * 3 * LIGHTMAP_R;
         blocklightCol.g *= (3.50 - newLightmap) * newLightmap * 1.25 * LIGHTMAP_G;
         blocklightCol.b *= (3.50 - newLightmap - newLightmap) * 2.50 * LIGHTMAP_B;
     } else {
@@ -63,6 +65,17 @@ void GetLighting(inout vec3 albedo, out vec3 shadow, vec3 viewPos, vec3 worldPos
     }
     #endif
 
+    //float brightFactor = 8.2 - newLightmap - newLightmap - newLightmap - newLightmap - newLightmap;
+    //float dimFactor = -1.55 + newLightmap + newLightmap + newLightmap;
+    //float redfactor = dimFactor * brightFactor;
+
+    //float lightFlatten1 = clamp(1.0 - pow(1.0 - emission, 128.0), 0.0, 1.0);
+    //if (lightFlatten1 == 0){
+        //blocklightCol.r *= pow(redfactor, 4) * 0.5;
+        //blocklightCol.b *= 4 * (1.25 - redfactor);
+    //} else {
+        //blocklightCol *= 2 * BLOCKLIGHT_I;
+    //}
 
     #ifdef LIGHTMAP_DIM_CUTOFF
     blocklightCol *= pow(newLightmap, DIM_CUTOFF_FACTOR);

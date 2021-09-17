@@ -33,7 +33,7 @@ void DrawStars(inout vec3 color, vec3 viewPos) {
 	color += star * pow(vec3(1.15, 0.85, 1.00) * 16, vec3(0.8));
 	#endif
 
-	color *= STARS_BRIGHTNESS;
+	star *= 0.5 * STARS_BRIGHTNESS;
 }
 
 void DrawBigStars(inout vec3 color, vec3 viewPos) {
@@ -63,6 +63,8 @@ void DrawBigStars(inout vec3 color, vec3 viewPos) {
 	#ifdef END
 	color += star * pow(vec3(1.15, 0.85, 1.00) * 16 * endCol.rgb, vec3(1.0));
 	#endif
+
+	star *= 0.5 * STARS_BRIGHTNESS;
 }
 
 #ifdef OVERWORLD

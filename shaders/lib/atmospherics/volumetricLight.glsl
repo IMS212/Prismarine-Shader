@@ -40,9 +40,8 @@ float getFogSample(vec3 pos, float height, float verticalThickness, float sample
 	vec3 wind = vec3(frametime * 0.25, 0.0, 0.0);
 	
 	if (ymult < 2.0){
-		noise+= getVolumetricNoise(pos * samples * 0.5 - wind * 0.5) * 5.0 * LIGHTSHAFT_HORIZONTAL_THICKNESS;
-		noise+= getVolumetricNoise(pos * samples * 0.25 - wind * 0.3) * 7.0 * LIGHTSHAFT_HORIZONTAL_THICKNESS;
-		noise+= getVolumetricNoise(pos * samples * 0.125 - wind * 0.1) * 9.0 * LIGHTSHAFT_HORIZONTAL_THICKNESS;
+		noise+= getVolumetricNoise(pos * samples * 0.5 - wind * 0.5) * 7.0 * LIGHTSHAFT_HORIZONTAL_THICKNESS;
+		noise+= getVolumetricNoise(pos * samples * 0.25 - wind * 0.3) * 9.0 * LIGHTSHAFT_HORIZONTAL_THICKNESS;
 	}
 	noise = clamp(mix(noise * LIGHTSHAFT_AMOUNT, 21.0, 0.25) - (10.0 + 5.0 * ymult), 0.0, 1.0);
 	return noise;
@@ -217,9 +216,10 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 				if (depth0 < minDist) shadow *= color;
 				else if (isEyeInWater == 1.0) shadow *= watercol * 1024 * LIGHTSHAFT_WI * (1.0 + eBS);
 
+				vec3 npos = worldposition.xyz + cameraPosition.xyz + vec3(frametime * 2.0, 0, 0);
+
 				#if defined END_VOLUMETRIC_FOG && defined END
 				if (isEyeInWater != 1){
-					vec3 npos = worldposition.xyz + cameraPosition.xyz + vec3(frametime * 4.0, 0, 0);
 					float n3da = texture2D(noisetex, npos.xz / 512.0 + floor(npos.y / 3.0) * 0.35).r;
 					float n3db = texture2D(noisetex, npos.xz / 512.0 + floor(npos.y / 3.0 + 1.0) * 0.35).r;
 					float noise = mix(n3da, n3db, fract(npos.y / 3.0));
@@ -229,9 +229,8 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 				#elif defined LIGHTSHAFT_CLOUDY_NOISE && defined OVERWORLD
 				float timeFactor = 1.0 - timeBrightness;
 				if (isEyeInWater != 1 && timeFactor > 0.025){
-					vec3 npos = worldposition.xyz + cameraPosition.xyz;
 
-					float vh = getHeightNoise((worldposition.xz + cameraPosition.xz + (frametime * 2)) * 0.005);
+					float vh = getHeightNoise(npos.xz * 0.00025);
 
 					#ifdef WORLD_CURVATURE
 					if (length(worldposition.xz) < WORLD_CURVATURE_SIZE) worldposition.y += length(worldposition.xz) * length(worldposition.xyz) / WORLD_CURVATURE_SIZE;

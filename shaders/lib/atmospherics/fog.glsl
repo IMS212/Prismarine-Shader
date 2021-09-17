@@ -134,7 +134,7 @@ void NormalFog(inout vec3 color, vec3 viewPos, float fogType) {
 	fog = 1.0 - exp(-2.0 * pow(fog, 0.15 * clearDay + 1.25));
 
 	if (isEyeInWater == 0){
-		vec3 pos = worldPos.xyz + cameraPosition.xyz + vec3(frametime * 4.0, 0, 0) + 100;
+		vec3 pos = worldPos.xyz + cameraPosition.xyz + 100;
 		float height;
 		if (fogType == 0){
 			height = (pos.y - FOG_FIRST_LAYER_ALTITUDE) * 0.01;

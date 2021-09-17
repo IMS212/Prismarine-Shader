@@ -431,6 +431,7 @@ void main() {
 				#endif
 
 				skyReflection *= (4.0 - 3.0 * eBS) * lightmap.y;
+				skyReflection *= eBS;
 				#endif
 
 				skyReflection *= clamp(1.0 - isEyeInWater, 0.0, 1.0);

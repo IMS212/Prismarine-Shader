@@ -179,6 +179,7 @@ option.BLOCKLIGHT_FLICKERING_STRENGTH=Flickering Strength
 
 option.SHADING_REDUCTION_FACTOR=Shading Reduction
 option.COLORED_SHADOW_OPACITY=Colored Shadows Opacity
+option.COLORED_SHADOW_BRIGHTNESS=Colored Shadows Brightness
 option.NOISEMAP_SHADOWS=Noisemap Shadows
 option.NOISEMAP_SHADOWS.comment=Random shadows on the world surface. First mode adds cloud shadows (not synced with clouds). Second mode adds small shadows to all blocks.
 value.NOISEMAP_SHADOWS.0=OFF
