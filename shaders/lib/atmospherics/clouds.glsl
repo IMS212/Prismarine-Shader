@@ -169,6 +169,9 @@ vec3 DrawRift(vec3 viewPos, float dither, int samples, float riftType) {
 		for(int i = 0; i < samples; i++) {
 			vec3 planeCoord = wpos * ((16.0 + currentStep * -8.0)) * 0.001 * NEBULA_STRETCHING;
 			vec2 coord = cameraPosition.xz * 0.0000225 * NEBULA_OFFSET_FACTOR + planeCoord.xz;
+			#ifdef NETHER
+			coord = cameraPosition.xz * 0.0001 + planeCoord.xz;
+			#endif
 
 			if (riftType == 0){
 				coord += vec2(coord.y, -coord.x) * 1.00 * NEBULA_DISTORTION;
@@ -226,7 +229,9 @@ vec3 DrawRift(vec3 viewPos, float dither, int samples, float riftType) {
 					riftColor = mix(netherCol.rgb, netherCol.rgb, pow(currentStep, 0.4));
 					#endif
 				}
+				#ifndef NETHER
 				riftColor += star;
+				#endif
 				rift += noise * riftColor * exp2(-4.0 * i * sampleStep);
 			}
 			currentStep += sampleStep;

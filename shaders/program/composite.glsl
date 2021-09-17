@@ -72,6 +72,19 @@ float GetLinearDepth(float depth) {
    return (2.0 * near) / (far + near - depth * (far - near));
 }
 
+float mefade0 = 1.0 - clamp(abs(timeAngle - 0.5) * 8.0 - 1.5, 0.0, 1.0);
+float dfade0 = 1.0 - timeBrightness;
+
+float CalcDayVisibility(float morning, float day, float evening) {
+	float me = mix(morning, evening, mefade0);
+	return mix(me, day, 1.0 - dfade0 * sqrt(dfade0));
+}
+
+float CalcVisibility(float sun, float night) {
+	float c = mix(night, sun, sunVisibility);
+	return c * c;
+}
+
 //Includes//
 #include "/lib/color/dimensionColor.glsl"
 #include "/lib/color/skyColor.glsl"
@@ -132,7 +145,7 @@ void main() {
 	#endif
 	
 	#if FOG_MODE == 1 || FOG_MODE == 2
-	float dither = Bayer256(gl_FragCoord.xy);
+	float dither = Bayer64(gl_FragCoord.xy);
 	vec3 vl = GetLightShafts(z0, z1, translucent, dither);
 	#else
 	vec3 vl = vec3(0.0);

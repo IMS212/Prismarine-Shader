@@ -33,6 +33,7 @@ vec3 GetFogColor(vec3 viewPos, float fogType) {
 
 	float densitySun = CalcFogDensity(MORNING_FOG_DENSITY, DAY_FOG_DENSITY, EVENING_FOG_DENSITY);
 	float density = CalcDensity(densitySun, NIGHT_FOG_DENSITY) * FOG_DENSITY;
+	density *= 0.25 + (cameraPosition.y * 0.001);
 	if (fogType == 0) density *= 4;
 	if (isEyeInWater == 1) density *= 0.0;
     float nightDensity = NIGHT_FOG_DENSITY;
@@ -96,13 +97,15 @@ vec3 GetFogColor(vec3 viewPos, float fogType) {
     );
     fog *= fog;
 
+    float scattering = pow(VoL * shadowFade * 0.5 + 0.5, 6.0);
+
 	float nightGradient = exp(-(VoU * 0.5 + 0.5) * 0.35 / nightDensity);
     vec3 nightFog = fogcolorNight * fogcolorNight * nightGradient * nightExposure;
     fog = mix(nightFog, fog, sunVisibility * sunVisibility);
 
     float rainGradient = exp(-(VoU * 0.5 + 0.5) * 0.125 / weatherDensity);
     vec3 weatherFog = weatherCol.rgb * weatherCol.rgb;
-    weatherFog *= GetLuminance(ambientCol / (weatherFog)) * (0.2 * sunVisibility + 0.2);
+    weatherFog *= GetLuminance(ambientCol / (weatherFog)) * (0.2 * sunVisibility + 0.2) * (1 + scattering);
     fog = mix(fog, weatherFog * rainGradient, rainStrength);
 
 	return fog;
@@ -159,15 +162,7 @@ void NormalFog(inout vec3 color, vec3 viewPos, float fogType) {
 	
 		if(vanillaFog > 0.0){
 			vec3 vanillaFogColor = vec3(0.0);
-			if (isEyeInWater == 0.0){
-				vanillaFogColor = GetSkyColor(viewPos, false) * 2;
-				#if NIGHT_SKY_MODE == 1
-				vanillaFogColor += DrawRift(viewPos.xyz, dither, 4, 1);
-				vanillaFogColor += DrawRift(viewPos.xyz, dither, 4, 0);
-				#endif
-			} else {
-				vanillaFogColor = waterColor.rgb * WATER_I;
-			}
+			vanillaFogColor = GetSkyColor(viewPos, false);
 			vanillaFogColor *= (4.0 - 3.0) * (1.0 + nightVision);
 
 			fogColor *= fog;
@@ -207,6 +202,11 @@ void NormalFog(inout vec3 color, vec3 viewPos, float fogType) {
 	fogColor *= 1.5;
 	#endif
 	#endif
+	#endif
+
+	#if NIGHT_SKY_MODE == 1
+	fogColor += DrawRift(viewPos.xyz, dither, 4, 1);
+	fogColor += DrawRift(viewPos.xyz, dither, 4, 0);
 	#endif
 
 	#if (defined OVERWORLD || defined NETHER) || (defined END && (DISTANT_FADE == 2 || DISTANT_FADE == 3))

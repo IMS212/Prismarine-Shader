@@ -74,7 +74,7 @@ vec3 GetSkyColor(vec3 viewPos, bool isReflection) {
 
     vec3 weatherSky = weatherCol.rgb * weatherCol.rgb * weatherExposure;
 
-    vec3 sky = skyCol * CalcSkyColor(CalcSunSkyColor(skyCol, skyCol * skylightDay, skyCol), skyCol * skylightNight, weatherSky.rgb) * baseGradient / (SKY_I * SKY_I);
+    vec3 sky = mix(skyCol * 0.75, skyCol * skyCol, 0.75) * baseGradient;
 
     #if SKY_COLOR_MODE == 1
     vec3 biomeSky = CalcSkyColor(CalcSunSkyColor(skyCol, getBiomeskyColor() * getBiomeskyColor(), skyCol), skyCol * skylightNight, weatherSky.rgb);

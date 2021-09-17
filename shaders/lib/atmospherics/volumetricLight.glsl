@@ -87,26 +87,20 @@ vec4 GetShadowSpace(vec4 wpos) {
 
 //Light shafts from Robobo1221 (modified)
 vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dither) {
-	dither *= 0.8;
+	dither *= 0.5;
 
 	vec3 vl = vec3(0.0);
-
-	#ifndef LIGHTSHAFT_DAY
-	float visibilityFactor = 1.0 - timeBrightness;
-	if (visibilityFactor <= 0.025) visibilityFactor = 1 - eBS;
-	if (isEyeInWater == 1) visibilityFactor = 1;
-	#endif
-
-	bool isThereADragon = gl_Fog.start / far < 0.5; //yes emin thanks for telling people about this in shaderlabs
-	float dragonFactor;
-	if (isThereADragon) dragonFactor = 1;
-	else dragonFactor = 0;
 
 	#ifdef END_VOLUMETRIC_FOG
 	#endif
 	
 	#ifdef LIGHTSHAFT_CLOUDY_NOISE
 	#endif
+
+	bool isThereADragon = gl_Fog.start / far < 0.5; //yes emin thanks for telling people about this in shaderlabs
+	float dragonFactor;
+	if (isThereADragon) dragonFactor = 1;
+	else dragonFactor = 0;
 
 	vec3 screenPos = vec3(texCoord, pixeldepth0);
 	vec4 viewPos = gbufferProjectionInverse * (vec4(texCoord, pixeldepth0, 1.0) * 2.0 - 1.0);
@@ -119,19 +113,26 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 	#ifdef OVERWORLD	
 	float visfactor = 0.05 * (-0.1 * timeBrightness + 1.0) * (1.0 - rainStrength);
 	float invvisfactor = 1.0 - visfactor;
-	float visibility = 0.975;
+	float dayVis, nightVis;
+	
+	#ifdef LIGHTSHAFT_NIGHT
+	nightVis = 1;
+	#endif
+
+	#ifdef LIGHTSHAFT_DAY
+	dayVis = 1;
+	#endif
+
+	if (isEyeInWater == 1){
+		dayVis = 1;
+		nightVis = 1;
+	}
+
+	float visibility = CalcVisibility(CalcDayVisibility(1, dayVis, 1), nightVis);
 
 	visibility = visfactor / (1.0 - invvisfactor * visibility) - visfactor;
 	visibility = clamp(visibility * 1.015 / invvisfactor - 0.015, 0.0, 1.0);
 	visibility = mix(1.0, visibility, 0.25 * 1 + 0.75) * 0.14285 * float(pixeldepth0 > 0.56);
-	
-	#ifndef LIGHTSHAFT_NIGHT
-	visibility *= 1 - moonVisibility;
-	#endif
-
-	#ifndef LIGHTSHAFT_DAY
-	visibility *= visibilityFactor;
-	#endif
 	
 	#ifdef LIGHTSHAFT_PERSISTENCE
 	float persistence = (LIGHTSHAFT_PERSISTENCE_FACTOR * 2);
@@ -154,27 +155,21 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 
 	if (visibility > 0.0) {
 		float minDistFactor = LIGHTSHAFT_MIN_DISTANCE;
-		float maxDist = LIGHTSHAFT_MAX_DISTANCE * 1.5;
+		float maxDist = LIGHTSHAFT_MAX_DISTANCE;
 		
 		float depth0 = GetLinearDepth2(pixeldepth0);
 		float depth1 = GetLinearDepth2(pixeldepth1);
 		vec4 worldposition = vec4(0.0);
 		vec4 shadowposition = vec4(0.0);
-
-		float scattering = pow(VoL * shadowFade * 0.5 + 0.5, 6.0);
 		
-		#if defined OVERWORLD
-		vec3 watercol = vec3(LIGHTSHAFT_WR, LIGHTSHAFT_WG, LIGHTSHAFT_WB) * LIGHTSHAFT_WI / 255.0 * lightCol.rgb * LIGHTSHAFT_WI * WATER_I;
-		#elif defined END
-		vec3 watercol = vec3(LIGHTSHAFT_WR, LIGHTSHAFT_WG, LIGHTSHAFT_WB) * LIGHTSHAFT_WI / 255.0 * endCol.rgb * LIGHTSHAFT_WI * WATER_I;
-		#else
-		vec3 watercol = vec3(1);
-		#endif
+		vec3 watercol = vec3(LIGHTSHAFT_WR, LIGHTSHAFT_WG, LIGHTSHAFT_WB);
 		
 		for(int i = 0; i < LIGHTSHAFT_SAMPLES; i++) {
 			float minDist = (i + dither) * minDistFactor;
 
-			if (isEyeInWater == 1) minDist = (exp2(i + dither) - 0.95) * 8;
+			if (isEyeInWater == 1){
+				minDist = (exp2(i + dither) - 0.95) * 2;
+			}
 			
 			#ifdef END
 			minDist = (exp2(i + dither) - 0.95) * 2;
@@ -214,7 +209,7 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 				vec3 shadow = clamp(shadowCol * (1.0 - shadow0) + shadow0, vec3(0.0), vec3(1.0));
 
 				if (depth0 < minDist) shadow *= color;
-				else if (isEyeInWater == 1.0) shadow *= watercol * 1024 * LIGHTSHAFT_WI * (1.0 + eBS);
+				else if (isEyeInWater == 1.0) shadow *= watercol;
 
 				vec3 npos = worldposition.xyz + cameraPosition.xyz + vec3(frametime * 2.0, 0, 0);
 
@@ -230,7 +225,7 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 				float timeFactor = 1.0 - timeBrightness;
 				if (isEyeInWater != 1 && timeFactor > 0.025){
 
-					float vh = getHeightNoise(npos.xz * 0.00025);
+					float vh = getHeightNoise(npos.xz);
 
 					#ifdef WORLD_CURVATURE
 					if (length(worldposition.xz) < WORLD_CURVATURE_SIZE) worldposition.y += length(worldposition.xz) * length(worldposition.xyz) / WORLD_CURVATURE_SIZE;
@@ -243,7 +238,7 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 					shadow *= noise;
 				}
 				#endif
-				
+
 				vl += shadow;
 			}
 		}

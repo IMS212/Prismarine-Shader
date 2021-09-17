@@ -104,22 +104,18 @@ void main() {
 	vl *= vl;
 
 	#ifdef OVERWORLD
-	if (isEyeInWater == 0){
-		#if LIGHTSHAFT_COLOR_MODE == 0
-		vl *= lightCol * 0.25;
-		#elif LIGHTSHAFT_COLOR_MODE == 1
-		vl *= lightshaftCol * 0.25;
-		#else
-		vec3 lightshaftCol0 = CalcSunColor(GetSkyColor(viewPos.xyz, false), lightshaftDay * 0.25, GetSkyColor(viewPos.xyz, false));
-		vec3 skylightshaftCol = CalcLightColor(lightshaftCol0, lightshaftNight * 0.50, waterColor.rgb);
-		vl *= skylightshaftCol;
-		#endif
-
-		#ifdef PERBIOME_LIGHTSHAFTS
-		vl *= getBiomeFogColor(viewPos.xyz);
-		#endif
+	if (isEyeInWater == 1){
+		vl *= waterShadowColor.rgb * (timeBrightness + LIGHTSHAFT_WI);
 	}
-	if (isEyeInWater == 1) vl *= vec3(LIGHTSHAFT_WR, LIGHTSHAFT_WG, LIGHTSHAFT_WB) * LIGHTSHAFT_WI / 255.0 * (timeBrightness + LIGHTSHAFT_WI) * 0.01;
+	#if LIGHTSHAFT_COLOR_MODE == 0
+	vl *= lightCol * 0.25;
+	#elif LIGHTSHAFT_COLOR_MODE == 1
+	vl *= lightshaftCol * 0.25;
+	#else
+	vec3 lightshaftCol0 = CalcSunColor(GetSkyColor(viewPos.xyz, false), lightshaftDay * 0.25, GetSkyColor(viewPos.xyz, false));
+	vec3 skylightshaftCol = CalcLightColor(lightshaftCol0, lightshaftNight * 0.50, waterColor.rgb);
+	vl *= skylightshaftCol;
+	#endif
 	#endif
 
 	#ifdef END

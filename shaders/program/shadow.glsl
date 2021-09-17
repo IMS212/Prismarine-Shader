@@ -26,7 +26,7 @@ uniform int blockEntityId;
 uniform int isEyeInWater;
 uniform int worldTime;
 
-uniform sampler2D noisetex;
+uniform sampler2D noisetex, colortex15;
 uniform sampler2D texture;
 
 uniform mat4 gbufferProjectionInverse;
