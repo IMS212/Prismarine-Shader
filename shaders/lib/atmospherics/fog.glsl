@@ -156,7 +156,7 @@ void NormalFog(inout vec3 color, vec3 viewPos, float fogType) {
 
 	#if DISTANT_FADE == 1 || DISTANT_FADE == 3
 	if(isEyeInWater != 2.0){
-		float vanillaFog = 1.0 - (far - (fogFactor + 20.0)) * 5.0 / ((density + isEyeInWater + isEyeInWater) * far);
+		float vanillaFog = 1.0 - (far - (fogFactor + 20.0)) * 5.0 / ((FOG_DENSITY + isEyeInWater + isEyeInWater) * far);
 		vanillaFog = clamp(vanillaFog, 0.0, 1.0);
 		if (isEyeInWater == 1) vanillaFog *= 0.0;
 	
@@ -164,6 +164,11 @@ void NormalFog(inout vec3 color, vec3 viewPos, float fogType) {
 			vec3 vanillaFogColor = vec3(0.0);
 			vanillaFogColor = GetSkyColor(viewPos, false);
 			vanillaFogColor *= (4.0 - 3.0) * (1.0 + nightVision);
+
+			#if NIGHT_SKY_MODE == 1
+			vanillaFogColor += DrawRift(viewPos.xyz, dither, 4, 1);
+			vanillaFogColor += DrawRift(viewPos.xyz, dither, 4, 0);
+			#endif
 
 			fogColor *= fog;
 			
@@ -202,11 +207,6 @@ void NormalFog(inout vec3 color, vec3 viewPos, float fogType) {
 	fogColor *= 1.5;
 	#endif
 	#endif
-	#endif
-
-	#if NIGHT_SKY_MODE == 1
-	fogColor += DrawRift(viewPos.xyz, dither, 4, 1);
-	fogColor += DrawRift(viewPos.xyz, dither, 4, 0);
 	#endif
 
 	#if (defined OVERWORLD || defined NETHER) || (defined END && (DISTANT_FADE == 2 || DISTANT_FADE == 3))

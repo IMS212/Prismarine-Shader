@@ -87,7 +87,6 @@ vec4 GetShadowSpace(vec4 wpos) {
 
 //Light shafts from Robobo1221 (modified)
 vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dither) {
-	dither *= 0.5;
 
 	vec3 vl = vec3(0.0);
 
@@ -146,7 +145,7 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 	#ifdef END
 	VoL = pow(VoL * 0.5 + 0.5, 16.0) * 0.75 + 0.25;
 	float visibility = VoL;
-	visibility *= (0.25 + dragonFactor);
+	visibility *= (0.1 + dragonFactor);
 	#endif
 
 	#ifdef NETHER
@@ -225,7 +224,7 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 				float timeFactor = 1.0 - timeBrightness;
 				if (isEyeInWater != 1 && timeFactor > 0.025){
 
-					float vh = getHeightNoise(npos.xz);
+					float vh = getHeightNoise(npos.xz * 0.0001);
 
 					#ifdef WORLD_CURVATURE
 					if (length(worldposition.xz) < WORLD_CURVATURE_SIZE) worldposition.y += length(worldposition.xz) * length(worldposition.xyz) / WORLD_CURVATURE_SIZE;

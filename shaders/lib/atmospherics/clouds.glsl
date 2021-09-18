@@ -214,7 +214,7 @@ vec3 DrawRift(vec3 viewPos, float dither, int samples, float riftType) {
 				noise *= max(sqrt(1.0 - length(planeCoord.xz) * 2.5), 0.0);
 				if (riftType == 0){
 					#if defined END
-					riftColor = mix(riftLowCol, riftHighCol, pow(currentStep, 0.4)) * vec3(END_R * 8.0, END_G * 0.5, END_B * 4.0) * 0.25;
+					riftColor = mix(endCol.rgb * 12, endCol.rgb * 10, pow(currentStep, 0.4));
 					#elif defined OVERWORLD
 					riftColor = mix(riftLowCol, riftHighCol, pow(currentStep, 0.4));
 					#elif defined NETHER
@@ -222,7 +222,7 @@ vec3 DrawRift(vec3 viewPos, float dither, int samples, float riftType) {
 					#endif
 				}else{
 					#if defined END
-					riftColor = mix(secondRiftLowCol, secondRiftHighCol, pow(currentStep, 0.4)) * vec3(END_R * 10.0, END_G * 0.25, END_B * 6.0) * 0.50;
+					riftColor = mix(endCol.rgb * 8, endCol.rgb * 10, pow(currentStep, 0.4));
 					#elif defined OVERWORLD
 					riftColor = mix(secondRiftLowCol, secondRiftHighCol, pow(currentStep, 0.4));
 					#elif defined NETHER

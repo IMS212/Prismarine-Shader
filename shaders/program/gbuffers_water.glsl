@@ -225,7 +225,7 @@ void main() {
 		
 		float metalness      = 0.0;
 		float emission       = 0.0;
-		float subsurface     = glass * 0.25 + (translucent + water);
+		float subsurface     = translucent + water;
 		vec3 baseReflectance = vec3(0.04);
 		
 		#ifndef REFLECTION_TRANSLUCENT

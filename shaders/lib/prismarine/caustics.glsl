@@ -1,9 +1,10 @@
 float h(vec3 pos){
-	float noise  = texture2D(noisetex, (pos.xz + vec2(frametime) * 0.25 - pos.y) / WATER_CAUSTICS_AMOUNT * 1.5).r;
-		  noise += texture2D(noisetex, (pos.xz - vec2(frametime) * 0.5 - pos.y) / WATER_CAUSTICS_AMOUNT * 3.0).r*0.8;
-		  noise -= texture2D(noisetex, (pos.xz + vec2(frametime) * 0.75 + pos.y) / WATER_CAUSTICS_AMOUNT * 4.5).r*0.6;
-		  noise += texture2D(noisetex, (pos.xz - vec2(frametime) * 0.25 - pos.y) / WATER_CAUSTICS_AMOUNT * 7.0).r*0.4;
-		  noise -= texture2D(noisetex, (pos.xz + vec2(frametime) * 0.5 + pos.y) / WATER_CAUSTICS_AMOUNT * 14.0).r*0.2;
+	float noise  = texture2D(noisetex, (pos.xz + vec2(frametime) * 0.1 + pos.y) / WATER_CAUSTICS_AMOUNT * 1).r;
+		  noise += texture2D(noisetex, (pos.xz - vec2(frametime) * 0.2 - pos.y) / WATER_CAUSTICS_AMOUNT * 2).r;
+		  noise -= texture2D(noisetex, (pos.xz + vec2(frametime) * 0.3 + pos.y) / WATER_CAUSTICS_AMOUNT * 4).r;
+		  noise += texture2D(noisetex, (pos.xz - vec2(frametime) * 0.1 - pos.y) / WATER_CAUSTICS_AMOUNT * 7).r;
+		  noise -= texture2D(noisetex, (pos.xz + vec2(frametime) * 0.2 + pos.y) / WATER_CAUSTICS_AMOUNT * 11).r;
+		  noise += texture2D(noisetex, (pos.xz - vec2(frametime) * 0.3 - pos.y) / WATER_CAUSTICS_AMOUNT * 16).r;
 	
 	return noise;
 }
@@ -16,7 +17,7 @@ float getCaustics(vec3 pos){
 	float h4 = h(pos + vec3(0, 0, -1));
 	
 	float caustic = max((1 - abs(0.5 - h0)) * (1 - (abs(h1 - h2) + abs(h3 - h4))), 0);
-	caustic = max(pow(caustic, 3.5), 0) * 16;
+	caustic = max(pow(caustic, 3.5), 0);
 	
 	return caustic;
 }

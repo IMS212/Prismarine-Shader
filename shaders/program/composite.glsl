@@ -10,7 +10,9 @@ https://bitslablab.com
 #ifdef FSH
 
 //Varyings//
-varying vec2 texCoord;
+varying float isWater;
+
+varying vec2 texCoord, lmCoord;
 
 varying vec3 sunVec, upVec;
 
@@ -35,7 +37,11 @@ uniform mat4 gbufferModelViewInverse;
 uniform mat4 shadowModelView;
 uniform mat4 shadowProjection;
 
-uniform sampler2D colortex0;
+#ifdef REFRACTION
+uniform sampler2D texture;
+#endif
+
+uniform sampler2D colortex0, noisetex;
 uniform sampler2D colortex1;
 uniform sampler2D depthtex0;
 uniform sampler2D depthtex1;
@@ -44,7 +50,6 @@ uniform sampler2D depthtex1;
 uniform sampler2DShadow shadowtex0;
 uniform sampler2DShadow shadowtex1;
 uniform sampler2D shadowcolor0;
-uniform sampler2D noisetex;
 #endif
 
 //Optifine Constants//
@@ -85,12 +90,46 @@ float CalcVisibility(float sun, float night) {
 	return c * c;
 }
 
+#ifdef REFRACTION
+float waterH(vec3 pos) {
+	float noise  = texture2D(noisetex, (pos.xz + vec2(frametime) * 0.025 + pos.y) / 512 * 1).r;
+		  noise += texture2D(noisetex, (pos.xz - vec2(frametime) * 0.075 - pos.y) / 512 * 2).r;
+		  noise -= texture2D(noisetex, (pos.xz + vec2(frametime) * 0.100 + pos.y) / 512 * 4).r;
+		  noise += texture2D(noisetex, (pos.xz - vec2(frametime) * 0.025 - pos.y) / 512 * 7).r;
+		  noise -= texture2D(noisetex, (pos.xz + vec2(frametime) * 0.075 + pos.y) / 512 * 11).r;
+		  noise += texture2D(noisetex, (pos.xz - vec2(frametime) * 0.100 - pos.y) / 512 * 15).r;
+
+	noise /= pow(max(length(pos), 4.0), 0.35);
+	return noise;
+}
+
+vec2 getRefract(vec2 coord, vec3 posxz){
+	float deltaPos = 0.1;
+	float h0 = waterH(posxz);
+	float h1 = waterH(posxz + vec3(deltaPos, 0.0,0.0));
+	float h2 = waterH(posxz + vec3(-deltaPos, 0.0,0.0));
+	float h3 = waterH(posxz + vec3(0.0,0.0, deltaPos));
+	float h4 = waterH(posxz + vec3(0.0,0.0, -deltaPos));
+
+	float xDelta = ((h1-h0)+(h0-h2))/deltaPos;
+	float yDelta = ((h3-h0)+(h0-h4))/deltaPos;
+
+	vec2 newcoord = coord + vec2(xDelta,yDelta) * 0.0075;
+
+	return mix(newcoord, coord, 0);
+}
+#endif
+
 //Includes//
 #include "/lib/color/dimensionColor.glsl"
 #include "/lib/color/skyColor.glsl"
 #include "/lib/color/waterColor.glsl"
 #include "/lib/util/dither.glsl"
 #include "/lib/atmospherics/waterFog.glsl"
+
+#ifdef REFRACTION
+#include "/lib/util/spaceConversion.glsl"
+#endif
 
 #if FOG_MODE == 1 || FOG_MODE == 2
 #include "/lib/prismarine/functions.glsl"
@@ -113,6 +152,7 @@ void main() {
     vec3 translucent = texture2D(colortex1, texCoord).rgb;
 	float z0 = texture2D(depthtex0, texCoord).r;
 	float z1 = texture2D(depthtex1, texCoord).r;
+	vec2 lightmap = clamp(lmCoord, vec2(0.0), vec2(1.0));
 	
 	vec4 screenPos = vec4(texCoord.x, texCoord.y, z0, 1.0);
 	vec4 viewPos = gbufferProjectionInverse * (screenPos * 2.0 - 1.0);
@@ -151,8 +191,17 @@ void main() {
 	vec3 vl = vec3(0.0);
     #endif
 	
+	#ifdef REFRACTION
+	float depth = z1 - z0;
+	vec3 worldPos = ToWorld(viewPos.xyz);
+	if (depth > 0){
+		vec2 refractionCoord = getRefract(texCoord.xy, worldPos + cameraPosition);
+		color = texture2D(colortex0, refractionCoord);
+	}
+	#endif
+
 	vec3 reflectionColor = pow(color.rgb, vec3(0.125)) * 0.5;
-	
+
     /*DRAWBUFFERS:01*/
 	gl_FragData[0] = color;
 	#if ((FOG_MODE == 1 || FOG_MODE == 2) && defined OVERWORLD) || (defined END_VOLUMETRIC_FOG && defined END)
@@ -171,7 +220,9 @@ void main() {
 #ifdef VSH
 
 //Varyings//
-varying vec2 texCoord;
+varying float isWater;
+
+varying vec2 texCoord, lmCoord;
 
 varying vec3 sunVec, upVec;
 
@@ -180,11 +231,20 @@ uniform float timeAngle;
 
 uniform mat4 gbufferModelView;
 
+//Attributes//
+attribute vec4 mc_Entity;
+
 //Program//
 void main() {
 	texCoord = gl_MultiTexCoord0.xy;
 	
 	gl_Position = ftransform();
+
+	isWater = 0;
+	if (mc_Entity.x == 10300 || mc_Entity.x == 10303) isWater = 1;
+
+	lmCoord = (gl_TextureMatrix[1] * gl_MultiTexCoord1).xy;
+	lmCoord = clamp((lmCoord - 0.03125) * 1.06667, vec2(0.0), vec2(0.9333, 1.0));
 
 	const vec2 sunRotationData = vec2(cos(sunPathRotation * 0.01745329251994), -sin(sunPathRotation * 0.01745329251994));
 	float ang = fract(timeAngle - 0.25);
@@ -195,4 +255,3 @@ void main() {
 }
 
 #endif
-
