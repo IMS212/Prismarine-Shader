@@ -146,6 +146,8 @@ vec2 getRefract(vec2 coord, vec3 posxz){
 #include "/lib/post/outline.glsl"
 #endif
 
+#include "/lib/prismarine/fireflies.glsl"
+
 //Program//
 void main() {
     vec4 color = texture2D(colortex0, texCoord);
