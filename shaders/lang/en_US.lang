@@ -391,8 +391,8 @@ value.END_SKY.0=Vanilla
 value.END_SKY.1=Clouds
 option.END_VOLUMETRIC_FOG=End Volumetric Fog
 option.END_VOLUMETRIC_FOG.comment=Enables cloudy fog in End.
-option.CLOUD_UPPER_LAYER=Upper Layer
-option.CLOUD_LOWER_LAYER=Lower Layer
+option.FIREFLIES=Fireflies
+option.FIREFLIES_I=F.F. Brightness
 
 option.SKY_DESATURATION=Sky Desaturation
 option.SKY_DESATURATION.comment=Reduces saturation while adding some tint to the skybox at night
@@ -612,6 +612,8 @@ option.WATER_FOG_DENSITY.comment=Adjusts water fog density.
 option.WATER_PIXEL=Pixel Lock
 option.WATER_PIXEL.comment=Applies pixelation effect on water normals.
 value.WATER_PIXEL.0=OFF
+
+option.REFRACTION=Translucents Refraction
 
 #Post Effects
 option.NETHER_HEAT_WAVE=Nether Heat Wave

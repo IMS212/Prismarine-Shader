@@ -35,14 +35,12 @@ uniform mat4 gbufferModelViewInverse;
 uniform mat4 shadowModelView;
 uniform mat4 shadowProjection;
 
-#ifdef REFRACTION
-uniform sampler2D texture;
-#endif
-
-uniform sampler2D colortex0, noisetex;
+uniform sampler2D colortex0;
 uniform sampler2D colortex1;
 uniform sampler2D depthtex0;
 uniform sampler2D depthtex1;
+
+uniform sampler2D noisetex;
 
 #if FOG_MODE == 1 || FOG_MODE == 2
 uniform sampler2DShadow shadowtex0;
@@ -50,13 +48,14 @@ uniform sampler2DShadow shadowtex1;
 uniform sampler2D shadowcolor0;
 #endif
 
+//Attributes//
+
 //Optifine Constants//
 const bool colortex5Clear = false;
 
 //Common Variables//
 float eBS = eyeBrightnessSmooth.y / 240.0;
 float sunVisibility = clamp(dot(sunVec, upVec) + 0.05, 0.0, 0.1) * 10.0;
-float moonVisibility = clamp(dot(-sunVec, upVec) + 0.05, 0.0, 0.1) * 10.0;
 
 #ifdef WORLD_TIME_ANIMATION
 float frametime = float(worldTime) * 0.05 * ANIMATION_SPEED;
@@ -125,13 +124,12 @@ vec2 getRefract(vec2 coord, vec3 posxz){
 #include "/lib/util/dither.glsl"
 #include "/lib/atmospherics/waterFog.glsl"
 
-#ifdef REFRACTION
-#include "/lib/util/spaceConversion.glsl"
+#if FOG_MODE == 1 || FOG_MODE == 2
+#include "/lib/atmospherics/volumetricLight.glsl"
 #endif
 
-#if FOG_MODE == 1 || FOG_MODE == 2
-#include "/lib/prismarine/functions.glsl"
-#include "/lib/atmospherics/volumetricLight.glsl"
+#ifdef REFRACTION
+#include "/lib/util/spaceConversion.glsl"
 #endif
 
 #ifdef OUTLINE_ENABLED
@@ -139,7 +137,6 @@ vec2 getRefract(vec2 coord, vec3 posxz){
 #include "/lib/util/outlineOffset.glsl"
 #include "/lib/util/outlineMask.glsl"
 #include "/lib/atmospherics/sky.glsl"
-#include "/lib/color/fogColor.glsl"
 #include "/lib/atmospherics/fog.glsl"
 #include "/lib/post/outline.glsl"
 #endif
@@ -147,10 +144,10 @@ vec2 getRefract(vec2 coord, vec3 posxz){
 //Program//
 void main() {
     vec4 color = texture2D(colortex0, texCoord);
-    vec3 translucent = texture2D(colortex1, texCoord).rgb;
+    vec3 translucent = texture2D(colortex1,texCoord).rgb;
 	float z0 = texture2D(depthtex0, texCoord).r;
 	float z1 = texture2D(depthtex1, texCoord).r;
-	
+
 	float dayVis0, nightVis0;
 	
 	#ifdef LIGHTSHAFT_NIGHT
@@ -223,12 +220,10 @@ void main() {
 	#endif
 
 	vec3 reflectionColor = pow(color.rgb, vec3(0.125)) * 0.5;
-
+	
     /*DRAWBUFFERS:01*/
 	gl_FragData[0] = color;
-	#if ((FOG_MODE == 1 || FOG_MODE == 2) && defined OVERWORLD) || (defined END_VOLUMETRIC_FOG && defined END)
 	gl_FragData[1] = vec4(vl, 1.0);
-	#endif
 	
     #ifdef REFLECTION_PREVIOUS
     /*DRAWBUFFERS:015*/
@@ -250,9 +245,6 @@ varying vec3 sunVec, upVec;
 uniform float timeAngle;
 
 uniform mat4 gbufferModelView;
-
-//Attributes//
-attribute vec4 mc_Entity;
 
 //Program//
 void main() {

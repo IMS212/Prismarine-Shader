@@ -64,8 +64,8 @@ vec3 GetFireflies(float pixeldepth0, float pixeldepth1, vec3 color, float dither
 		float depth1 = GetLinearDepth2(pixeldepth1);
 		vec4 worldposition = vec4(0.0);
 		
-		for(int i = 0; i < 6; i++) {
-			float minDist = exp2(i + dither) * 6; 
+		for(int i = 0; i < 2; i++) {
+			float minDist = exp2(i + dither) * 12; 
 
 			worldposition = GetWorldSpace(GetLogarithmicDepth(minDist), texCoord.st);
 

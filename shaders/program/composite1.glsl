@@ -152,7 +152,7 @@ void main() {
 	#ifdef FIREFLIES
 	else {
 		float visibility1 = (1 - sunVisibility) * (1 - rainStrength) * (0 + eBS);
-		if (visibility1 > 0) vl *= vec3(80, 255, 200);
+		if (visibility1 > 0) vl *= vec3(80, 255, 200) * FIREFLIES_I;
 	}		
 	#endif
 
@@ -167,8 +167,9 @@ void main() {
 	#endif
 
 	#if defined VOLUMETRIC_CLOUDS && defined OVERWORLD
+	float dither = Bayer64(gl_FragCoord.xy);
 	float pixeldepth1 = texture2D(depthtex1, texCoord.xy).x;
-	vc = getVolumetricCloud(pixeldepth1, pixeldepth0, VCLOUDS_HEIGHT_ADJ_FACTOR, 2, viewPos.xyz);
+	vc = getVolumetricCloud(pixeldepth1, pixeldepth0, VCLOUDS_HEIGHT_ADJ_FACTOR, 2, dither);
 	#endif
 
 	/* DRAWBUFFERS:0189 */
