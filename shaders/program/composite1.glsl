@@ -65,6 +65,19 @@ float GetLuminance(vec3 color) {
 	return dot(color,vec3(0.299, 0.587, 0.114));
 }
 
+float mefade0 = 1.0 - clamp(abs(timeAngle - 0.5) * 8.0 - 1.5, 0.0, 1.0);
+float dfade0 = 1.0 - timeBrightness;
+
+float CalcDayVisibility(float morning, float day, float evening) {
+	float me = mix(morning, evening, mefade0);
+	return mix(me, day, 1.0 - dfade0 * sqrt(dfade0));
+}
+
+float CalcVisibility(float sun, float night) {
+	float c = mix(night, sun, sunVisibility);
+	return c * c;
+}
+
 //Includes//
 #include "/lib/color/dimensionColor.glsl"
 #include "/lib/color/waterColor.glsl"
@@ -99,6 +112,23 @@ void main() {
 	vec4 viewPos = gbufferProjectionInverse * (vec4(texCoord.xy, pixeldepth0, 1.0) * 2.0 - 1.0);
 		 viewPos /= viewPos.w;
 
+	float dayVis0, nightVis0;
+	
+	#ifdef LIGHTSHAFT_NIGHT
+	nightVis0 = 1;
+	#endif
+
+	#ifdef LIGHTSHAFT_DAY
+	dayVis0 = 1;
+	#endif
+
+	if (isEyeInWater == 1){
+		dayVis0 = 1;
+		nightVis0 = 1;
+	}
+
+	float visibility0 = CalcVisibility(CalcDayVisibility(1, dayVis0, 1), nightVis0);
+
 	#if ((FOG_MODE == 1 || FOG_MODE == 2) && defined OVERWORLD) || (defined END_VOLUMETRIC_FOG && defined END)
 	vec3 vl = texture2DLod(colortex1, texCoord.xy, 1.5).rgb;
 	vl *= vl;
@@ -107,15 +137,23 @@ void main() {
 	if (isEyeInWater == 1){
 		vl *= waterShadowColor.rgb * (timeBrightness + LIGHTSHAFT_WI);
 	}
-	#if LIGHTSHAFT_COLOR_MODE == 0
-	vl *= lightCol * 0.25;
-	#elif LIGHTSHAFT_COLOR_MODE == 1
-	vl *= lightshaftCol * 0.25;
-	#else
-	vec3 lightshaftCol0 = CalcSunColor(GetSkyColor(viewPos.xyz, false), lightshaftDay * 0.25, GetSkyColor(viewPos.xyz, false));
-	vec3 skylightshaftCol = CalcLightColor(lightshaftCol0, lightshaftNight * 0.50, waterColor.rgb);
-	vl *= skylightshaftCol;
-	#endif
+	if (visibility0 > 0){
+		#if LIGHTSHAFT_COLOR_MODE == 0
+		vl *= lightCol * 0.25;
+		#elif LIGHTSHAFT_COLOR_MODE == 1
+		vl *= lightshaftCol * 0.25;
+		#else
+		vec3 lightshaftCol0 = CalcSunColor(GetSkyColor(viewPos.xyz, false), lightshaftDay * 0.25, GetSkyColor(viewPos.xyz, false));
+		vec3 skylightshaftCol = CalcLightColor(lightshaftCol0, lightshaftNight * 0.50, waterColor.rgb);
+		vl *= skylightshaftCol;
+		#endif
+		#endif
+	}
+	#ifdef FIREFLIES
+	else {
+		float visibility1 = (1 - sunVisibility) * (1 - rainStrength) * (0 + eBS);
+		if (visibility1 > 0) vl *= vec3(80, 255, 200);
+	}		
 	#endif
 
 	#ifdef END

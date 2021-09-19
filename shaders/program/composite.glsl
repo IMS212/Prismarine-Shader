@@ -10,9 +10,7 @@ https://bitslablab.com
 #ifdef FSH
 
 //Varyings//
-varying float isWater;
-
-varying vec2 texCoord, lmCoord;
+varying vec2 texCoord;
 
 varying vec3 sunVec, upVec;
 
@@ -146,16 +144,30 @@ vec2 getRefract(vec2 coord, vec3 posxz){
 #include "/lib/post/outline.glsl"
 #endif
 
-#include "/lib/prismarine/fireflies.glsl"
-
 //Program//
 void main() {
     vec4 color = texture2D(colortex0, texCoord);
     vec3 translucent = texture2D(colortex1, texCoord).rgb;
 	float z0 = texture2D(depthtex0, texCoord).r;
 	float z1 = texture2D(depthtex1, texCoord).r;
-	vec2 lightmap = clamp(lmCoord, vec2(0.0), vec2(1.0));
 	
+	float dayVis0, nightVis0;
+	
+	#ifdef LIGHTSHAFT_NIGHT
+	nightVis0 = 1;
+	#endif
+
+	#ifdef LIGHTSHAFT_DAY
+	dayVis0 = 1;
+	#endif
+
+	if (isEyeInWater == 1){
+		dayVis0 = 1;
+		nightVis0 = 1;
+	}
+
+	float visibility0 = CalcVisibility(CalcDayVisibility(1, dayVis0, 1), nightVis0);
+
 	vec4 screenPos = vec4(texCoord.x, texCoord.y, z0, 1.0);
 	vec4 viewPos = gbufferProjectionInverse * (screenPos * 2.0 - 1.0);
 	viewPos /= viewPos.w;
@@ -186,11 +198,19 @@ void main() {
 	color.rgb = mix(color.rgb, outerOutline.rgb, outerOutline.a);
 	#endif
 	
+	vec3 vl = vec3(0.0);
+
 	#if FOG_MODE == 1 || FOG_MODE == 2
 	float dither = Bayer64(gl_FragCoord.xy);
-	vec3 vl = GetLightShafts(z0, z1, translucent, dither);
+	if (visibility0 > 0) vl = GetLightShafts(z0, z1, translucent, dither);
+	#ifdef FIREFLIES
+	else{
+		float visibility1 = (1 - sunVisibility) * (1 - rainStrength) * (0 + eBS);
+		if (visibility1 > 0) vl = GetFireflies(z0, z1, translucent, dither);
+	}
+	#endif
 	#else
-	vec3 vl = vec3(0.0);
+	vl = vec3(0.0);
     #endif
 	
 	#ifdef REFRACTION
@@ -222,9 +242,7 @@ void main() {
 #ifdef VSH
 
 //Varyings//
-varying float isWater;
-
-varying vec2 texCoord, lmCoord;
+varying vec2 texCoord;
 
 varying vec3 sunVec, upVec;
 
@@ -241,12 +259,6 @@ void main() {
 	texCoord = gl_MultiTexCoord0.xy;
 	
 	gl_Position = ftransform();
-
-	isWater = 0;
-	if (mc_Entity.x == 10300 || mc_Entity.x == 10303) isWater = 1;
-
-	lmCoord = (gl_TextureMatrix[1] * gl_MultiTexCoord1).xy;
-	lmCoord = clamp((lmCoord - 0.03125) * 1.06667, vec2(0.0), vec2(0.9333, 1.0));
 
 	const vec2 sunRotationData = vec2(cos(sunPathRotation * 0.01745329251994), -sin(sunPathRotation * 0.01745329251994));
 	float ang = fract(timeAngle - 0.25);

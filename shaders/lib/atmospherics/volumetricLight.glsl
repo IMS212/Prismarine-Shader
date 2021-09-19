@@ -1,8 +1,95 @@
-#if (defined OVERWORLD && FOG_MODE == 1 || FOG_MODE == 2) || (defined END && defined END_VOLUMETRIC_FOG)
 float getNoise(vec2 pos){
 	return fract(sin(dot(pos, vec2(12.9898, 4.1414))) * 43758.5453);
 }
 
+float GetLogarithmicDepth(float dist) {
+	return (far * (dist - near)) / (dist * (far - near));
+}
+
+float GetLinearDepth2(float depth) {
+    return 2.0 * near * far / (far + near - (2.0 * depth - 1.0) * (far - near));
+}
+
+vec4 GetWorldSpace(float shadowdepth, vec2 texCoord) {
+	vec4 viewPos = gbufferProjectionInverse * (vec4(texCoord, shadowdepth, 1.0) * 2.0 - 1.0);
+	viewPos /= viewPos.w;
+
+	vec4 wpos = gbufferModelViewInverse * viewPos;
+	wpos /= wpos.w;
+	
+	return wpos;
+}
+
+#if (defined OVERWORLD && defined FIREFLIES)
+float getVolumetricNoise0(vec3 pos){
+	vec3 flr = floor(pos);
+	vec3 frc = fract(pos);
+	frc = frc * frc * (3.0-2.0 * frc);
+	
+	float noisebdl = getNoise(flr.xz + (vec2(frametime, 0) * 0.00005) + flr.y * 32);
+	float noisebdr = getNoise(flr.xz - (vec2(frametime * 0.00015, 0) * 0.000075) + flr.y * 32 + vec2(1.0,0.0));
+	float noisebul = getNoise(flr.xz + (vec2(frametime * 0.00040, 0) * 0.000100) + flr.y * 32 + vec2(0.0,1.0));
+	float noisebur = getNoise(flr.xz - (vec2(frametime * 0.00055, 0) * 0.000150) + flr.y * 32 + vec2(1.0,1.0));
+	float noisetdl = getNoise(flr.xz + (vec2(frametime * 0.00040, 0) * 0.000175) + flr.y * 32 + 32);
+	float noisetdr = getNoise(flr.xz - (vec2(frametime * 0.00035, 0) * 0.000200) + flr.y * 32 + 32 + vec2(1.0,0.0));
+	float noisetul = getNoise(flr.xz + flr.y * 32 + 32 + vec2(0.0,1.0));
+	float noisetur = getNoise(flr.xz + flr.y * 32 + 32 + vec2(1.0,1.0));
+	float noise= mix(mix(mix(noisebdl, noisebdr, frc.x), mix(noisebul, noisebur, frc.x), frc.z),
+				 mix(mix(noisetdl, noisetdr, frc.x), mix(noisetul, noisetur, frc.x), frc.z), frc.y);
+	return noise;
+}
+
+float getFireflyNoise(vec3 pos, float height){
+	float noise = 0.0;
+	float ymult = pow(abs(height - pos.y) / 32, 32);
+	
+	if (ymult < 2.0){
+		noise+= getVolumetricNoise0(pos) * 6.50;
+	}
+    
+	noise = clamp(mix(noise, 21.0, 0.25) - (10.0 + 5.0 * ymult), 0.0, 1.0);
+	return noise;
+}
+
+vec3 GetFireflies(float pixeldepth0, float pixeldepth1, vec3 color, float dither) {
+	dither *= 0.25;
+	vec3 ff = vec3(0.0);
+
+	float visibility = (1 - sunVisibility) * (1 - rainStrength) * (0 + eBS);
+
+	if (visibility > 0.0) {
+		float maxDist = 32;
+		
+		float depth0 = GetLinearDepth2(pixeldepth0);
+		float depth1 = GetLinearDepth2(pixeldepth1);
+		vec4 worldposition = vec4(0.0);
+		
+		for(int i = 0; i < 6; i++) {
+			float minDist = exp2(i + dither) * 6; 
+
+			worldposition = GetWorldSpace(GetLogarithmicDepth(minDist), texCoord.st);
+
+			if (length(worldposition.xz) < maxDist && depth0 > minDist){
+				vec3 col = vec3(1);
+
+				if (depth0 < minDist) col *= color;
+				
+				vec3 npos = worldposition.xyz + cameraPosition.xyz;
+
+				float noise = getFireflyNoise(npos.xyz + vec3(frametime, 0, 0), 70);
+				col *= noise;
+
+				ff += col;
+			}
+		}
+		ff = sqrt(ff * visibility);
+	}
+	
+	return ff;
+}
+#endif
+
+#if (defined OVERWORLD && FOG_MODE == 1 || FOG_MODE == 2) || (defined END && defined END_VOLUMETRIC_FOG)
 float getHeightNoise(vec2 pos){
 	vec2 flr = floor(pos);
 	vec2 frc = fract(pos);
@@ -47,30 +134,12 @@ float getFogSample(vec3 pos, float height, float verticalThickness, float sample
 	return noise;
 }
 
-float GetLogarithmicDepth(float dist) {
-	return (far * (dist - near)) / (dist * (far - near));
-}
-
-float GetLinearDepth2(float depth) {
-    return 2.0 * near * far / (far + near - (2.0 * depth - 1.0) * (far - near));
-}
-
 vec4 DistortShadow(vec4 shadowpos, float distortFactor) {
 	shadowpos.xy *= 1.0 / distortFactor;
 	shadowpos.z = shadowpos.z * 0.2;
 	shadowpos = shadowpos * 0.5 + 0.5;
 
 	return shadowpos;
-}
-
-vec4 GetWorldSpace(float shadowdepth, vec2 texCoord) {
-	vec4 viewPos = gbufferProjectionInverse * (vec4(texCoord, shadowdepth, 1.0) * 2.0 - 1.0);
-	viewPos /= viewPos.w;
-
-	vec4 wpos = gbufferModelViewInverse * viewPos;
-	wpos /= wpos.w;
-	
-	return wpos;
 }
 
 vec4 GetShadowSpace(vec4 wpos) {
