@@ -644,6 +644,8 @@ option.MOTION_BLUR.comment=Enables camera motion based blurring.
 option.MOTION_BLUR_STRENGTH=Motion Blur Strength
 option.MOTION_BLUR_STRENGTH.comment=Adjusts motion blur intensity.
 
+option.BLOOM_RADIUS=Bloom Radius
+option.BLOOM_CONTRAST=Bloom Contrast
 option.BLOOM=Bloom
 option.BLOOM.comment=Allows bright areas to glow.
 

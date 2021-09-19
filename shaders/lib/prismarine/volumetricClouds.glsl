@@ -102,7 +102,7 @@ vec2 getVolumetricCloud(float pixeldepth0, float pixeldepth1, float heightAdjFac
 	vec4 wpos = vec4(0.0);
 		
 	for(int i = 0; i < 8; i++) {
-		float minDist = exp2(i + dither) * 12; 
+		float minDist = (i + dither) * 16; 
 
 		wpos = getWorldPos(getFragPos(texCoord.xy, GetLogarithmicDepth(minDist)));
 
@@ -124,7 +124,6 @@ vec2 getVolumetricCloud(float pixeldepth0, float pixeldepth1, float heightAdjFac
 			float col = pow(smoothstep(height - vertThickness * noise, height + vertThickness * noise, wpos.y), 2);
 			vc.x = max(noise * col, vc.x);
 			vc.y = max(noise, vc.y);
-			
 		}
 	}
 	

@@ -224,6 +224,7 @@ void main() {
 		if (lava > 0.5) {
 			albedo.rgb = pow(albedo.rgb * ec / BLOCKLIGHT_I, vec3(2.0));
 			albedo.rgb /= 0.5 * albedo.rgb + 0.5;
+			albedo.rgb *= BLOCKLIGHT_I * 2;
 		}
 		#endif
 

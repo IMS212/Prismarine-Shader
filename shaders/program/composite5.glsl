@@ -117,10 +117,34 @@ void Bloom(inout vec3 color, vec2 coord) {
 	blur7 *= dirt * 16.0 + 1.0;
 	#endif
 
+	#if BLOOM_RADIUS == 1
+	vec3 blur = blur1 * 0.667;
+	#elif BLOOM_RADIUS == 2
+	vec3 blur = (blur1 + blur2) * 0.37;
+	#elif BLOOM_RADIUS == 3
+	vec3 blur = (blur1 + blur2 + blur3) * 0.27;
+	#elif BLOOM_RADIUS == 4
+	vec3 blur = (blur1 + blur2 + blur3 + blur4) * 0.212;
+	#elif BLOOM_RADIUS == 5
+	vec3 blur = (blur1 + blur2 + blur3 + blur4 + blur5) * 0.175;
+	#elif BLOOM_RADIUS == 6
+	vec3 blur = (blur1 + blur2 + blur3 + blur4 + blur5 + blur6) * 0.151;
+	#elif BLOOM_RADIUS == 7
 	vec3 blur = (blur1 + blur2 + blur3 + blur4 + blur5 + blur6 + blur7) * 0.137;
+	#endif
 
+	#if BLOOM_CONTRAST == 0
 	color = mix(color, blur, 0.2 * BLOOM_STRENGTH);
+	#else
+	vec3 bloomContrast = vec3(exp2(BLOOM_CONTRAST * 0.25));
+	color = pow(color, bloomContrast);
+	blur = pow(blur, bloomContrast);
+	vec3 bloomStrength = pow(vec3(0.2 * BLOOM_STRENGTH), bloomContrast);
+	color = mix(color, blur, bloomStrength);
+	color = pow(color, 1.0 / bloomContrast);
+	#endif
 }
+
 
 void AutoExposure(inout vec3 color, inout float exposure, float tempExposure) {
 	float exposureLod = log2(viewHeight * 0.7);

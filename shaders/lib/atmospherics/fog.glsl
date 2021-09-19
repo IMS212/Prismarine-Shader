@@ -129,7 +129,7 @@ void NormalFog(inout vec3 color, vec3 viewPos, float fogType) {
 	float densitySun = CalcFogDensity(MORNING_FOG_DENSITY, DAY_FOG_DENSITY, EVENING_FOG_DENSITY);
 	float density = CalcDensity(densitySun, NIGHT_FOG_DENSITY) * FOG_DENSITY;
 	density *= 0 + eBS;
-	if (fogType == 0) density *= 2;
+	if (fogType == 0) density *= 1.5;
 
 	float fog = length(viewPos) * density / 256.0;
 	float clearDay = sunVisibility * (1.0 - rainStrength);
