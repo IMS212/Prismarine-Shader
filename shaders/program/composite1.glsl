@@ -149,7 +149,7 @@ void main() {
 		#endif
 		#endif
 	}
-	#ifdef FIREFLIES
+	#if defined FIREFLIES && defined OVERWORLD
 	else {
 		float visibility1 = (1 - sunVisibility) * (1 - rainStrength) * (0 + eBS);
 		if (visibility1 > 0) vl *= vec3(80, 255, 200) * FIREFLIES_I;

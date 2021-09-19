@@ -200,7 +200,7 @@ void main() {
 	#if FOG_MODE == 1 || FOG_MODE == 2
 	float dither = Bayer64(gl_FragCoord.xy);
 	if (visibility0 > 0) vl = GetLightShafts(z0, z1, translucent, dither);
-	#ifdef FIREFLIES
+	#if defined FIREFLIES && defined OVERWORLD
 	else{
 		float visibility1 = (1 - sunVisibility) * (1 - rainStrength) * (0 + eBS);
 		if (visibility1 > 0) vl = GetFireflies(z0, z1, translucent, dither);
