@@ -101,7 +101,7 @@ vec2 getVolumetricCloud(float pixeldepth0, float pixeldepth1, float heightAdjFac
 	float depth1 = GetLinearDepth2(pixeldepth1);
 	vec4 wpos = vec4(0.0);
 		
-	for(int i = 0; i < 16; i++) {
+	for(int i = 0; i < 8; i++) {
 		float minDist = exp2(i + dither) * 12; 
 
 		wpos = getWorldPos(getFragPos(texCoord.xy, GetLogarithmicDepth(minDist)));
