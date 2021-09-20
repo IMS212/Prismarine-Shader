@@ -20,7 +20,7 @@ vec4 GetWorldSpace(float shadowdepth, vec2 texCoord) {
 	return wpos;
 }
 
-#if (defined OVERWORLD && defined FIREFLIES)
+#ifdef FIREFLIES
 float getVolumetricNoise0(vec3 pos){
 	vec3 flr = floor(pos);
 	vec3 frc = fract(pos);
@@ -231,13 +231,13 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 		vec4 worldposition = vec4(0.0);
 		vec4 shadowposition = vec4(0.0);
 		
-		vec3 watercol = vec3(LIGHTSHAFT_WR, LIGHTSHAFT_WG, LIGHTSHAFT_WB);
+		vec3 watercol = lightshaftWater.rgb * LIGHTSHAFT_WI;
 		
 		for(int i = 0; i < LIGHTSHAFT_SAMPLES; i++) {
 			float minDist = (i + dither) * minDistFactor;
 
 			if (isEyeInWater == 1){
-				minDist = (exp2(i + dither) - 0.95) * 2;
+				minDist = (exp2(i + dither) - 0.95) * 4;
 			}
 			
 			#ifdef END
@@ -278,7 +278,7 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 				vec3 shadow = clamp(shadowCol * (1.0 - shadow0) + shadow0, vec3(0.0), vec3(1.0));
 
 				if (depth0 < minDist) shadow *= color;
-				else if (isEyeInWater == 1.0) shadow *= watercol;
+				else if (isEyeInWater == 1.0) shadow *= watercol * 64;
 
 				vec3 npos = worldposition.xyz + cameraPosition.xyz + vec3(frametime * 2.0, 0, 0);
 

@@ -135,9 +135,7 @@ void main() {
 	#if ((FOG_MODE == 1 || FOG_MODE == 2) && defined OVERWORLD) || (defined END_VOLUMETRIC_FOG && defined END)
 
 	#ifdef OVERWORLD
-	if (isEyeInWater == 1){
-		vl *= waterShadowColor.rgb * (timeBrightness + LIGHTSHAFT_WI);
-	}
+	if (isEyeInWater == 1) visibility0 = 1;
 	if (visibility0 > 0){
 		#if LIGHTSHAFT_COLOR_MODE == 0
 		vl *= lightCol * 0.25;
@@ -148,6 +146,7 @@ void main() {
 		vec3 skylightshaftCol = CalcLightColor(lightshaftCol0, lightshaftNight * 0.50, waterColor.rgb);
 		vl *= skylightshaftCol;
 		#endif
+		if (isEyeInWater == 1) vl *= waterShadowColor.rgb * lightshaftWater.rgb * lightCol.rgb * (timeBrightness + LIGHTSHAFT_WI);
 	}
 	#if defined FIREFLIES
 	else {
