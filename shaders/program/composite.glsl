@@ -216,7 +216,7 @@ void main() {
 	#ifdef REFRACTION
 	float depth = z1 - z0;
 	vec3 worldPos = ToWorld(viewPos.xyz);
-	if (depth > 0){
+	if (depth > 0 && isEyeInWater == 0){
 		vec2 refractionCoord = getRefract(texCoord.xy, worldPos + cameraPosition);
 		color = texture2D(colortex0, refractionCoord);
 	}

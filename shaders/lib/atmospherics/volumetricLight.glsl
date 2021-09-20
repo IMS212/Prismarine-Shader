@@ -47,7 +47,7 @@ float getFireflyNoise(vec3 pos, float height){
 		noise+= getVolumetricNoise0(pos) * 6.50;
 	}
     
-	noise = clamp(mix(noise, 21.0, 0.25) - (10.0 + 5.0 * ymult), 0.0, 1.0);
+	noise = clamp(mix(noise * 0.975, 21.0, 0.25) - (10.0 + 5.0 * ymult), 0.0, 1.0);
 	return noise;
 }
 
@@ -83,7 +83,7 @@ vec3 GetFireflies(float pixeldepth0, float pixeldepth1, vec3 color, float dither
 			}
 		}
 		ff = sqrt(ff * visibility);
-	}
+	} else discard;
 	
 	return ff;
 }
@@ -128,9 +128,9 @@ float getFogSample(vec3 pos, float height, float verticalThickness, float sample
 	
 	if (ymult < 2.0){
 		noise+= getVolumetricNoise(pos * samples * 1.00 - wind * 0.5) * 3.0 * LIGHTSHAFT_HORIZONTAL_THICKNESS;
-		noise+= getVolumetricNoise(pos * samples * 0.75 - wind * 0.3) * 5.0 * LIGHTSHAFT_HORIZONTAL_THICKNESS;
-		noise+= getVolumetricNoise(pos * samples * 0.50 - wind * 0.2) * 7.0 * LIGHTSHAFT_HORIZONTAL_THICKNESS;
-		noise+= getVolumetricNoise(pos * samples * 0.25 - wind * 0.1) * 9.0 * LIGHTSHAFT_HORIZONTAL_THICKNESS;
+		noise+= getVolumetricNoise(pos * samples * 0.75 - wind * 0.3) * 7.0 * LIGHTSHAFT_HORIZONTAL_THICKNESS;
+		noise+= getVolumetricNoise(pos * samples * 0.50 - wind * 0.2) * 11.0 * LIGHTSHAFT_HORIZONTAL_THICKNESS;
+		noise+= getVolumetricNoise(pos * samples * 0.25 - wind * 0.1) * 15.0 * LIGHTSHAFT_HORIZONTAL_THICKNESS;
 	}
 	noise = clamp(mix(noise * LIGHTSHAFT_AMOUNT, 21.0, 0.25) - (10.0 + 5.0 * ymult), 0.0, 1.0);
 	return noise;
