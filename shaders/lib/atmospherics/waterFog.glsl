@@ -10,7 +10,7 @@ vec4 GetWaterFog(vec3 viewPos) {
     float VoL = dot(normalize(viewPos), lightVec);
     float scattering = pow(VoL * shadowFade * 0.5 + 0.5, 6.0);
     vec3 waterFogColor = waterColor.rgb * waterColor.rgb * (2.25 - rainStrength - rainStrength);
-    if (isEyeInWater == 1) waterFogColor *= (1 + scattering + scattering + scattering + scattering + scattering + scattering + scattering + scattering);
+    if (isEyeInWater == 1) waterFogColor *= (1 + scattering + scattering + scattering + scattering + scattering + scattering);
     #elif  WATER_MODE == 1 || WATER_MODE == 3
     vec3 waterFogColor = fogColor * fogColor * 0.5;
     #endif

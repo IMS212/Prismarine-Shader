@@ -102,6 +102,9 @@ void main() {
 	vec3 aux9 = texture2D(colortex9, texCoord.xy).rgb;
 	#endif
 
+	vec3 vl = texture2DLod(colortex1, texCoord.xy, 1.5).rgb;
+	vl *= vl;
+
 	#ifdef VOLUMETRIC_CLOUDS
 	vec2 vc = vec2(0.0);
 	#endif
@@ -130,8 +133,6 @@ void main() {
 	float visibility0 = CalcVisibility(CalcDayVisibility(1, dayVis0, 1), nightVis0);
 
 	#if ((FOG_MODE == 1 || FOG_MODE == 2) && defined OVERWORLD) || (defined END_VOLUMETRIC_FOG && defined END)
-	vec3 vl = texture2DLod(colortex1, texCoord.xy, 1.5).rgb;
-	vl *= vl;
 
 	#ifdef OVERWORLD
 	if (isEyeInWater == 1){
@@ -147,13 +148,13 @@ void main() {
 		vec3 skylightshaftCol = CalcLightColor(lightshaftCol0, lightshaftNight * 0.50, waterColor.rgb);
 		vl *= skylightshaftCol;
 		#endif
-		#endif
 	}
-	#if defined FIREFLIES && defined OVERWORLD
+	#if defined FIREFLIES
 	else {
 		float visibility1 = (1 - sunVisibility) * (1 - rainStrength) * (0 + eBS);
 		if (visibility1 > 0) vl *= vec3(80, 255, 200) * FIREFLIES_I;
 	}		
+	#endif
 	#endif
 
 	#ifdef END

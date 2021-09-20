@@ -33,7 +33,6 @@ vec3 GetFogColor(vec3 viewPos, float fogType) {
 
 	float densitySun = CalcFogDensity(MORNING_FOG_DENSITY, DAY_FOG_DENSITY, EVENING_FOG_DENSITY);
 	float density = CalcDensity(densitySun, NIGHT_FOG_DENSITY) * FOG_DENSITY;
-	density *= 0.25 + (cameraPosition.y * 0.001);
 	if (fogType == 0) density *= 4;
 	if (isEyeInWater == 1) density *= 0.0;
     float nightDensity = NIGHT_FOG_DENSITY;
@@ -52,7 +51,7 @@ vec3 GetFogColor(vec3 viewPos, float fogType) {
         #elif FOG_COLOR_MODE == 0
         fog = GetSkyColor(viewPos, false) * baseGradient / (SKY_I * SKY_I);
         #elif FOG_COLOR_MODE == 2
-        fog = getBiomeFogColor(viewPos) * baseGradient / (SKY_I * SKY_I);
+        fog = getBiomeFogColor() * baseGradient / (SKY_I * SKY_I);
         #endif
     }
 
@@ -78,7 +77,7 @@ vec3 GetFogColor(vec3 viewPos, float fogType) {
         #elif FOG_COLOR_MODE == 0
         lightFog = pow(GetSkyColor(viewPos, false) / 2, vec3(4.0 - sunVisibility)) * baseGradient;
         #elif FOG_COLOR_MODE == 2
-        lightFog = pow(getBiomeFogColor(viewPos) / 2, vec3(4.0 - sunVisibility)) * baseGradient;
+        lightFog = pow(getBiomeFogColor() / 2, vec3(4.0 - sunVisibility)) * baseGradient;
         #endif
     }
 
@@ -129,7 +128,7 @@ void NormalFog(inout vec3 color, vec3 viewPos, float fogType) {
 	float densitySun = CalcFogDensity(MORNING_FOG_DENSITY, DAY_FOG_DENSITY, EVENING_FOG_DENSITY);
 	float density = CalcDensity(densitySun, NIGHT_FOG_DENSITY) * FOG_DENSITY;
 	density *= 0 + eBS;
-	if (fogType == 0) density *= 1.5;
+	if (fogType == 0) density *= 4;
 
 	float fog = length(viewPos) * density / 256.0;
 	float clearDay = sunVisibility * (1.0 - rainStrength);

@@ -127,8 +127,10 @@ float getFogSample(vec3 pos, float height, float verticalThickness, float sample
 	vec3 wind = vec3(frametime * 0.25, 0.0, 0.0);
 	
 	if (ymult < 2.0){
-		noise+= getVolumetricNoise(pos * samples * 0.5 - wind * 0.5) * 7.0 * LIGHTSHAFT_HORIZONTAL_THICKNESS;
-		noise+= getVolumetricNoise(pos * samples * 0.25 - wind * 0.3) * 9.0 * LIGHTSHAFT_HORIZONTAL_THICKNESS;
+		noise+= getVolumetricNoise(pos * samples * 1.00 - wind * 0.5) * 3.0 * LIGHTSHAFT_HORIZONTAL_THICKNESS;
+		noise+= getVolumetricNoise(pos * samples * 0.75 - wind * 0.3) * 5.0 * LIGHTSHAFT_HORIZONTAL_THICKNESS;
+		noise+= getVolumetricNoise(pos * samples * 0.50 - wind * 0.2) * 7.0 * LIGHTSHAFT_HORIZONTAL_THICKNESS;
+		noise+= getVolumetricNoise(pos * samples * 0.25 - wind * 0.1) * 9.0 * LIGHTSHAFT_HORIZONTAL_THICKNESS;
 	}
 	noise = clamp(mix(noise * LIGHTSHAFT_AMOUNT, 21.0, 0.25) - (10.0 + 5.0 * ymult), 0.0, 1.0);
 	return noise;

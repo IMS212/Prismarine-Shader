@@ -30,8 +30,8 @@ float getHeightNoise(vec2 pos){
 	float noisedr = getNoise(flr + vec2(1.0,0.0));
 	float noiseul = getNoise(flr + vec2(0.0,1.0));
 	float noiseur = getNoise(flr + vec2(1.0,1.0));
-	float noise= mix(mix(noisedl, noisedr, frc.x),
-				 mix(noiseul, noiseur, frc.x), frc.y);
+	float noise = mix(mix(noisedl, noisedr, frc.x),
+			          mix(noiseul, noiseur, frc.x), frc.y);
 	return noise;
 }
 

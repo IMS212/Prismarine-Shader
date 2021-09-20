@@ -25,6 +25,10 @@ uniform float frameTimeCounter;
 uniform float viewHeight, viewWidth, aspectRatio;
 uniform float eyeAltitude;
 
+#if defined OVERWORLD && SKY_COLOR_MODE == 1 && defined PERBIOME_CLOUDS_COLOR
+uniform float isTaiga, isForest, isJungle;
+#endif
+
 uniform ivec2 eyeBrightnessSmooth;
 
 uniform vec3 cameraPosition, previousCameraPosition;
@@ -125,8 +129,6 @@ vec3 CalcLightColor0(vec3 sun, vec3 night, vec3 weatherCol) {
 
 #if defined VOLUMETRIC_CLOUDS && defined OVERWORLD
 #include "/lib/color/dimensionColor.glsl"
-#include "/lib/color/skyColor.glsl"
-#include "/lib/atmospherics/sky.glsl"
 #include "/lib/color/fogColor.glsl"
 #endif
 
@@ -169,8 +171,8 @@ void main() {
 	float VoL = dot(normalize(viewPos.xyz), lightVec);
 
 	#if defined OVERWORLD && SKY_COLOR_MODE == 1 && defined PERBIOME_CLOUDS_COLOR
-	vcSun *= getBiomeCloudsColor(viewPos.xyz);
-	vcDownSun *= getBiomeCloudsColor(viewPos.xyz);
+	vcSun *= getBiomeCloudsColor();
+	vcDownSun *= getBiomeCloudsColor();
 	#endif
 
 	vec2 vc = vec2(texture2DLod(colortex8, texCoord.xy, float(2.0)).a, texture2DLod(colortex9, texCoord.xy, float(2.0)).a);

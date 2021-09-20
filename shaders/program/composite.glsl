@@ -89,12 +89,12 @@ float CalcVisibility(float sun, float night) {
 
 #ifdef REFRACTION
 float waterH(vec3 pos) {
-	float noise  = texture2D(noisetex, (pos.xz + vec2(frametime) * 0.025 + pos.y) / 512 * 1).r;
-		  noise += texture2D(noisetex, (pos.xz - vec2(frametime) * 0.075 - pos.y) / 512 * 2).r;
-		  noise -= texture2D(noisetex, (pos.xz + vec2(frametime) * 0.100 + pos.y) / 512 * 4).r;
+	float noise  = texture2D(noisetex, (pos.xz + vec2(frametime) * 0.01 + pos.y) / 512 * 1).r;
+		  noise += texture2D(noisetex, (pos.xz - vec2(frametime) * 0.02 - pos.y) / 512 * 2).r;
+		  noise -= texture2D(noisetex, (pos.xz + vec2(frametime) * 0.03 + pos.y) / 512 * 4).r;
 		  noise += texture2D(noisetex, (pos.xz - vec2(frametime) * 0.025 - pos.y) / 512 * 7).r;
-		  noise -= texture2D(noisetex, (pos.xz + vec2(frametime) * 0.075 + pos.y) / 512 * 11).r;
-		  noise += texture2D(noisetex, (pos.xz - vec2(frametime) * 0.100 - pos.y) / 512 * 15).r;
+		  noise -= texture2D(noisetex, (pos.xz + vec2(frametime) * 0.035 + pos.y) / 512 * 11).r;
+		  noise += texture2D(noisetex, (pos.xz - vec2(frametime) * 0.05 - pos.y) / 512 * 15).r;
 
 	noise /= pow(max(length(pos), 4.0), 0.35);
 	return noise;
@@ -111,7 +111,7 @@ vec2 getRefract(vec2 coord, vec3 posxz){
 	float xDelta = ((h1-h0)+(h0-h2))/deltaPos;
 	float yDelta = ((h3-h0)+(h0-h4))/deltaPos;
 
-	vec2 newcoord = coord + vec2(xDelta,yDelta) * 0.0075;
+	vec2 newcoord = coord + vec2(xDelta,yDelta) * 0.005;
 
 	return mix(newcoord, coord, 0);
 }
@@ -147,6 +147,8 @@ void main() {
     vec3 translucent = texture2D(colortex1,texCoord).rgb;
 	float z0 = texture2D(depthtex0, texCoord).r;
 	float z1 = texture2D(depthtex1, texCoord).r;
+
+	vec3 vl = vec3(0.0);
 
 	float dayVis0, nightVis0;
 	
@@ -194,11 +196,12 @@ void main() {
 	#ifdef OUTLINE_ENABLED
 	color.rgb = mix(color.rgb, outerOutline.rgb, outerOutline.a);
 	#endif
-	
-	vec3 vl = vec3(0.0);
 
-	#if FOG_MODE == 1 || FOG_MODE == 2
+	#if (FOG_MODE == 1 || FOG_MODE == 2) || (defined END_VOLUMETRIC_FOG && defined END)
 	float dither = Bayer64(gl_FragCoord.xy);
+	#ifdef END
+	visibility0 = 1;
+	#endif
 	if (visibility0 > 0) vl = GetLightShafts(z0, z1, translucent, dither);
 	#if defined FIREFLIES && defined OVERWORLD
 	else{
