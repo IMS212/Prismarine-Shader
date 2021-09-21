@@ -231,7 +231,7 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 		vec4 worldposition = vec4(0.0);
 		vec4 shadowposition = vec4(0.0);
 		
-		vec3 watercol = lightshaftWater.rgb * LIGHTSHAFT_WI;
+		vec3 watercol = vec3(LIGHTSHAFT_WR, LIGHTSHAFT_WG, LIGHTSHAFT_WB) * LIGHTSHAFT_WI / 255.0 * LIGHTSHAFT_WI;
 		
 		for(int i = 0; i < LIGHTSHAFT_SAMPLES; i++) {
 			float minDist = (i + dither) * minDistFactor;

@@ -78,6 +78,8 @@ float CalcVisibility(float sun, float night) {
 	return c * c;
 }
 
+vec3 lightshaftWater    = vec3(LIGHTSHAFT_WR, LIGHTSHAFT_WG, LIGHTSHAFT_WB) * LIGHTSHAFT_WI / 255.0;
+
 //Includes//
 #include "/lib/color/dimensionColor.glsl"
 #include "/lib/color/waterColor.glsl"
