@@ -173,6 +173,10 @@ option.LIGHTMAP_DIM_CUTOFF=Dim Parts Cutoff
 option.LIGHTMAP_DIM_CUTOFF.comment=Removed dim parts of the block lightmap.
 option.DIM_CUTOFF_FACTOR=Dim Cutoff Factor
 
+option.BLOOM_FLICKERING=Bloom Flickering
+option.BLOOM_FLICKERING.comment=Enables flickering of bloom.
+option.BLOOM_FLICKERING_STRENGTH=Flickering Strength
+
 option.BLOCKLIGHT_FLICKERING=Blocklight Flickering
 option.BLOCKLIGHT_FLICKERING.comment=Enables flickering of blocklight.
 option.BLOCKLIGHT_FLICKERING_STRENGTH=Flickering Strength
@@ -425,6 +429,7 @@ value.FOG_MODE.0=Exponental
 value.FOG_MODE.1=Volumetric
 value.FOG_MODE.2=Mixed
 
+option.LIGHTSHAFTS_PERBIOME=Per Biome Light Shafts
 option.LIGHTSHAFT_DAY=Noon Light Shafts
 option.LIGHTSHAFT_NIGHT=Night Light Shafts
 option.LIGHTSHAFT_PERSISTENCE=Persistence
@@ -644,6 +649,8 @@ option.MOTION_BLUR.comment=Enables camera motion based blurring.
 option.MOTION_BLUR_STRENGTH=Motion Blur Strength
 option.MOTION_BLUR_STRENGTH.comment=Adjusts motion blur intensity.
 
+option.BLOOM_BALANCING=Bloom Balancing
+option.BLOOM_BALANCING.comment=Reduces the bloom strength when outdoors.
 option.BLOOM_RADIUS=Bloom Radius
 option.BLOOM_CONTRAST=Bloom Contrast
 option.BLOOM=Bloom

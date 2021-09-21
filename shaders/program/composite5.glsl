@@ -15,6 +15,7 @@ varying vec2 texCoord;
 varying vec3 sunVec, upVec;
 
 //Uniforms//
+uniform int blockEntityId;
 uniform int isEyeInWater;
 uniform int worldTime;
 uniform int frameCounter;
@@ -97,6 +98,12 @@ vec3 GetBloomTile(float lod, vec2 coord, vec2 offset) {
 }
 
 void Bloom(inout vec3 color, vec2 coord) {
+	float strength = BLOOM_STRENGTH;
+
+	#ifdef BLOOM_BALANCING
+	strength *= (1.25 - eBS);
+	#endif
+
 	vec3 blur1 = GetBloomTile(1.0, coord, vec2(0.0      , 0.0   )) * 1.5;
 	vec3 blur2 = GetBloomTile(2.0, coord, vec2(0.51     , 0.0   )) * 1.2;
 	vec3 blur3 = GetBloomTile(3.0, coord, vec2(0.51     , 0.26  ));
@@ -133,13 +140,18 @@ void Bloom(inout vec3 color, vec2 coord) {
 	vec3 blur = (blur1 + blur2 + blur3 + blur4 + blur5 + blur6 + blur7) * 0.137;
 	#endif
 
+	#ifdef BLOOM_FLICKERING
+    float jitter = 1.0 - sin(frameTimeCounter + cos(frameTimeCounter)) * BLOOM_FLICKERING_STRENGTH;
+    strength *= jitter;
+	#endif
+
 	#if BLOOM_CONTRAST == 0
-	color = mix(color, blur, 0.2 * BLOOM_STRENGTH);
+	color = mix(color, blur, 0.2 * strength);
 	#else
 	vec3 bloomContrast = vec3(exp2(BLOOM_CONTRAST * 0.25));
 	color = pow(color, bloomContrast);
 	blur = pow(blur, bloomContrast);
-	vec3 bloomStrength = pow(vec3(0.2 * BLOOM_STRENGTH), bloomContrast);
+	vec3 bloomStrength = pow(vec3(0.2 * strength), bloomContrast);
 	color = mix(color, blur, bloomStrength);
 	color = pow(color, 1.0 / bloomContrast);
 	#endif
