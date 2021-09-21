@@ -197,7 +197,7 @@ void main() {
 	color.rgb = mix(color.rgb, outerOutline.rgb, outerOutline.a);
 	#endif
 
-	#if (FOG_MODE == 1 || FOG_MODE == 2) || (defined END_VOLUMETRIC_FOG && defined END)
+	#if (FOG_MODE == 1 || FOG_MODE == 2) || (defined END_VOLUMETRIC_FOG && defined END) || (defined FIREFLIES && defined OVERWORLD)
 	float dither = Bayer64(gl_FragCoord.xy);
 	#ifdef END
 	visibility0 = 1;

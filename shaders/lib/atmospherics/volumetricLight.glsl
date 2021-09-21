@@ -47,7 +47,7 @@ float getFireflyNoise(vec3 pos, float height){
 		noise+= getVolumetricNoise0(pos) * 6.50;
 	}
     
-	noise = clamp(mix(noise * 0.975, 21.0, 0.25) - (10.0 + 5.0 * ymult), 0.0, 1.0);
+	noise = clamp(mix(noise, 21.0, 0.25) - (10.0 + 5.0 * ymult), 0.0, 1.0);
 	return noise;
 }
 

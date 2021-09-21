@@ -132,7 +132,7 @@ void main() {
 
 	float visibility0 = CalcVisibility(CalcDayVisibility(1, dayVis0, 1), nightVis0);
 
-	#if ((FOG_MODE == 1 || FOG_MODE == 2) && defined OVERWORLD) || (defined END_VOLUMETRIC_FOG && defined END)
+	#if ((FOG_MODE == 1 || FOG_MODE == 2) && defined OVERWORLD) || (defined END_VOLUMETRIC_FOG && defined END) || (defined FIREFLIES && defined OVERWORLD)
 
 	#ifdef OVERWORLD
 	if (isEyeInWater == 1) visibility0 = 1;
