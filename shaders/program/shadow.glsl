@@ -44,8 +44,6 @@ float sunVisibility  = clamp((dot( sunVec, upVec) + 0.05) * 10.0, 0.0, 1.0);
 float moonVisibility = clamp((dot(-sunVec, upVec) + 0.05) * 10.0, 0.0, 1.0);
 
 #include "/lib/color/waterColor.glsl"
-#include "/lib/color/lightColor.glsl"
-#include "/lib/prismarine/functions.glsl"
 #include "/lib/util/spaceConversion.glsl"
 #include "/lib/prismarine/caustics.glsl"
 

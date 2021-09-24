@@ -89,7 +89,6 @@ vec3 GetFireflies(float pixeldepth0, float pixeldepth1, vec3 color, float dither
 }
 #endif
 
-#if (defined OVERWORLD && FOG_MODE == 1 || FOG_MODE == 2) || (defined END && defined END_VOLUMETRIC_FOG)
 float getHeightNoise(vec2 pos){
 	vec2 flr = floor(pos);
 	vec2 frc = fract(pos);
@@ -124,7 +123,7 @@ float getVolumetricNoise(vec3 pos){
 float getFogSample(vec3 pos, float height, float verticalThickness, float samples){
 	float noise = 0.0;
 	float ymult = pow(abs(height - pos.y) / verticalThickness, LIGHTSHAFT_VERTICAL_THICKNESS);
-	vec3 wind = vec3(frametime * 0.25, 0.0, 0.0);
+	vec3 wind = vec3(frametime * 0.1, 0.0, 0.0);
 	
 	if (ymult < 2.0){
 		noise+= getVolumetricNoise(pos * samples * 1.00 - wind * 0.5) * 3.0 * LIGHTSHAFT_HORIZONTAL_THICKNESS;
@@ -160,6 +159,8 @@ vec4 GetShadowSpace(vec4 wpos) {
 vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dither) {
 	vec3 vl = vec3(0.0);
 
+	dither *= 0.5;
+
 	#ifdef END_VOLUMETRIC_FOG
 	#endif
 	
@@ -178,6 +179,7 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 	vec3 lightVec = sunVec * (1.0 - 2.0 * float(timeAngle > 0.5325 && timeAngle < 0.9675));
 	vec3 nViewPos = normalize(viewPos.xyz);
 	float VoL = dot(nViewPos, lightVec);
+	float VoU = dot(nViewPos, upVec);
 
 	#ifdef OVERWORLD	
 	float visfactor = 0.05 * (-0.1 * timeBrightness + 1.0) * (1.0 - rainStrength);
@@ -291,9 +293,7 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 					shadow *= noise;
 				}
 				#elif defined LIGHTSHAFT_CLOUDY_NOISE && defined OVERWORLD
-				float timeFactor = 1.0 - timeBrightness;
-				if (isEyeInWater != 1 && timeFactor > 0.025){
-
+				if (isEyeInWater != 1){
 					float vh = getHeightNoise(npos.xz * 0.005);
 
 					#ifdef WORLD_CURVATURE
@@ -301,11 +301,17 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 					else break;
 					#endif
 
-					npos.xyz += vec3(frametime * 2, -vh * 32, 0.0);
+					npos.xyz += vec3(frametime * 0.5, -vh * 32, 0.0);
 
-					float noise = getFogSample(npos.xyz, LIGHTSHAFT_HEIGHT / 2, LIGHTSHAFT_VERTICAL_THICKNESS, 0.25);
+					float noise = getFogSample(npos.xyz, LIGHTSHAFT_HEIGHT / 2, LIGHTSHAFT_VERTICAL_THICKNESS * (2 - eBS), 0.25);
 					shadow *= noise;
+					shadow *= 1.5 - eBS;
 				}
+				#endif
+
+				#ifdef OVERWORLD
+				VoU = clamp(VoU, 0, 1);
+				shadow *= 1 - VoU;
 				#endif
 
 				vl += shadow;
@@ -317,4 +323,3 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 	
 	return vl;
 }
-#endif

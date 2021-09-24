@@ -15,13 +15,13 @@ varying vec2 texCoord;
 varying vec3 sunVec, upVec, lightVec;
 
 //Uniforms//
-uniform int isEyeInWater;
+uniform int isEyeInWater, frameCounter;
 uniform int worldTime;
 
+uniform float frameTimeCounter;
 uniform float rainStrength;
 uniform float shadowFade;
 uniform float timeAngle, timeBrightness;
-uniform float frameTimeCounter;
 uniform float viewHeight, viewWidth, aspectRatio;
 uniform float eyeAltitude;
 
@@ -42,14 +42,16 @@ uniform sampler2D depthtex0;
 uniform sampler2D depthtex1;
 uniform sampler2D colortex0;
 uniform sampler2D colortex1;
-uniform sampler2D colortex8;
-uniform sampler2D colortex9;
 uniform sampler2D noisetex;
 
 //Optifine Constants//
 const bool colortex1MipmapEnabled = true;
+#ifdef VOLUMETRIC_CLOUDS
+uniform sampler2D colortex8;
+uniform sampler2D colortex9;
 const bool colortex8MipmapEnabled = true;
 const bool colortex9MipmapEnabled = true;
+#endif
 
 #ifdef WORLD_TIME_ANIMATION
 float frametime = float(worldTime)/20.0*ANIMATION_SPEED;
@@ -170,12 +172,12 @@ void main() {
 	viewPos /= viewPos.w;
 	float VoL = dot(normalize(viewPos.xyz), lightVec);
 
-	#if defined OVERWORLD && SKY_COLOR_MODE == 1 && defined PERBIOME_CLOUDS_COLOR
+	#if defined OVERWORLD && defined PERBIOME_CLOUDS_COLOR
 	vcSun *= getBiomeCloudsColor();
 	vcDownSun *= getBiomeCloudsColor();
 	#endif
 
-	vec2 vc = vec2(texture2DLod(colortex8, texCoord.xy, float(2.0)).a, texture2DLod(colortex9, texCoord.xy, float(2.0)).a);
+	vec2 vc = vec2(texture2DLod(colortex8, texCoord.xy, 2).a, texture2DLod(colortex9, texCoord.xy, 2).a);
 	color = mix(color, mix(vcloudsDownCol, vcloudsCol, vc.x) * (1.0 - rainStrength * 0.25), vc.y * vc.y * VCLOUDS_OPACITY);
 	#endif
 

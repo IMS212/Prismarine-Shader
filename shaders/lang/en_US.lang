@@ -658,6 +658,7 @@ option.BLOOM.comment=Allows bright areas to glow.
 
 option.BLOOM_STRENGTH=Bloom Strength
 option.BLOOM_STRENGTH.comment=Adjusts bloom intensity.
+value.BLOOM_STRENGTH.16=You should check BSL
 
 option.LENS_FLARE=Lens Flare
 option.LENS_FLARE.comment=Enables lens flare.

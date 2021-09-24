@@ -100,11 +100,11 @@ vec3 lightshaftWater    = vec3(LIGHTSHAFT_WR, LIGHTSHAFT_WG, LIGHTSHAFT_WB) * LI
 //Program//
 void main() {
 	#if defined VOLUMETRIC_CLOUDS && defined OVERWORLD
-	vec3 aux8 = texture2D(colortex8, texCoord.xy).rgb;
-	vec3 aux9 = texture2D(colortex9, texCoord.xy).rgb;
+	vec3 aux8 = texture2DLod(colortex8, texCoord.xy, 2).rgb;
+	vec3 aux9 = texture2DLod(colortex9, texCoord.xy, 2).rgb;
 	#endif
 
-	vec3 vl = texture2DLod(colortex1, texCoord.xy, 1.5).rgb;
+	vec3 vl = texture2DLod(colortex1, texCoord.xy, 1).rgb;
 	vl *= vl;
 
 	#ifdef VOLUMETRIC_CLOUDS
@@ -148,6 +148,11 @@ void main() {
 		vec3 skylightshaftCol = CalcLightColor(lightshaftCol0, lightshaftNight * 0.50, waterColor.rgb);
 		vl *= skylightshaftCol;
 		#endif
+
+		#ifdef PERBIOME_LIGHTSHAFTS
+		vl *= getBiomeFogColor();
+		#endif
+
 		if (isEyeInWater == 1) vl *= waterShadowColor.rgb * lightshaftWater.rgb * lightCol.rgb * (timeBrightness + LIGHTSHAFT_WI);
 	}
 	#if defined FIREFLIES

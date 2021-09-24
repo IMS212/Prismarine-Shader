@@ -49,7 +49,7 @@ uniform mat4 gbufferModelViewInverse;
 uniform mat4 shadowProjection;
 uniform mat4 shadowModelView;
 
-uniform sampler2D texture;
+uniform sampler2D texture, noisetex;
 
 uniform vec3 cameraPosition;
 

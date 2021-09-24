@@ -1,22 +1,22 @@
-float h(vec3 pos){
-	float noise  = texture2D(noisetex, (pos.xz + vec2(frametime) * 0.1 + pos.y) / WATER_CAUSTICS_AMOUNT * 1).r;
-		  noise += texture2D(noisetex, (pos.xz - vec2(frametime) * 0.2 - pos.y) / WATER_CAUSTICS_AMOUNT * 2).r;
-		  noise -= texture2D(noisetex, (pos.xz + vec2(frametime) * 0.3 + pos.y) / WATER_CAUSTICS_AMOUNT * 4).r;
-		  noise += texture2D(noisetex, (pos.xz - vec2(frametime) * 0.1 - pos.y) / WATER_CAUSTICS_AMOUNT * 7).r;
-		  noise -= texture2D(noisetex, (pos.xz + vec2(frametime) * 0.2 + pos.y) / WATER_CAUSTICS_AMOUNT * 11).r;
-		  noise += texture2D(noisetex, (pos.xz - vec2(frametime) * 0.3 - pos.y) / WATER_CAUSTICS_AMOUNT * 16).r;
+float GetWaterHeightMap(vec3 pos, vec2 offset){
+	offset /= 256.0;
+	float noiseA = texture2D(noisetex, (pos.xz - frametime * 0.25) / 256.0 + offset).r;
+	float noiseB = texture2D(noisetex, (pos.xz + frametime * 0.50) / 96.0 + offset).r;
+	noiseA *= noiseA; noiseB *= noiseB;	
+	float noise = mix(noiseA, noiseB, WATER_DETAIL);
 	
-	return noise;
+	return noise * 3 * WATER_BUMP;
 }
 
 float getCaustics(vec3 pos){
-	float h0 = h(pos);
-	float h1 = h(pos + vec3(1, 0, 0));
-	float h2 = h(pos + vec3(-1, 0, 0));
-	float h3 = h(pos + vec3(0, 0, 1));
-	float h4 = h(pos + vec3(0, 0, -1));
+	float normalOffset = WATER_SHARPNESS;
+
+	float h1 = GetWaterHeightMap(pos, vec2( normalOffset, 0.0));
+	float h2 = GetWaterHeightMap(pos, vec2(-normalOffset, 0.0));
+	float h3 = GetWaterHeightMap(pos, vec2(0.0,  normalOffset));
+	float h4 = GetWaterHeightMap(pos, vec2(0.0, -normalOffset));
 	
-	float caustic = max((1 - abs(0.5 - h0)) * (1 - (abs(h1 - h2) + abs(h3 - h4))), 0);
+	float caustic = max((1 - (abs(h1 - h2) + abs(h3 - h4))), 0);
 	caustic = max(pow(caustic, 3.5), 0);
 	
 	return caustic;

@@ -32,6 +32,8 @@ uniform float viewWidth, viewHeight;
 
 uniform ivec2 eyeBrightnessSmooth;
 
+uniform sampler2D noisetex;
+
 uniform vec3 cameraPosition;
 
 uniform mat4 gbufferProjectionInverse;

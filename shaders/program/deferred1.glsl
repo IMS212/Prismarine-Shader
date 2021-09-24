@@ -277,6 +277,10 @@ void main() {
 		Fog(color.rgb, viewPos.xyz);
 		#endif
 	} else {
+		#ifdef TF
+		color.rgb = GetSkyColor(viewPos.xyz, false);
+		#endif
+
 		#ifdef NETHER
 		color.rgb = netherCol.rgb * 0.04;
 		#ifdef NETHER_SMOKE
@@ -284,6 +288,7 @@ void main() {
 		color.rgb += DrawRift(viewPos.xyz, dither, 4, 0);
 		#endif
 		#endif
+
 		#if defined END && FOG_MODE == 0
 		float VoL = dot(normalize(viewPos.xyz), lightVec);
 		VoL = pow(VoL * 0.5 + 0.5, 16.0) * 0.75 + 0.25;

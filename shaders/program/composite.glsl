@@ -42,7 +42,7 @@ uniform sampler2D depthtex1;
 
 uniform sampler2D noisetex;
 
-#if FOG_MODE == 1 || FOG_MODE == 2
+#if FOG_MODE == 1 || FOG_MODE == 2 || defined FIREFLIES
 uniform sampler2DShadow shadowtex0;
 uniform sampler2DShadow shadowtex1;
 uniform sampler2D shadowcolor0;
@@ -124,7 +124,7 @@ vec2 getRefract(vec2 coord, vec3 posxz){
 #include "/lib/util/dither.glsl"
 #include "/lib/atmospherics/waterFog.glsl"
 
-#if FOG_MODE == 1 || FOG_MODE == 2
+#if FOG_MODE == 1 || FOG_MODE == 2 || defined FIREFLIES
 #include "/lib/atmospherics/volumetricLight.glsl"
 #endif
 
@@ -147,7 +147,6 @@ void main() {
     vec3 translucent = texture2D(colortex1,texCoord).rgb;
 	float z0 = texture2D(depthtex0, texCoord).r;
 	float z1 = texture2D(depthtex1, texCoord).r;
-
 	vec3 vl = vec3(0.0);
 
 	float dayVis0, nightVis0;
@@ -197,21 +196,22 @@ void main() {
 	color.rgb = mix(color.rgb, outerOutline.rgb, outerOutline.a);
 	#endif
 
-	#if (FOG_MODE == 1 || FOG_MODE == 2) || (defined END_VOLUMETRIC_FOG && defined END) || (defined FIREFLIES && defined OVERWORLD)
 	float dither = Bayer64(gl_FragCoord.xy);
+
 	#ifdef END
 	visibility0 = 1;
 	#endif
+
+	#if ((FOG_MODE == 1 || FOG_MODE == 2) && defined OVERWORLD) || (defined END_VOLUMETRIC_FOG && defined END)
 	if (visibility0 > 0) vl = GetLightShafts(z0, z1, translucent, dither);
+	#endif
+
 	#if defined FIREFLIES && defined OVERWORLD
-	else{
+	if (visibility0 == 0) {
 		float visibility1 = (1 - sunVisibility) * (1 - rainStrength) * (0 + eBS);
 		if (visibility1 > 0) vl = GetFireflies(z0, z1, translucent, dither);
 	}
 	#endif
-	#else
-	vl = vec3(0.0);
-    #endif
 	
 	#ifdef REFRACTION
 	float depth = z1 - z0;

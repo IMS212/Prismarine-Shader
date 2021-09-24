@@ -143,6 +143,11 @@ void main() {
 	SunGlare(albedo, viewPos.xyz, skylightCol.rgb);
 
 	albedo.rgb *= 1 * (1.0 + nightVision);
+
+	#if ALPHA_BLEND == 0
+	albedo.rgb = pow(max(albedo.rgb, vec3(0.0)), vec3(1.0 / 2.2));
+	albedo.rgb = albedo.rgb + dither / vec3(64.0);
+	#endif
 	#endif
 	
     /* DRAWBUFFERS:0 */

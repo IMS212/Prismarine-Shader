@@ -122,7 +122,7 @@ float GetWaterHeightMap(vec3 worldPos, vec2 offset) {
 	noise = mix(noiseA, noiseB, WATER_DETAIL);
 	#endif
 
-    return noise * WATER_BUMP;
+    return noise * WATER_BUMP * 0.25;
 }
 
 vec3 GetParallaxWaves(vec3 worldPos, vec3 viewVector) {

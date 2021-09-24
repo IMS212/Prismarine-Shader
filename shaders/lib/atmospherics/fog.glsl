@@ -55,6 +55,10 @@ vec3 GetFogColor(vec3 viewPos, float fogType) {
         #endif
     }
 
+	#ifdef TF
+	fog = GetSkyColor(viewPos, false) * baseGradient / (SKY_I * SKY_I);
+	#endif
+
 	#ifdef COLORED_FOG
 		fog = x4(ntmix(pos, pos, pos, 0.00001));
 		fog *= 10;
@@ -80,6 +84,10 @@ vec3 GetFogColor(vec3 viewPos, float fogType) {
         lightFog = pow(getBiomeFogColor() / 2, vec3(4.0 - sunVisibility)) * baseGradient;
         #endif
     }
+
+	#ifdef TF
+	lightFog = pow(GetSkyColor(viewPos, false) / 2, vec3(4.0 - sunVisibility)) * baseGradient;
+	#endif
 
 	#ifdef COLORED_FOG
 		lightFog = x4(ntmix(pos, pos, pos, 0.00001));
