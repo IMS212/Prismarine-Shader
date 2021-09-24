@@ -926,6 +926,16 @@ option.SKY_COLOR_MODE=Sky Color Mode
 value.SKY_COLOR_MODE.0=Single Color
 value.SKY_COLOR_MODE.1=Per - Biome
 
+option.TFSKY_R=Twilight Forest - Red
+option.TFSKY_G=Twilight Forest - Green
+option.TFSKY_B=Twilight Forest - Blue
+option.TFSKY_I=Twilight Forest - Intensity
+
+option.TFSKYD_R=Twilight Forest - Red
+option.TFSKYD_G=Twilight Forest - Green
+option.TFSKYD_B=Twilight Forest - Blue
+option.TFSKYD_I=Twilight Forest - Intensity
+
 option.SKY_R=Red
 option.SKY_G=Green
 option.SKY_B=Blue
