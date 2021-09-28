@@ -24,11 +24,6 @@ uniform float shadowFade;
 uniform float timeAngle, timeBrightness;
 uniform float viewHeight, viewWidth, aspectRatio;
 uniform float eyeAltitude;
-
-#if defined OVERWORLD && SKY_COLOR_MODE == 1 && defined PERBIOME_CLOUDS_COLOR
-uniform float isTaiga, isForest, isJungle;
-#endif
-
 uniform ivec2 eyeBrightnessSmooth;
 
 uniform vec3 cameraPosition, previousCameraPosition;
@@ -106,22 +101,6 @@ vec3 MotionBlur(vec3 color, float z, float dither) {
 	else return color;
 }
 
-#ifdef VOLUMETRIC_CLOUDS
-float mefade0 = 1.0 - clamp(abs(timeAngle - 0.5) * 8.0 - 1.5, 0.0, 1.0);
-float dfade0 = 1.0 - timeBrightness;
-
-vec3 CalcSunColor0(vec3 morning, vec3 day, vec3 evening) {
-	vec3 me = mix(morning, evening, mefade0);
-	return mix(me, day, 1.0 - dfade0 * sqrt(dfade0));
-}
-
-vec3 CalcLightColor0(vec3 sun, vec3 night, vec3 weatherCol) {
-	vec3 c = mix(night, sun, sunVisibility);
-	c = mix(c, dot(c, vec3(0.299, 0.587, 0.114)) * weatherCol, rainStrength);
-	return c * c;
-}
-#endif
-
 #include "/lib/util/dither.glsl"
 
 #ifdef OUTLINE_OUTER
@@ -159,10 +138,10 @@ void main() {
 	vec3 vcDownEvening    = vec3(VCLOUDDOWN_ER,   VCLOUDDOWN_EG,   VCLOUDDOWN_EB)   * VCLOUDDOWN_EI / 255;
 	vec3 vcDownNight      = vec3(VCLOUDDOWN_NR,   VCLOUDDOWN_NG,   VCLOUDDOWN_NB)   * VCLOUDDOWN_NI * 0.3 / 255;
 
-	vec3 vcSun = CalcSunColor0(vcMorning, vcDay, vcEvening);
-	vec3 vcDownSun = CalcSunColor0(vcDownMorning, vcDownDay, vcDownEvening);
-	vec3 vcloudsCol     = CalcLightColor0(vcSun, vcNight, weatherCol.rgb * 0.4);
-	vec3 vcloudsDownCol = CalcLightColor0(vcDownSun, vcDownNight, weatherCol.rgb * 0.4);
+	vec3 vcSun = CalcSunColor(vcMorning, vcDay, vcEvening);
+	vec3 vcDownSun = CalcSunColor(vcDownMorning, vcDownDay, vcDownEvening);
+	vec3 vcloudsCol     = CalcLightColor(vcSun, vcNight, weatherCol.rgb * 0.4);
+	vec3 vcloudsDownCol = CalcLightColor(vcDownSun, vcDownNight, weatherCol.rgb * 0.4);
 	#endif
 
 	#ifdef VOLUMETRIC_CLOUDS

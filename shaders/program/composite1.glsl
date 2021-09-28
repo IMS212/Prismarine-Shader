@@ -65,19 +65,6 @@ float GetLuminance(vec3 color) {
 	return dot(color,vec3(0.299, 0.587, 0.114));
 }
 
-float mefade0 = 1.0 - clamp(abs(timeAngle - 0.5) * 8.0 - 1.5, 0.0, 1.0);
-float dfade0 = 1.0 - timeBrightness;
-
-float CalcDayVisibility(float morning, float day, float evening) {
-	float me = mix(morning, evening, mefade0);
-	return mix(me, day, 1.0 - dfade0 * sqrt(dfade0));
-}
-
-float CalcVisibility(float sun, float night) {
-	float c = mix(night, sun, sunVisibility);
-	return c * c;
-}
-
 vec3 lightshaftWater    = vec3(LIGHTSHAFT_WR, LIGHTSHAFT_WG, LIGHTSHAFT_WB) * LIGHTSHAFT_WI / 255.0;
 
 //Includes//
@@ -132,7 +119,7 @@ void main() {
 		nightVis0 = 1;
 	}
 
-	float visibility0 = CalcVisibility(CalcDayVisibility(1, dayVis0, 1), nightVis0);
+	float visibility0 = CalcTotalAmount(CalcDayAmount(1, dayVis0, 1), nightVis0);
 
 	#if ((FOG_MODE == 1 || FOG_MODE == 2) && defined OVERWORLD) || (defined END_VOLUMETRIC_FOG && defined END) || (defined FIREFLIES && defined OVERWORLD)
 

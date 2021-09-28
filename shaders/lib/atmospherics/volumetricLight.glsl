@@ -159,8 +159,6 @@ vec4 GetShadowSpace(vec4 wpos) {
 vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dither) {
 	vec3 vl = vec3(0.0);
 
-	dither *= 0.5;
-
 	#ifdef END_VOLUMETRIC_FOG
 	#endif
 	
@@ -169,7 +167,7 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 
 	bool isThereADragon = gl_Fog.start / far < 0.5; //yes emin thanks for telling people about this in shaderlabs
 	float dragonFactor;
-	if (isThereADragon) dragonFactor = 1;
+	if (isThereADragon) dragonFactor = 0.5;
 	else dragonFactor = 0;
 
 	vec3 screenPos = vec3(texCoord, pixeldepth0);
@@ -225,7 +223,6 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 	#endif
 
 	if (visibility > 0.0) {
-		float minDistFactor = LIGHTSHAFT_MIN_DISTANCE;
 		float maxDist = LIGHTSHAFT_MAX_DISTANCE;
 		
 		float depth0 = GetLinearDepth2(pixeldepth0);
@@ -236,7 +233,7 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 		vec3 watercol = vec3(LIGHTSHAFT_WR, LIGHTSHAFT_WG, LIGHTSHAFT_WB) * LIGHTSHAFT_WI / 255.0 * LIGHTSHAFT_WI;
 		
 		for(int i = 0; i < LIGHTSHAFT_SAMPLES; i++) {
-			float minDist = (i + dither) * minDistFactor;
+			float minDist = (i + dither) * LIGHTSHAFT_MIN_DISTANCE;
 
 			if (isEyeInWater == 1){
 				minDist = (exp2(i + dither) - 0.95) * 4;
@@ -248,7 +245,6 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 
 			if (minDist >= maxDist) break;
 			if (depth1 < minDist || (depth0 < minDist && color == vec3(0.0))) break;
-			if (rainStrength == 1) break;
 
 			#ifndef LIGHTSHAFT_WATER
 			if (isEyeInWater == 1.0) break;
@@ -286,8 +282,8 @@ vec3 GetLightShafts(float pixeldepth0, float pixeldepth1, vec3 color, float dith
 
 				#if defined END_VOLUMETRIC_FOG && defined END
 				if (isEyeInWater != 1){
-					float n3da = texture2D(noisetex, npos.xz / 512.0 + floor(npos.y / 3.0) * 0.35).r;
-					float n3db = texture2D(noisetex, npos.xz / 512.0 + floor(npos.y / 3.0 + 1.0) * 0.35).r;
+					float n3da = texture2D(noisetex, npos.xz / 1024.0 + floor(npos.y / 3.0) * 0.30).r;
+					float n3db = texture2D(noisetex, npos.xz / 2048.0 + floor(npos.y / 3.0 + 1.0) * 0.35).r;
 					float noise = mix(n3da, n3db, fract(npos.y / 3.0));
 					noise = sin(noise * 16.0 + frametime) * 0.25 + 0.5;
 					shadow *= noise;

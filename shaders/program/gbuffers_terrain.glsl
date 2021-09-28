@@ -103,7 +103,7 @@ float InterleavedGradientNoise() {
 #ifdef GLOWING_THINGS
 vec3 GetGlow(vec3 color){
     vec3 x = max(vec3(0), color);
-    return x * x;
+    return x * x * GLOW_STRENGTH;
 }
 #endif
 
@@ -384,6 +384,8 @@ void main() {
 		#else
 		float noiseMap = 1;
 		#endif
+
+		albedo *= noiseMap;
 
 		#if ALPHA_BLEND == 0
 		albedo.rgb = pow(max(albedo.rgb, vec3(0.0)), vec3(1.0 / 2.2));

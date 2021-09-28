@@ -1,23 +1,9 @@
-float mefade1 = 1.0 - clamp(abs(timeAngle - 0.5) * 8.0 - 1.5, 0.0, 1.0);
-float dfade1 = 1.0 - timeBrightness;
-
-vec3 CalcSunColor1(vec3 morning, vec3 day, vec3 evening) {
-	vec3 me = mix(morning, evening, mefade1);
-	return mix(me, day, 1.0 - dfade1 * sqrt(dfade1));
-}
-
-vec3 CalcLightColor1(vec3 sun, vec3 night, vec3 weatherCol) {
-	vec3 c = mix(night, sun, sunVisibility);
-	c = mix(c, dot(c, vec3(0.299, 0.587, 0.114)) * weatherCol, 1);
-	return c * c;
-}
-
 vec3 vcMorning    = vec3(VCLOUD_MR,   VCLOUD_MG,   VCLOUD_MB)   * VCLOUD_MI / 255;
 vec3 vcDay        = vec3(VCLOUD_DR,   VCLOUD_DG,   VCLOUD_DB)   * VCLOUD_DI / 255;
 vec3 vcEvening    = vec3(VCLOUD_ER,   VCLOUD_EG,   VCLOUD_EB)   * VCLOUD_EI / 255;
 vec3 vcNight      = vec3(VCLOUD_NR,   VCLOUD_NG,   VCLOUD_NB)   * VCLOUD_NI * 0.3 / 255;
 
-vec3 vcSun = CalcSunColor1(vcMorning, vcDay, vcEvening);
+vec3 vcSun = CalcSunColor(vcMorning, vcDay, vcEvening);
 
 #ifdef OVERWORLD
 vec3 fogcolorMorning    = vec3(FOGCOLOR_MR,   FOGCOLOR_MG,   FOGCOLOR_MB)   * FOGCOLOR_MI / 255.0;
@@ -25,8 +11,8 @@ vec3 fogcolorDay        = vec3(FOGCOLOR_DR,   FOGCOLOR_DG,   FOGCOLOR_DB)   * FO
 vec3 fogcolorEvening    = vec3(FOGCOLOR_ER,   FOGCOLOR_EG,   FOGCOLOR_EB)   * FOGCOLOR_EI / 255.0;
 vec3 fogcolorNight      = vec3(FOGCOLOR_NR,   FOGCOLOR_NG,   FOGCOLOR_NB)   * FOGCOLOR_NI * 0.3 / 255.0;
 
-vec3 fogcolorSun    = CalcSunColor1(fogcolorMorning, fogcolorDay, fogcolorEvening);
-vec4 fogColorC    	= vec4(CalcLightColor1(fogcolorSun, fogcolorNight, weatherCol.rgb), 1);
+vec3 fogcolorSun    = CalcSunColor(fogcolorMorning, fogcolorDay, fogcolorEvening);
+vec4 fogColorC    	= vec4(CalcLightColor(fogcolorSun, fogcolorNight, weatherCol.rgb), 1);
 
 #if FOG_COLOR_MODE == 2 || defined PERBIOME_LIGHTSHAFTS
 vec3 getBiomeFogColor(){

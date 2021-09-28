@@ -11,28 +11,30 @@ https://bitslablab.com
 
 //Varyings//
 varying float mat;
-varying vec4 texCoord, position0;
 
-varying vec3 sunVec, upVec, eastVec;
+varying vec2 texCoord;
 
-uniform vec3 cameraPosition;
+varying vec4 position0;
+
 varying vec4 color;
 
 //Uniforms//
-uniform float rainStrength;
-uniform float frameTimeCounter;
-uniform float timeAngle, timeBrightness;
 uniform int blockEntityId;
 uniform int isEyeInWater;
-uniform int worldTime;
 
-uniform sampler2D noisetex, colortex15;
-uniform sampler2D texture;
+uniform sampler2D tex;
+
+#ifdef PROJECTED_CAUSTICS
+uniform sampler2D noisetex;
 
 uniform mat4 gbufferProjectionInverse;
 uniform mat4 gbufferModelViewInverse;
 uniform mat4 shadowProjection;
 uniform mat4 shadowModelView;
+
+uniform vec3 cameraPosition;
+
+uniform float frameTimeCounter, timeBrightness;
 
 #ifdef WORLD_TIME_ANIMATION
 float frametime = float(worldTime) * 0.05 * ANIMATION_SPEED;
@@ -40,12 +42,10 @@ float frametime = float(worldTime) * 0.05 * ANIMATION_SPEED;
 float frametime = frameTimeCounter * ANIMATION_SPEED;
 #endif
 
-float sunVisibility  = clamp((dot( sunVec, upVec) + 0.05) * 10.0, 0.0, 1.0);
-float moonVisibility = clamp((dot(-sunVec, upVec) + 0.05) * 10.0, 0.0, 1.0);
-
 #include "/lib/color/waterColor.glsl"
 #include "/lib/util/spaceConversion.glsl"
 #include "/lib/prismarine/caustics.glsl"
+#endif
 
 //Program//
 void main() {
@@ -53,7 +53,7 @@ void main() {
 	if (blockEntityId == 10205) discard;
 	#endif
 
-    vec4 albedo = texture2D(texture, texCoord.xy);
+    vec4 albedo = texture2D(tex, texCoord.xy);
 	albedo.rgb *= color.rgb;
 
     float premult = float(mat > 0.98 && mat < 1.02);
@@ -71,7 +71,7 @@ void main() {
 	#ifdef PROJECTED_CAUSTICS
 	if (water > 0.9){
 		albedo.rgb = waterColor.rgb;
-		albedo.rgb = getCaustics(position0.xyz+cameraPosition.xyz) * albedo.rgb * WATER_CAUSTICS_STRENGTH * (1.25 - moonVisibility);
+		albedo.rgb = getCaustics(position0.xyz + cameraPosition.xyz) * albedo.rgb * WATER_CAUSTICS_STRENGTH * (0.25 + timeBrightness);
 	}
 	#endif
 
@@ -86,13 +86,12 @@ void main() {
 //Varyings//
 varying float mat;
 
-varying vec4 texCoord, position0;
-varying vec3 sunVec, upVec, eastVec;
+varying vec2 texCoord;
+varying vec4 position0;
 varying vec4 color;
 
 //Uniforms//
 uniform int worldTime;
-uniform float timeAngle;
 uniform float frameTimeCounter;
 
 uniform vec3 cameraPosition;
@@ -121,7 +120,7 @@ float frametime = frameTimeCounter * ANIMATION_SPEED;
 
 //Program//
 void main() {
-	texCoord = gl_MultiTexCoord0;
+	texCoord = gl_MultiTexCoord0.xy;
 
 	color = gl_Color;
 	

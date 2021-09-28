@@ -4,8 +4,4 @@ float InterleavedGradientNoise(vec2 a) {
 	return fract(n + frameCounter / 8.0);
 }
 
-#define Bayer4(a)   (InterleavedGradientNoise(  0.5 * (a)) * 0.25 + InterleavedGradientNoise(a))
-#define Bayer8(a)   (Bayer4(  0.5 * (a)) * 0.25 + InterleavedGradientNoise(a))
-#define Bayer16(a)  (Bayer8(  0.5 * (a)) * 0.25 + InterleavedGradientNoise(a))
-#define Bayer32(a)  (Bayer16( 0.5 * (a)) * 0.25 + InterleavedGradientNoise(a))
-#define Bayer64(a)  (Bayer32( 0.5 * (a)) * 0.25 + InterleavedGradientNoise(a))
+#define Bayer64(a)  InterleavedGradientNoise(a)

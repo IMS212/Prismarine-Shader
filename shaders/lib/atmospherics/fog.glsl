@@ -3,7 +3,10 @@ uniform vec3 fogColor;
 #endif
 
 #include "/lib/color/fogColor.glsl"
+
+#if (defined OVERWORLD && NIGHT_SKY_MODE == 1) || (defined END && END_SKY == 1)
 #include "/lib/atmospherics/clouds.glsl"
+#endif
 
 float mefade0 = 1.0 - clamp(abs(timeAngle - 0.5) * 8.0 - 1.5, 0.0, 1.0);
 float dfade0 = 1.0 - timeBrightness;

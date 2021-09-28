@@ -87,7 +87,7 @@ void main() {
 	#endif
 
 	#ifdef END
-	albedo.rgb = endCol.rgb * 0.25 * vec3(0.75, 1.00, 1.25);
+	albedo.rgb = endCol.rgb * 0.75;
 
 	vec3 nViewPos = normalize(viewPos.xyz);
 	float NdotU = dot(nViewPos, upVec);
@@ -112,7 +112,7 @@ void main() {
 	albedo.rgb = GetLuminance(albedo.rgb) * endCol.rgb;
 	#endif
 
-	albedo.rgb *= SKYBOX_BRIGHTNESS * 0.02;
+	albedo.rgb *= SKYBOX_BRIGHTNESS * 0.2;
 	#endif
 	
     /* DRAWBUFFERS:0 */

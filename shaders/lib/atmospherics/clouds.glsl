@@ -1,5 +1,4 @@
 #include "/lib/color/auroraColor.glsl"
-#include "/lib/prismarine/functions.glsl"
 
 float GetNoise(vec2 pos) {
 	return fract(sin(dot(pos, vec2(12.9898, 4.1414))) * 43758.5453);
@@ -23,6 +22,8 @@ void DrawStars(inout vec3 color, vec3 viewPos) {
 	}
 	star = clamp(star - 0.7125, 0.0, 1.0) * multiplier;
 	
+	star *= 0.5 * STARS_BRIGHTNESS;
+
 	#ifdef DAY_STARS
 	color += star * vec3(0.75, 0.85, 1.00);
 	#else
@@ -32,8 +33,6 @@ void DrawStars(inout vec3 color, vec3 viewPos) {
 	#ifdef END
 	color += star * pow(vec3(1.15, 0.85, 1.00) * 16, vec3(0.8));
 	#endif
-
-	star *= 0.5 * STARS_BRIGHTNESS;
 }
 
 void DrawBigStars(inout vec3 color, vec3 viewPos) {
@@ -54,6 +53,8 @@ void DrawBigStars(inout vec3 color, vec3 viewPos) {
 	}
 	star = clamp(star - 0.7125, 0.0, 1.0) * multiplier;
 		
+	star *= 0.5 * STARS_BRIGHTNESS;
+
 	#ifdef DAY_STARS
 	color += star * vec3(0.75, 0.85, 1.00);
 	#else
@@ -63,15 +64,15 @@ void DrawBigStars(inout vec3 color, vec3 viewPos) {
 	#ifdef END
 	color += star * pow(vec3(1.15, 0.85, 1.00) * 16 * endCol.rgb, vec3(1.0));
 	#endif
-
-	star *= 0.5 * STARS_BRIGHTNESS;
 }
 
 #ifdef OVERWORLD
 #ifdef AURORA
 float AuroraSample(vec2 coord, vec2 wind, float VoU) {
-	float noise = texture2D(noisetex, coord * 0.0625  + wind * 0.25).b * 3.0;
-		  noise+= texture2D(noisetex, coord * 0.03125 + wind * 0.15).b * 3.0;
+	float noise = texture2D(noisetex, coord * 0.12500 + wind * 0.25).b * 0.5;
+		  noise+= texture2D(noisetex, coord * 0.06250 + wind * 0.15).b * 1.0;
+		  noise+= texture2D(noisetex, coord * 0.03125 + wind * 0.05).b * 2.0;
+		  noise+= texture2D(noisetex, coord * 0.01575 + wind * 0.05).b * 3.0;
 
 	noise = max(1.0 - 4.0 * (0.5 * VoU + 0.5) * abs(noise - 3.0), 0.0);
 
@@ -79,7 +80,7 @@ float AuroraSample(vec2 coord, vec2 wind, float VoU) {
 }
 
 vec3 DrawAurora(vec3 viewPos, float dither, int samples) {
-
+	dither *= 2;
 	float sampleStep = 1.0 / samples;
 	float currentStep = dither * sampleStep;
 
@@ -92,8 +93,8 @@ vec3 DrawAurora(vec3 viewPos, float dither, int samples) {
 	#endif
 
 	vec2 wind = vec2(
-		frametime * CLOUD_SPEED * 0.000125,
-		sin(frametime * CLOUD_SPEED * 0.05) * 0.00025
+		frametime * 0.000125,
+		sin(frametime * 0.05) * 0.00025
 	);
 
 	vec3 aurora = vec3(0.0);
@@ -101,7 +102,7 @@ vec3 DrawAurora(vec3 viewPos, float dither, int samples) {
 	if (VoU > 0.0 && visibility > 0.0) {
 		vec3 wpos = normalize((gbufferModelViewInverse * vec4(viewPos, 1.0)).xyz);
 		for(int i = 0; i < samples; i++) {
-			vec3 planeCoord = wpos * ((8.0 + currentStep * 7.0) / wpos.y) * 0.003;
+			vec3 planeCoord = wpos * ((4.0 + currentStep * 6.0) / wpos.y) * 0.005;
 			vec2 coord = cameraPosition.xz * 0.00004 + planeCoord.xz;
 
 			float noise = AuroraSample(coord, wind, VoU);
@@ -124,19 +125,22 @@ vec3 DrawAurora(vec3 viewPos, float dither, int samples) {
 #endif
 #endif
 
-float RiftSample(vec2 coord, vec2 wind, float VoU) {
-	float noise = texture2D(noisetex, coord * 1.0000  + wind * 0.25).b;
+#if (defined OVERWORLD && NIGHT_SKY_MODE == 1) || (defined END && END_SKY == 1) || (defined NETHER && defined NETHER_SMOKE)
+float nebulaSample(vec2 coord, vec2 wind, float VoU) {
+	float noise = texture2D(noisetex, coord * 2.0000  + wind * 0.30).b;
+		  noise+= texture2D(noisetex, coord * 1.0000  + wind * 0.25).b;
 		  noise+= texture2D(noisetex, coord * 0.5000  + wind * 0.20).b;
 		  noise+= texture2D(noisetex, coord * 0.2500  + wind * 0.15).b;
-		  noise+= texture2D(noisetex, coord * 0.1250  + wind * 0.10).b;
-		  noise+= texture2D(noisetex, coord * 0.0625  + wind * 0.05).b;	
+		  noise+= texture2D(noisetex, coord * 0.1250  + wind * 0.10).b;	
+		  noise+= texture2D(noisetex, coord * 0.0625  + wind * 0.05).b;
+		  noise+= texture2D(noisetex, coord * 0.03125).b;
 	noise *= NEBULA_AMOUNT;
 	noise = max(1.0 - 2.0 * (0.5 * VoU + 0.5) * abs(noise - 3.5), 0.0);
 
 	return noise;
 }
 
-vec3 DrawRift(vec3 viewPos, float dither, int samples, float riftType) {
+vec3 DrawRift(vec3 viewPos, float dither, int samples, float nebulaType) {
 	dither *= NEBULA_DITHERING_STRENGTH;
 
 	float auroraVisibility = 0.0;
@@ -157,12 +161,12 @@ vec3 DrawRift(vec3 viewPos, float dither, int samples, float riftType) {
 	float currentStep = dither * sampleStep;
 
 	vec2 wind = vec2(
-		frametime * CLOUD_SPEED * 0.000125,
-		sin(frametime * CLOUD_SPEED * 0.05) * 0.00125
+		frametime * NEBULA_SPEED * 0.000125,
+		sin(frametime * NEBULA_SPEED * 0.05) * 0.00125
 	);
 
-	vec3 rift = vec3(0.0);
-	vec3 riftColor = vec3(0.0);
+	vec3 nebula = vec3(0.0);
+	vec3 nebulaColor = vec3(0.0);
 
 	if (VoU > 0.0) {
 		vec3 wpos = normalize((gbufferModelViewInverse * vec4(viewPos, 1.0)).xyz);
@@ -173,19 +177,19 @@ vec3 DrawRift(vec3 viewPos, float dither, int samples, float riftType) {
 			coord = cameraPosition.xz * 0.0001 + planeCoord.xz;
 			#endif
 
-			if (riftType == 0){
+			if (nebulaType == 0){
 				coord += vec2(coord.y, -coord.x) * 1.00 * NEBULA_DISTORTION;
-				coord += cos(mix(vec2(cos(currentStep * 1), sin(currentStep * 2.00)), vec2(cos(currentStep * 3.0), sin(currentStep * 4.00)), currentStep) * 0.0005);
-				coord += sin(mix(vec2(cos(currentStep * 2), sin(currentStep * 2.50)), vec2(cos(currentStep * 3.0), sin(currentStep * 3.50)), currentStep) * 0.0010);
-				coord += cos(mix(vec2(cos(currentStep * 3), sin(currentStep * 3.75)), vec2(cos(currentStep * 4.5), sin(currentStep * 5.25)), currentStep) * 0.0015);
+				coord += cos(mix(vec2(cos(currentStep * 1), sin(currentStep * 2.00)), vec2(cos(currentStep * 3.0), sin(currentStep * 4.00)), currentStep) * 0.005);
+				coord += sin(mix(vec2(cos(currentStep * 2), sin(currentStep * 2.50)), vec2(cos(currentStep * 3.0), sin(currentStep * 3.50)), currentStep) * 0.010);
+				coord += cos(mix(vec2(cos(currentStep * 3), sin(currentStep * 3.75)), vec2(cos(currentStep * 4.5), sin(currentStep * 5.25)), currentStep) * 0.015);
 			}else{
 				coord += vec2(coord.y, -coord.x) * 2.00 * NEBULA_DISTORTION;
-				coord += cos(mix(vec2(cos(currentStep * 0.50), sin(currentStep * 1.00)), vec2(cos(currentStep * 1.50), sin(currentStep * 2.00)), currentStep) * 0.0020);
-				coord += sin(mix(vec2(cos(currentStep * 1.00), sin(currentStep * 2.00)), vec2(cos(currentStep * 3.00), sin(currentStep * 4.00)), currentStep) * 0.0015);
-				coord += cos(mix(vec2(cos(currentStep * 1.50), sin(currentStep * 3.00)), vec2(cos(currentStep * 4.50), sin(currentStep * 6.00)), currentStep) * 0.0010);
+				coord += cos(mix(vec2(cos(currentStep * 0.50), sin(currentStep * 1.00)), vec2(cos(currentStep * 1.50), sin(currentStep * 2.00)), currentStep) * 0.020);
+				coord += sin(mix(vec2(cos(currentStep * 1.00), sin(currentStep * 2.00)), vec2(cos(currentStep * 3.00), sin(currentStep * 4.00)), currentStep) * 0.015);
+				coord += cos(mix(vec2(cos(currentStep * 1.50), sin(currentStep * 3.00)), vec2(cos(currentStep * 4.50), sin(currentStep * 6.00)), currentStep) * 0.010);
 			}
 
-			float noise = RiftSample(coord, wind, VoU);
+			float noise = nebulaSample(coord, wind, VoU);
 
 			#ifdef NEBULA_STARS
 			vec3 planeCoordstar = wpos / (wpos.y + length(wpos.xz));
@@ -212,31 +216,33 @@ vec3 DrawRift(vec3 viewPos, float dither, int samples, float riftType) {
 				noise *= 1.0 * texture2D(noisetex, coord + wind * 16.0).b + 0.75;
 				noise = noise * noise * 4 * sampleStep;
 				noise *= max(sqrt(1.0 - length(planeCoord.xz) * 2.5), 0.0);
-				if (riftType == 0){
+				if (nebulaType == 0){
 					#if defined END
-					riftColor = mix(endCol.rgb * 12, endCol.rgb * 10, pow(currentStep, 0.4));
+					nebulaColor = mix(endCol.rgb * 12, endCol.rgb * 14, pow(currentStep, 0.4));
 					#elif defined OVERWORLD
-					riftColor = mix(riftLowCol, riftHighCol, pow(currentStep, 0.4));
+					nebulaColor = mix(nebulaLowCol, nebulaHighCol, pow(currentStep, 0.4));
 					#elif defined NETHER
-					riftColor = mix(netherCol.rgb, netherCol.rgb, pow(currentStep, 0.4)) * 0.4;
+					nebulaColor = mix(netherCol.rgb, netherCol.rgb, pow(currentStep, 0.4)) * 0.4;
 					#endif
 				}else{
 					#if defined END
-					riftColor = mix(endCol.rgb * 8, endCol.rgb * 10, pow(currentStep, 0.4));
+					nebulaColor = mix(vec3(endCol.r * 2.5, endCol.g, endCol.b) * 8, vec3(endCol.r * 2.5, endCol.g, endCol.b) * 16, pow(currentStep, 0.4));
 					#elif defined OVERWORLD
-					riftColor = mix(secondRiftLowCol, secondRiftHighCol, pow(currentStep, 0.4));
+					nebulaColor = mix(secondnebulaLowCol, secondnebulaHighCol, pow(currentStep, 0.4));
 					#elif defined NETHER
-					riftColor = mix(netherCol.rgb, netherCol.rgb, pow(currentStep, 0.4));
+					nebulaColor = mix(netherCol.rgb, netherCol.rgb, pow(currentStep, 0.4));
 					#endif
 				}
 				#ifndef NETHER
-				riftColor += star;
+				nebulaColor += star;
 				#endif
-				rift += noise * riftColor * exp2(-4.0 * i * sampleStep);
+				nebula += noise * nebulaColor * exp2(-4.0 * i * sampleStep);
 			}
 			currentStep += sampleStep;
 		}
 	}
 
-	return rift * NEBULA_BRIGHTNESS * visFactor;
+	return nebula * NEBULA_BRIGHTNESS * visFactor;
 }
+#endif
+
