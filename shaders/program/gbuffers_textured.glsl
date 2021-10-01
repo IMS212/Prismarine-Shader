@@ -21,7 +21,6 @@ varying vec4 color;
 uniform int frameCounter;
 uniform int isEyeInWater;
 uniform int worldTime;
-uniform int heldItemId, heldItemId2;
 
 uniform float blindFactor, nightVision;
 uniform float far, near;
@@ -31,7 +30,6 @@ uniform float screenBrightness;
 uniform float shadowFade;
 uniform float timeAngle, timeBrightness;
 uniform float viewWidth, viewHeight;
-uniform float isTaiga, isJungle, isBadlands, isForest;
 
 uniform ivec2 eyeBrightnessSmooth;
 
@@ -84,16 +82,13 @@ float GetLinearDepth(float depth) {
 #endif
 
 //Includes//
-#include "/lib/prismarine/functions.glsl"
+#include "/lib/util/dither.glsl"
 #include "/lib/color/blocklightColor.glsl"
+#include "/lib/color/waterColor.glsl"
 #include "/lib/color/dimensionColor.glsl"
 #include "/lib/color/skyColor.glsl"
-#include "/lib/util/dither.glsl"
 #include "/lib/util/spaceConversion.glsl"
-#include "/lib/color/waterColor.glsl"
 #include "/lib/atmospherics/sky.glsl"
-#include "/lib/atmospherics/clouds.glsl"
-#include "/lib/color/fogColor.glsl"
 #include "/lib/atmospherics/fog.glsl"
 #include "/lib/lighting/forwardLighting.glsl"
 
@@ -133,17 +128,6 @@ void main() {
 		albedo.rgb = vec3(0.35);
 		#endif
 
-		vec2 noisePos = (cameraPosition.xz + worldPos.xz);
-		#if NOISEMAP_SHADOWS == 1
-		float noiseMap = texture2D(noisetex, noisePos * 0.0002).r;
-		#elif NOISEMAP_SHADOWS == 2
-		float noiseMap = texture2D(noisetex, noisePos * 0.02).r + SHADING_REDUCTION_FACTOR + SHADING_REDUCTION_FACTOR;
-		#else
-		float noiseMap = 1;
-		#endif
-
-		albedo.rgb *= noiseMap;
-
 		float NoL = 1.0;
 		//NoL = clamp(dot(normal, lightVec) * 1.01 - 0.01, 0.0, 1.0);
 
@@ -158,6 +142,10 @@ void main() {
 
 		#if defined FOG && MC_VERSION >= 11500
 		Fog(albedo.rgb, viewPos);
+		#endif
+
+		#if ALPHA_BLEND == 0
+		albedo.rgb = pow(max(albedo.rgb, vec3(0.0)), vec3(1.0 / 2.2));
 		#endif
 	}
 

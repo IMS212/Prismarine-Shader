@@ -1,4 +1,6 @@
-uniform float isDesert, isMesa, isCold, isSwamp, isMushroom, isSavanna;
+#include "/lib/prismarine/timeCalculations.glsl"
+
+uniform float isDesert, isMesa, isCold, isSwamp, isMushroom, isSavanna, isJungle, isTaiga, isForest;
 
 vec3 lightMorning    = vec3(LIGHT_MR,   LIGHT_MG,   LIGHT_MB)   * LIGHT_MI / 255.0;
 vec3 lightDay        = vec3(LIGHT_DR,   LIGHT_DG,   LIGHT_DB)   * LIGHT_DI / 255.0;
@@ -19,10 +21,6 @@ vec3 lightshaftMorning  = vec3(LIGHTSHAFT_MR, LIGHTSHAFT_MG, LIGHTSHAFT_MB) * LI
 vec3 lightshaftDay      = vec3(LIGHTSHAFT_DR, LIGHTSHAFT_DG, LIGHTSHAFT_DB) * LIGHTSHAFT_DI / 255.0;
 vec3 lightshaftEvening  = vec3(LIGHTSHAFT_ER, LIGHTSHAFT_EG, LIGHTSHAFT_EB) * LIGHTSHAFT_EI / 255.0;
 vec3 lightshaftNight    = vec3(LIGHTSHAFT_NR, LIGHTSHAFT_NG, LIGHTSHAFT_NB) * LIGHTSHAFT_NI * 0.3 / 255.0;
-vec3 lightshaftWater    = vec3(LIGHTSHAFT_WR, LIGHTSHAFT_WG, LIGHTSHAFT_WB) * LIGHTSHAFT_WI / 255.0;
-
-vec3 cloudlightEnd      = vec3(CLOUDS_END_R,   CLOUDS_END_G,   CLOUDS_END_B)   * CLOUDS_END_I / 64.0;
-vec3 cloudambientEnd    = vec3(CLOUDS_END_R,   CLOUDS_END_G,   CLOUDS_END_B)   * CLOUDS_END_I * 0.2 / 64.0;
 
 #ifdef WEATHER_PERBIOME
 vec4 weatherRain     = vec4(vec3(WEATHER_RR, WEATHER_RG, WEATHER_RB) / 255.0, 1.0) * WEATHER_RI;
@@ -47,20 +45,6 @@ vec4 weatherCol = mix(
 #else
 vec4 weatherCol = vec4(vec3(WEATHER_RR, WEATHER_RG, WEATHER_RB) / 255.0, 1.0) * WEATHER_RI;
 #endif
-
-float mefade = 1.0 - clamp(abs(timeAngle - 0.5) * 8.0 - 1.5, 0.0, 1.0);
-float dfade = 1.0 - timeBrightness;
-
-vec3 CalcSunColor(vec3 morning, vec3 day, vec3 evening) {
-	vec3 me = mix(morning, evening, mefade);
-	return mix(me, day, 1.0 - dfade * sqrt(dfade));
-}
-
-vec3 CalcLightColor(vec3 sun, vec3 night, vec3 weatherCol) {
-	vec3 c = mix(night, sun, sunVisibility);
-	c = mix(c, dot(c, vec3(0.299, 0.587, 0.114)) * weatherCol, rainStrength);
-	return c * c;
-}
 
 vec3 lightSun     	   = CalcSunColor(lightMorning, lightDay, lightEvening);
 vec3 ambientSun   	   = CalcSunColor(ambientMorning, ambientDay, ambientEvening);

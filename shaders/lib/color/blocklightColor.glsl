@@ -1,6 +1,7 @@
 vec3 blocklightColSqrt = vec3(BLOCKLIGHT_R, BLOCKLIGHT_G, BLOCKLIGHT_B) * BLOCKLIGHT_I / 255.0;
 vec3 blocklightCol = blocklightColSqrt * blocklightColSqrt;
 
+#if COLORED_LIGHTING_MODE == 3
 vec3 SOUL_TORCHColSqrt = vec3(SOUL_TORCH_R, SOUL_TORCH_G, SOUL_TORCH_B) * SOUL_TORCH_I / 255.0;
 vec3 SOUL_TORCH = SOUL_TORCHColSqrt * SOUL_TORCHColSqrt;
 
@@ -30,3 +31,4 @@ vec3 END_ROD = END_RODColSqrt * END_RODColSqrt;
 
 vec3 BEACONColSqrt = vec3(BEACON_R, BEACON_G, BEACON_B) * BEACON_I / 255.0;
 vec3 BEACON = BEACONColSqrt * BEACONColSqrt;
+#endif

@@ -26,7 +26,7 @@ uniform sampler2D colortex2;
 uniform sampler2D depthtex1;
 
 //Optifine Constants//
-#ifdef LIGHTSHAFT
+#if FOG_MODE == 1 || FOG_MODE == 2
 const bool colortex1MipmapEnabled = true;
 #endif
 

@@ -26,7 +26,6 @@ uniform float rainStrength;
 uniform float shadowFade;
 uniform float timeAngle, timeBrightness;
 uniform float viewWidth, viewHeight;
-uniform float isTaiga, isJungle, isBadlands, isForest;
 
 uniform ivec2 eyeBrightnessSmooth;
 
@@ -89,9 +88,8 @@ void SunGlare(inout vec3 color, vec3 viewPos, vec3 lightCol) {
 #include "/lib/color/waterColor.glsl"
 #include "/lib/color/skyColor.glsl"
 #include "/lib/util/dither.glsl"
-#include "/lib/prismarine/functions.glsl"
-#include "/lib/atmospherics/clouds.glsl"
 #include "/lib/atmospherics/sky.glsl"
+#include "/lib/atmospherics/clouds.glsl"
 
 //Program//
 void main() {
@@ -99,6 +97,8 @@ void main() {
 	#endif
 
 	float dither = Bayer64(gl_FragCoord.xy);
+	dither = fract(dither + frameCounter / 8.0);
+
 	vec4 screenPos = vec4(gl_FragCoord.xy / vec2(viewWidth, viewHeight), gl_FragCoord.z, 1.0);
 	vec4 viewPos = gbufferProjectionInverse * (screenPos * 2.0 - 1.0);
 	viewPos /= viewPos.w;
@@ -111,11 +111,15 @@ void main() {
 	
 	#ifdef ROUND_SUN_MOON
 	vec3 lightMA = mix(lightMorning, lightEvening, mefade);
-    vec3 sunColor = mix(lightMA, sqrt(lightDay * lightMA * LIGHT_DI), timeBrightness);
+    vec3 sunColor = mix(lightMA, sqrt(vec3(1) * lightMA * LIGHT_DI), timeBrightness);
 	if (isEyeInWater == 1) sunColor = waterColor.rgb;
     vec3 moonColor = sqrt(lightNight);
 
 	RoundSunMoon(albedo, viewPos.xyz, sunColor, moonColor);
+	#endif
+
+	#ifdef END
+	albedo.rgb = pow(albedo.rgb, vec3(2.2));
 	#endif
 
 	#ifdef STARS
@@ -135,12 +139,17 @@ void main() {
 	#endif
 
 	#ifdef AURORA
-	if (moonVisibility != 0) albedo.rgb += DrawAurora(viewPos.xyz, dither, 8);
+	if (moonVisibility != 0) albedo.rgb += DrawAurora(viewPos.xyz, dither, 6);
 	#endif
 
 	SunGlare(albedo, viewPos.xyz, skylightCol.rgb);
 
 	albedo.rgb *= 1 * (1.0 + nightVision);
+
+	#if ALPHA_BLEND == 0
+	albedo.rgb = pow(max(albedo.rgb, vec3(0.0)), vec3(1.0 / 2.2));
+	albedo.rgb = albedo.rgb + dither / vec3(64.0);
+	#endif
 	#endif
 	
     /* DRAWBUFFERS:0 */

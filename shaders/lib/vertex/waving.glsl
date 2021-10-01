@@ -24,7 +24,7 @@ float Noise2D(vec2 pos) {
 vec3 CalcMove(vec3 pos, float density, float speed, vec2 mult) {
     pos = pos * density + frametime * speed;
     vec3 wave = vec3(Noise2D(pos.yz), Noise2D(pos.xz + 0.333), Noise2D(pos.xy + 0.667));
-    return wave * vec3(mult, mult.x) * WAVING_AMPLITUDE;
+    return wave * vec3(mult, mult.x);
 }
 
 float CalcLilypadMove(vec3 worldpos) {
@@ -40,7 +40,7 @@ float CalcLavaMove(vec3 worldpos) {
     if (fy > 0.01) {
     float wave = sin(pi * (frametime * 0.7 + worldpos.x * 0.14 + worldpos.z * 0.07)) +
                  sin(pi * (frametime * 0.5 + worldpos.x * 0.10 + worldpos.z * 0.20));
-    return wave * 0.0125 * WAVING_AMPLITUDE;
+    return wave * 0.0125;
     } else return 0.0;
 }
 
@@ -90,7 +90,7 @@ vec3 WavingBlocks(vec3 position, float istopv) {
         wave += CalcMove(worldpos, 0.35, 1.0, vec2(0.15, 0.06));
     if (mc_Entity.x == 10106)
         wave += CalcMove(worldpos, 0.35, 1.25, vec2(0.06, 0.06));        
-    if (mc_Entity.x == 10107 || mc_Entity.x == 10206)
+    if (mc_Entity.x == 10107 || mc_Entity.x == 10207)
         wave += CalcMove(worldpos, 0.5, 1.25, vec2(0.06, 0.00));
     if (mc_Entity.x == 10108)
         wave.y += CalcLilypadMove(worldpos);
@@ -106,7 +106,7 @@ vec3 WavingBlocks(vec3 position, float istopv) {
     #ifdef WAVING_EXTRA
     if (mc_Entity.x == 10204 && istopv > 0.9)
         wave += CalcMove(worldpos, 1.0, 1.5, vec2(0.0, 0.37));
-    if (mc_Entity.x == 10205)
+    if (mc_Entity.x == 10206)
 		wave += CalcLanternMove(worldpos);
     #endif
 

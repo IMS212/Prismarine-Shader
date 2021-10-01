@@ -27,10 +27,10 @@ varying vec4 vTexCoord, vTexCoordAM;
 #endif
 
 //Uniforms//
+uniform int blockEntityId;
 uniform int frameCounter;
 uniform int isEyeInWater;
 uniform int worldTime;
-uniform int heldItemId, heldItemId2;
 
 uniform float frameTimeCounter;
 uniform float nightVision;
@@ -38,9 +38,9 @@ uniform float rainStrength;
 uniform float screenBrightness; 
 uniform float shadowFade;
 uniform float timeAngle, timeBrightness;
-uniform float viewWidth, viewHeight;
+uniform float viewWidth, viewHeight, aspectRatio;
 
-uniform ivec2 eyeBrightnessSmooth, eyeBrightness;
+uniform ivec2 eyeBrightnessSmooth;
 
 uniform vec3 cameraPosition;
 
@@ -49,8 +49,7 @@ uniform mat4 gbufferModelViewInverse;
 uniform mat4 shadowProjection;
 uniform mat4 shadowModelView;
 
-uniform sampler2D texture;
-uniform sampler2D noisetex;
+uniform sampler2D texture, noisetex;
 
 #ifdef ADVANCED_MATERIALS
 uniform ivec2 atlasSize;
@@ -93,12 +92,10 @@ float InterleavedGradientNoise() {
 }
 
 //Includes//
-#include "/lib/prismarine/functions.glsl"
 #include "/lib/color/blocklightColor.glsl"
 #include "/lib/color/dimensionColor.glsl"
 #include "/lib/color/specularColor.glsl"
 #include "/lib/util/spaceConversion.glsl"
-#include "/lib/color/waterColor.glsl"
 #include "/lib/lighting/forwardLighting.glsl"
 #include "/lib/surface/ggx.glsl"
 
@@ -146,15 +143,17 @@ void main() {
 	vec3 fresnel3 = vec3(0.0);
 	#endif
 
+	if (blockEntityId == 10402) albedo.a = 0.0;
+
 	if (albedo.a > 0.001) {
 		vec2 lightmap = clamp(lmCoord, vec2(0.0), vec2(1.0));
 		
 		float metalness      = 0.0;
-		float emission       = float(blockEntityId == 10201);
+		float emission       = float(blockEntityId == 10205);
 		float subsurface     = float(blockEntityId == 10109) * 0.5;
 		vec3 baseReflectance = vec3(0.04);
 		
-		emission *= length(albedo.rgb);
+		emission *= dot(albedo.rgb, albedo.rgb) * 0.333;
 
 		vec3 screenPos = vec3(gl_FragCoord.xy / vec2(viewWidth, viewHeight), gl_FragCoord.z);
 		#ifdef TAA
@@ -197,7 +196,7 @@ void main() {
     	albedo.rgb = pow(albedo.rgb, vec3(2.2));
 
 		#ifdef EMISSIVE_RECOLOR
-		if (blockEntityId == 10201 && dot(color.rgb, vec3(1.0)) > 2.66) {
+		if (blockEntityId == 10205 && dot(color.rgb, vec3(1.0)) > 2.66) {
 			float ec = length(albedo.rgb);
 			albedo.rgb = blocklightCol * (ec * 0.63 / BLOCKLIGHT_I) + ec * 0.07;
 		}
@@ -275,6 +274,38 @@ void main() {
 		#if defined ADVANCED_MATERIALS && defined REFLECTION_SPECULAR && defined REFLECTION_ROUGH
 		normalMap = mix(vec3(0.0, 0.0, 1.0), normalMap, smoothness);
 		newNormal = clamp(normalize(normalMap * tbnMatrix), vec3(-1.0), vec3(1.0));
+		#endif
+
+		#if ALPHA_BLEND == 0
+		albedo.rgb = pow(max(albedo.rgb, vec3(0.0)), vec3(1.0 / 2.2));
+		if(blockEntityId == 10205) albedo.a = sqrt(albedo.a);
+		#endif
+	}
+
+	if (blockEntityId == 10402) {
+		vec2 portalCoord = gl_FragCoord.xy / vec2(viewWidth, viewHeight);
+		portalCoord = (portalCoord - 0.5) * vec2(aspectRatio, 1.0);
+
+		vec3 portColSqrt = vec3(END_R, END_G, END_B) / 255.0 * END_I;
+		vec3 portCol = portColSqrt * portColSqrt * 0.05;
+		vec2 wind = vec2(0, frametime * 0.025);
+
+		float portal = texture2D(noisetex, portalCoord * 0.1 + wind * 0.05).r * 0.25 + 0.375;
+
+		#ifdef END
+			  portal *= 0.5;
+		#endif
+			  
+			  portal+= texture2D(texture, portalCoord * 0.5 + wind).r * 1.4;
+			  portal+= texture2D(texture, portalCoord + wind + 0.15).r;
+			  portal+= texture2D(texture, portalCoord * 2.0 + wind + 0.30).r * 0.7;
+			  portal+= texture2D(texture, portalCoord * 4.0 + wind + 0.45).r * 0.5;
+		
+		albedo.rgb = portal * portal * portCol.rgb;
+		albedo.a = 1.0;
+		
+		#if ALPHA_BLEND == 0
+		albedo.rgb = pow(max(albedo.rgb, vec3(0.0)), vec3(1.0 / 2.2));
 		#endif
 	}
 

@@ -10,23 +10,20 @@ https://bitslablab.com
 #ifdef FSH
 
 //Varyings//
-varying vec4 texCoord;
+varying vec2 texCoord;
 
 varying vec3 sunVec, upVec, lightVec;
 
 //Uniforms//
-uniform int isEyeInWater;
+uniform int isEyeInWater, frameCounter;
 uniform int worldTime;
 
-uniform float blindFactor;
+uniform float frameTimeCounter;
 uniform float rainStrength;
 uniform float shadowFade;
 uniform float timeAngle, timeBrightness;
-uniform float frameTimeCounter;
 uniform float viewHeight, viewWidth, aspectRatio;
 uniform float eyeAltitude;
-uniform float isTaiga, isJungle, isBadlands, isForest;
-
 uniform ivec2 eyeBrightnessSmooth;
 
 uniform vec3 cameraPosition, previousCameraPosition;
@@ -40,14 +37,16 @@ uniform sampler2D depthtex0;
 uniform sampler2D depthtex1;
 uniform sampler2D colortex0;
 uniform sampler2D colortex1;
-uniform sampler2D colortex8;
-uniform sampler2D colortex9;
 uniform sampler2D noisetex;
 
 //Optifine Constants//
 const bool colortex1MipmapEnabled = true;
+#ifdef VOLUMETRIC_CLOUDS
+uniform sampler2D colortex8;
+uniform sampler2D colortex9;
 const bool colortex8MipmapEnabled = true;
 const bool colortex9MipmapEnabled = true;
+#endif
 
 #ifdef WORLD_TIME_ANIMATION
 float frametime = float(worldTime)/20.0*ANIMATION_SPEED;
@@ -88,7 +87,7 @@ vec3 MotionBlur(vec3 color, float z, float dither) {
 		vec2 velocity = (currentPosition - previousPosition).xy;
 		velocity = velocity / (1.0 + length(velocity)) * MOTION_BLUR_STRENGTH * 0.02;
 			
-		vec2 coord = texCoord.st - velocity * (1.5 + dither);
+		vec2 coord = texCoord.xy - velocity * (1.5 + dither);
 		for(int i = 0; i < 5; i++, coord += velocity) {
 			vec2 sampleCoord = clamp(coord, doublePixel, 1.0 - doublePixel);
 			float mask = float(texture2D(depthtex1, sampleCoord).r > 0.56);
@@ -102,22 +101,6 @@ vec3 MotionBlur(vec3 color, float z, float dither) {
 	else return color;
 }
 
-#ifdef VOLUMETRIC_CLOUDS
-float mefade0 = 1.0 - clamp(abs(timeAngle - 0.5) * 8.0 - 1.5, 0.0, 1.0);
-float dfade0 = 1.0 - timeBrightness;
-
-vec3 CalcSunColor0(vec3 morning, vec3 day, vec3 evening) {
-	vec3 me = mix(morning, evening, mefade0);
-	return mix(me, day, 1.0 - dfade0 * sqrt(dfade0));
-}
-
-vec3 CalcLightColor0(vec3 sun, vec3 night, vec3 weatherCol) {
-	vec3 c = mix(night, sun, sunVisibility);
-	c = mix(c, dot(c, vec3(0.299, 0.587, 0.114)) * weatherCol, rainStrength);
-	return c * c;
-}
-#endif
-
 #include "/lib/util/dither.glsl"
 
 #ifdef OUTLINE_OUTER
@@ -127,15 +110,13 @@ vec3 CalcLightColor0(vec3 sun, vec3 night, vec3 weatherCol) {
 
 #if defined VOLUMETRIC_CLOUDS && defined OVERWORLD
 #include "/lib/color/dimensionColor.glsl"
-#include "/lib/color/skyColor.glsl"
-#include "/lib/atmospherics/sky.glsl"
 #include "/lib/color/fogColor.glsl"
 #endif
 
 void main() {
-	vec3 color = texture2DLod(colortex0, texCoord.st, 0.0).rgb;
+	vec3 color = texture2DLod(colortex0, texCoord.xy, 0.0).rgb;
 	float dither = Bayer64(gl_FragCoord.xy);
-	float z = texture2D(depthtex1, texCoord.st).x;
+	float z = texture2D(depthtex1, texCoord.xy).x;
 
 	#ifdef MOTION_BLUR
 
@@ -157,10 +138,10 @@ void main() {
 	vec3 vcDownEvening    = vec3(VCLOUDDOWN_ER,   VCLOUDDOWN_EG,   VCLOUDDOWN_EB)   * VCLOUDDOWN_EI / 255;
 	vec3 vcDownNight      = vec3(VCLOUDDOWN_NR,   VCLOUDDOWN_NG,   VCLOUDDOWN_NB)   * VCLOUDDOWN_NI * 0.3 / 255;
 
-	vec3 vcSun = CalcSunColor0(vcMorning, vcDay, vcEvening);
-	vec3 vcDownSun = CalcSunColor0(vcDownMorning, vcDownDay, vcDownEvening);
-	vec3 vcloudsCol     = CalcLightColor0(vcSun, vcNight, weatherCol.rgb * 0.4);
-	vec3 vcloudsDownCol = CalcLightColor0(vcDownSun, vcDownNight, weatherCol.rgb * 0.4);
+	vec3 vcSun = CalcSunColor(vcMorning, vcDay, vcEvening);
+	vec3 vcDownSun = CalcSunColor(vcDownMorning, vcDownDay, vcDownEvening);
+	vec3 vcloudsCol     = CalcLightColor(vcSun, vcNight, weatherCol.rgb * 0.4);
+	vec3 vcloudsDownCol = CalcLightColor(vcDownSun, vcDownNight, weatherCol.rgb * 0.4);
 	#endif
 
 	#ifdef VOLUMETRIC_CLOUDS
@@ -170,14 +151,13 @@ void main() {
 	viewPos /= viewPos.w;
 	float VoL = dot(normalize(viewPos.xyz), lightVec);
 
-	#if defined OVERWORLD && SKY_COLOR_MODE == 1 && defined PERBIOME_CLOUDS_COLOR
-	vcSun *= getBiomeCloudsColor(viewPos.xyz);
-	vcDownSun *= getBiomeCloudsColor(viewPos.xyz);
+	#if defined OVERWORLD && defined PERBIOME_CLOUDS_COLOR
+	vcSun *= getBiomeCloudsColor();
+	vcDownSun *= getBiomeCloudsColor();
 	#endif
 
-	float scattering = pow(VoL * shadowFade * 0.5 + 0.5, 6.0);
-	vec2 vc = vec2(texture2DLod(colortex8, texCoord.xy, float(2.0)).a, texture2DLod(colortex9, texCoord.xy, float(2.0)).a);
-	color = mix(color, mix(vcloudsDownCol * (0.85 + 1.15 * scattering), vcloudsCol * (0.85 + 1.15 * scattering), vc.x) * (1.0 - rainStrength * 0.25), vc.y * vc.y * VCLOUDS_OPACITY);
+	vec2 vc = vec2(texture2DLod(colortex8, texCoord.xy, 2).a, texture2DLod(colortex9, texCoord.xy, 2).a);
+	color = mix(color, mix(vcloudsDownCol, vcloudsCol, vc.x) * (1.0 - rainStrength * 0.25), vc.y * vc.y * VCLOUDS_OPACITY);
 	#endif
 
 	/* DRAWBUFFERS:0 */
@@ -190,7 +170,7 @@ void main() {
 #ifdef VSH
 
 //Varyings//
-varying vec4 texCoord;
+varying vec2 texCoord;
 
 varying vec3 sunVec, upVec;
 
@@ -201,7 +181,7 @@ uniform mat4 gbufferModelView;
 
 //Program//
 void main() {
-	texCoord = gl_MultiTexCoord0;
+	texCoord = gl_MultiTexCoord0.xy;
 	
 	gl_Position = ftransform();
 

@@ -1,4 +1,5 @@
 //FXAA 3.11 from http://blog.simonrodriguez.fr/articles/30-07-2016_implementing_fxaa.html
+#ifdef FXAA
 float quality[12] = float[12] (1.0, 1.0, 1.0, 1.0, 1.0, 1.5, 2.0, 2.0, 2.0, 2.0, 4.0, 8.0);
 
 vec3 FXAA311(vec3 color) {
@@ -153,3 +154,4 @@ vec3 FXAA311(vec3 color) {
 
 	return color;
 }
+#endif

@@ -1,17 +1,4 @@
 #if defined VOLUMETRIC_CLOUDS && defined OVERWORLD
-float mefade0 = 1.0 - clamp(abs(timeAngle - 0.5) * 8.0 - 1.5, 0.0, 1.0);
-float dfade0 = 1.0 - timeBrightness;
-
-float CalcDayAmount(float morning, float day, float evening) {
-	float me = mix(morning, evening, mefade0);
-	return mix(me, day, 1.0 - dfade0 * sqrt(dfade0));
-}
-
-float CalcCloudAmount(float sun, float night) {
-	float c = mix(night, sun, sunVisibility);
-	return c * c;
-}
-
 float GetLogarithmicDepth(float dist){
 	return (far * (dist - near)) / (dist * (far - near));
 }
@@ -33,7 +20,8 @@ float getHeightNoise(vec2 pos){
 	float noisedr = getNoise(flr + vec2(1.0,0.0));
 	float noiseul = getNoise(flr + vec2(0.0,1.0));
 	float noiseur = getNoise(flr + vec2(1.0,1.0));
-	float noise= mix(mix(noisedl,noisedr,frc.x),mix(noiseul,noiseur,frc.x),frc.y);
+	float noise = mix(mix(noisedl, noisedr, frc.x),
+			          mix(noiseul, noiseur, frc.x), frc.y);
 	return noise;
 }
 
@@ -62,7 +50,7 @@ float getCloudSample(vec3 pos, float height, float verticalThickness, float samp
 	float ymult = pow(abs(height - pos.y) / verticalThickness, VCLOUDS_VERTICAL_THICKNESS);
 	vec3 wind = vec3(frametime * VCLOUDS_SPEED, 0.0, 0.0);
 	float rainStrengthLowered = rainStrength / 8.0;
-	float amount = CalcCloudAmount(CalcDayAmount(VCLOUDS_AMOUNT_MORNING, VCLOUDS_AMOUNT_DAY, VCLOUDS_AMOUNT_EVENING), VCLOUDS_AMOUNT_NIGHT);
+	float amount = CalcTotalAmount(CalcDayAmount(VCLOUDS_AMOUNT_MORNING, VCLOUDS_AMOUNT_DAY, VCLOUDS_AMOUNT_EVENING), VCLOUDS_AMOUNT_NIGHT);
 	float thickness = VCLOUDS_HORIZONTAL_THICKNESS + (VCLOUDS_THICKNESS_FACTOR * timeBrightness);
 
 	if (ymult < 2.0){
@@ -93,20 +81,22 @@ float getCloudSample(vec3 pos, float height, float verticalThickness, float samp
 	return noise;
 }
 
-vec2 getVolumetricCloud(float pixeldepth1, float pixeldepth0, float heightAdjFactor, float vertThicknessFactor) {
-	vec2 vc = vec2(0.0);
-	float quality = VCLOUDS_QUALITY / 2;
-	float dither = Bayer64(gl_FragCoord.xy) * quality;
+vec2 getVolumetricCloud(float pixeldepth0, float pixeldepth1, float heightAdjFactor, float vertThicknessFactor, float dither) {
+	dither *= 0.7;
+	vec2 vc = vec2(0);
 
-	float maxDist = 2.0 * VCLOUDS_RANGE * far;
-	float minDist = (0.01f + dither);
+	float maxDist = 1024;
+	
+	float depth0 = GetLinearDepth2(pixeldepth0);
+	float depth1 = GetLinearDepth2(pixeldepth1);
+	vec4 wpos = vec4(0.0);
+		
+	for(int i = 0; i < 8; i++) {
+		float minDist = (i + dither) * 16; 
 
-	for (minDist; minDist < maxDist; ) {
-		if (GetLinearDepth2(pixeldepth1) < minDist || vc.y > 0.999){
-			break;
-		}
-		vec4 wpos = getWorldPos(getFragPos(texCoord.xy, GetLogarithmicDepth(minDist)));
-		if (length(wpos.xz) < maxDist && GetLinearDepth2(pixeldepth0) > minDist){
+		wpos = getWorldPos(getFragPos(texCoord.xy, GetLogarithmicDepth(minDist)));
+
+		if (length(wpos.xz) < maxDist && depth0 > minDist){
 			float vh = getHeightNoise((wpos.xz + cameraPosition.xz + (frametime * VCLOUDS_SPEED)) * 0.005);
 
 			#ifdef WORLD_CURVATURE
@@ -120,12 +110,13 @@ vec2 getVolumetricCloud(float pixeldepth1, float pixeldepth0, float heightAdjFac
 			float vertThickness = VCLOUDS_VERTICAL_THICKNESS * vertThicknessFactor + timeBrightness;
 			float noise = getCloudSample(wpos.xyz, height, vertThickness, VCLOUDS_SAMPLES, VCLOUDS_NOISE_QUALITY);
 
-			float col = pow(smoothstep(height - vertThickness * noise, height + vertThickness * noise, wpos.y), 2);
+			
+			float col = pow(smoothstep(height - vertThickness * noise, height + vertThickness * noise, wpos.y), 3);
 			vc.x = max(noise * col, vc.x);
 			vc.y = max(noise, vc.y);
 		}
-		minDist = minDist + quality;
 	}
+	
 	return vc;
 }
 #endif

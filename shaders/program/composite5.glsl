@@ -10,13 +10,15 @@ https://bitslablab.com
 #ifdef FSH
 
 //Varyings//
-varying vec2 texCoord, lmCoord;
+varying vec2 texCoord;
 
 varying vec3 sunVec, upVec;
 
 //Uniforms//
+uniform int blockEntityId;
 uniform int isEyeInWater;
 uniform int worldTime;
+uniform int frameCounter;
 
 uniform float blindFactor;
 uniform float frameTimeCounter;
@@ -96,6 +98,11 @@ vec3 GetBloomTile(float lod, vec2 coord, vec2 offset) {
 }
 
 void Bloom(inout vec3 color, vec2 coord) {
+	float strength = BLOOM_STRENGTH;
+
+	#ifdef BLOOM_BALANCING
+	strength *= (1.25 - eBS);
+	#endif
 
 	vec3 blur1 = GetBloomTile(1.0, coord, vec2(0.0      , 0.0   )) * 1.5;
 	vec3 blur2 = GetBloomTile(2.0, coord, vec2(0.51     , 0.0   )) * 1.2;
@@ -117,10 +124,39 @@ void Bloom(inout vec3 color, vec2 coord) {
 	blur7 *= dirt * 16.0 + 1.0;
 	#endif
 
+	#if BLOOM_RADIUS == 1
+	vec3 blur = blur1 * 0.667;
+	#elif BLOOM_RADIUS == 2
+	vec3 blur = (blur1 + blur2) * 0.37;
+	#elif BLOOM_RADIUS == 3
+	vec3 blur = (blur1 + blur2 + blur3) * 0.27;
+	#elif BLOOM_RADIUS == 4
+	vec3 blur = (blur1 + blur2 + blur3 + blur4) * 0.212;
+	#elif BLOOM_RADIUS == 5
+	vec3 blur = (blur1 + blur2 + blur3 + blur4 + blur5) * 0.175;
+	#elif BLOOM_RADIUS == 6
+	vec3 blur = (blur1 + blur2 + blur3 + blur4 + blur5 + blur6) * 0.151;
+	#elif BLOOM_RADIUS == 7
 	vec3 blur = (blur1 + blur2 + blur3 + blur4 + blur5 + blur6 + blur7) * 0.137;
+	#endif
 
-	color = mix(color, blur, 0.2 * BLOOM_STRENGTH);
+	#ifdef BLOOM_FLICKERING
+    float jitter = 1.0 - sin(frameTimeCounter + cos(frameTimeCounter)) * BLOOM_FLICKERING_STRENGTH;
+    strength *= jitter;
+	#endif
+
+	#if BLOOM_CONTRAST == 0
+	color = mix(color, blur, 0.2 * strength);
+	#else
+	vec3 bloomContrast = vec3(exp2(BLOOM_CONTRAST * 0.25));
+	color = pow(color, bloomContrast);
+	blur = pow(blur, bloomContrast);
+	vec3 bloomStrength = pow(vec3(0.2 * strength), bloomContrast);
+	color = mix(color, blur, bloomStrength);
+	color = pow(color, 1.0 / bloomContrast);
+	#endif
 }
+
 
 void AutoExposure(inout vec3 color, inout float exposure, float tempExposure) {
 	float exposureLod = log2(viewHeight * 0.7);
@@ -186,6 +222,7 @@ vec2 GetLightPos() {
 void main() {
     vec2 newTexCoord = texCoord;
 	if (isEyeInWater == 1.0) UnderwaterDistort(newTexCoord);
+	
 	#ifdef NETHER_HEAT_WAVE
 	#ifdef NETHER
 	UnderwaterDistort(newTexCoord);
@@ -273,7 +310,7 @@ void main() {
 #ifdef VSH
 
 //Varyings//
-varying vec2 texCoord, lmCoord;
+varying vec2 texCoord;
 
 varying vec3 sunVec, upVec;
 
@@ -286,9 +323,6 @@ uniform mat4 gbufferModelView;
 void main() {
 	texCoord = gl_MultiTexCoord0.xy;
 	
-	lmCoord = (gl_TextureMatrix[1] * gl_MultiTexCoord1).xy;
-	lmCoord = clamp((lmCoord - 0.03125) * 1.06667, vec2(0.0), vec2(0.9333, 1.0));
-
 	gl_Position = ftransform();
 
 	const vec2 sunRotationData = vec2(cos(sunPathRotation * 0.01745329251994), -sin(sunPathRotation * 0.01745329251994));

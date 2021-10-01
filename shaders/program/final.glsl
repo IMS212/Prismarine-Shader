@@ -46,7 +46,7 @@ vec2 scaleCoord(vec2 coord, float scale) {
     return clamp(coord, 0, 0.999999);
 }
 
-vec3 ChromaticAbberation(vec2 coord, float amount) {
+vec3 getChromaticAbberation(vec2 coord, float amount) {
     vec3 col = vec3(0.0);
 
     amount = distance(coord, vec2(0.5)) * amount;
@@ -103,7 +103,7 @@ void main() {
 	#endif
 
 	#ifdef CHROMATIC_ABERRATION
-	vec3 color = ChromaticAbberation(texCoord, aberrationStrength);
+	vec3 color = getChromaticAbberation(texCoord, aberrationStrength);
 	#else
 	vec3 color = texture2D(colortex1, texCoord).rgb;
 	#endif

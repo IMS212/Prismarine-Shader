@@ -20,10 +20,3 @@ float adj(float x, float y){
     float t = x * (y + y + y);
     return (f + s + t);
 }
-
-vec3 ntmix(vec2 a, vec2 b, vec2 c, float d){
-    float f = texture2D(noisetex, a * d).r;
-    float s = texture2D(noisetex, b * (d + d)).r;
-    float t = texture2D(noisetex, c * (d + d +d)).r;
-    return vec3(f, s, t);
-}
